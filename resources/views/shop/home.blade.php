@@ -22,8 +22,8 @@
     <x-home.header />
     <main>
       <x-home.hero />
-      <x-home.featured-collections />
-      <x-home.best-sellers />
+      <x-home.featured-collections :categories="$categories" />
+      <x-home.best-sellers :products="$featuredProducts" />
       <x-home.why-us />
       <x-home.story />
       <x-home.process />
