@@ -4,53 +4,143 @@
 
 @section('content')
 <div class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
-    @if($addresses->isEmpty())
-        <div class="rounded-xl border border-amber-200 bg-amber-50 p-5 mb-6 text-sm">
-            Please add a shipping address before checkout.
-            <a href="{{ route('account.addresses.index') }}" class="text-brand underline ml-1">Manage addresses</a>
-        </div>
-    @endif
+    <x-shop.breadcrumb-trail :items="[['label' => 'Cart', 'url' => route('shop.cart')], ['label' => 'Checkout']]" />
 
     <div class="grid lg:grid-cols-5 gap-8">
-        <form data-ajax method="POST" action="{{ route('shop.checkout.store') }}" class="lg:col-span-3 rounded-xl border border-slate-200 bg-white p-6 space-y-4" id="checkout-form">
+        <form data-ajax method="POST" action="{{ route('shop.checkout.store') }}" class="lg:col-span-3 rounded-xl border border-slate-200 bg-white p-6 space-y-6" id="checkout-form">
             @csrf
-            <h2 class="font-medium text-lg">Shipping address</h2>
-            <div class="space-y-2">
-                @foreach($addresses as $address)
-                    <label class="flex gap-3 rounded-lg border border-slate-200 p-3 text-sm">
-                        <input type="radio" name="shipping_address_id" value="{{ $address->id }}" @checked(($defaultShipping?->id ?? null) === $address->id) required>
-                        <span>
-                            <strong>{{ $address->name }}</strong> · {{ $address->phone }}<br>
-                            {{ $address->fullAddress() }}
-                        </span>
-                    </label>
-                @endforeach
-            </div>
-
-            <label class="inline-flex items-center gap-2 text-sm">
-                <input type="checkbox" name="billing_same_as_shipping" value="1" data-bool checked id="billing-same"> Billing same as shipping
-            </label>
-
-            <div id="billing-box" class="hidden space-y-2">
-                <h2 class="font-medium text-lg">Billing address</h2>
-                @foreach($addresses as $address)
-                    <label class="flex gap-3 rounded-lg border border-slate-200 p-3 text-sm">
-                        <input type="radio" name="billing_address_id" value="{{ $address->id }}" @checked(($defaultBilling?->id ?? null) === $address->id)>
-                        <span>{{ $address->name }} — {{ $address->fullAddress() }}</span>
-                    </label>
-                @endforeach
-            </div>
 
             <div>
-                <label class="block text-sm mb-1">Delivery pincode check</label>
-                <div class="flex gap-2">
-                    <input id="checkout-pincode" type="text" maxlength="6" value="{{ $defaultShipping?->postal_code }}" class="rounded-lg border border-slate-300 px-3 py-2 text-sm w-40">
-                    <button type="button" id="quote-shipping" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">Calculate shipping</button>
+                <h2 class="font-medium text-lg mb-1">Billing details</h2>
+                <p class="text-sm text-slate-500 mb-4">We'll use this as your delivery address unless you ship to a different one below.</p>
+
+                <div class="grid sm:grid-cols-2 gap-4">
+                    <div class="sm:col-span-2">
+                        <label class="block text-sm mb-1">Full Name</label>
+                        <input name="billing_name" required value="{{ old('billing_name', $address?->name ?: $user->name) }}"
+                               class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                        @error('billing_name')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-sm mb-1">Email address</label>
+                        <input type="email" name="billing_email" required value="{{ old('billing_email', $address?->email ?: $user->email) }}"
+                               class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                        @error('billing_email')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-sm mb-1">Phone</label>
+                        <input name="billing_phone" required value="{{ old('billing_phone', $address?->phone ?: $user->phone) }}"
+                               class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                        @error('billing_phone')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <label class="block text-sm mb-1">Street Address</label>
+                        <input name="billing_address_line1" required placeholder="House number and street name"
+                               value="{{ old('billing_address_line1', $address?->address_line1) }}"
+                               class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm mb-2">
+                        <input name="billing_address_line2" placeholder="Apartment, suite, unit, etc. (optional)"
+                               value="{{ old('billing_address_line2', $address?->address_line2) }}"
+                               class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                        @error('billing_address_line1')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
+                    </div>
+
+
+                    <div>
+                        <label class="block text-sm mb-1">Country</label>
+                        <select name="billing_country" required class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                            @foreach(config('countries') as $code => $name)
+                                <option value="{{ $code }}" @selected(old('billing_country', 'IN') === $code)>{{ $name }}</option>
+                            @endforeach
+                        </select>
+                        @error('billing_country')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm mb-1">City</label>
+                        <input name="billing_city" required value="{{ old('billing_city', $address?->city) }}"
+                               class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                        @error('billing_city')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-sm mb-1">State</label>
+                        <input name="billing_state" required value="{{ old('billing_state', $address?->state) }}"
+                               class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                        @error('billing_state')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-sm mb-1">Pin code</label>
+                        <input name="billing_postal_code" id="billing_postal_code" required maxlength="6" inputmode="numeric"
+                               value="{{ old('billing_postal_code', $address?->postal_code) }}"
+                               class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                        @error('billing_postal_code')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
+                    </div>
+
+                    
                 </div>
-                <p id="quote-result" class="text-sm text-slate-600 mt-2"></p>
-                <input type="hidden" name="shipping_rate" id="shipping_rate" value="">
-                <input type="hidden" name="courier_name" id="courier_name" value="">
-                <input type="hidden" name="estimated_delivery_days" id="estimated_delivery_days" value="">
+            </div>
+
+            <label class="flex items-center gap-2 text-sm font-medium">
+                <input type="checkbox" name="ship_to_different_address" value="1" data-bool id="ship-different" {{ old('ship_to_different_address') ? 'checked' : '' }}>
+                Ship to a different address?
+            </label>
+
+            <div id="shipping-box" class="{{ old('ship_to_different_address') ? '' : 'hidden' }} space-y-4 border-t border-slate-100 pt-5">
+                <h2 class="font-medium text-lg">Shipping details</h2>
+                <div class="grid sm:grid-cols-2 gap-4">
+                    <div class="sm:col-span-2">
+                        <label class="block text-sm mb-1">Full Name</label>
+                        <input name="shipping_name" value="{{ old('shipping_name') }}" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                        @error('shipping_name')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <label class="block text-sm mb-1">Street Address</label>
+                        <input name="shipping_address_line1" placeholder="House number and street name"
+                               value="{{ old('shipping_address_line1') }}"
+                               class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm mb-2">
+                        <input name="shipping_address_line2" placeholder="Apartment, suite, unit, etc. (optional)"
+                               value="{{ old('shipping_address_line2') }}"
+                               class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                        @error('shipping_address_line1')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-sm mb-1">Country</label>
+                        <select name="shipping_country" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                            @foreach(config('countries') as $code => $name)
+                                <option value="{{ $code }}" @selected(old('shipping_country', 'IN') === $code)>{{ $name }}</option>
+                            @endforeach
+                        </select>
+                        @error('shipping_country')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-sm mb-1">City</label>
+                        <input name="shipping_city" value="{{ old('shipping_city') }}" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                        @error('shipping_city')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-sm mb-1">State</label>
+                        <input name="shipping_state" value="{{ old('shipping_state') }}" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                        @error('shipping_state')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-sm mb-1">Pin code</label>
+                        <input name="shipping_postal_code" id="shipping_postal_code" maxlength="6" inputmode="numeric"
+                               value="{{ old('shipping_postal_code') }}"
+                               class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                        @error('shipping_postal_code')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
+                    </div>
+
+                    
+                </div>
             </div>
 
             <div>
@@ -59,9 +149,9 @@
                     @if($codEnabled)
                         <label class="flex gap-2 items-center"><input type="radio" name="payment_method" value="cod" checked> Cash on Delivery</label>
                     @endif
-                    @if($onlineEnabled)
+                    <!-- @if($onlineEnabled)
                         <label class="flex gap-2 items-center"><input type="radio" name="payment_method" value="paytm" @checked(! $codEnabled)> Paytm (Online)</label>
-                    @endif
+                    @endif -->
                     @if(! $codEnabled && ! $onlineEnabled)
                         <p class="text-rose-600">No payment methods are enabled.</p>
                     @endif
@@ -69,11 +159,12 @@
             </div>
 
             <div>
-                <label class="block text-sm mb-1">Order notes</label>
-                <textarea name="notes" rows="2" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"></textarea>
+                <label class="block text-sm mb-1">Order notes (optional)</label>
+                <textarea name="notes" rows="3" placeholder="Notes about your order, e.g. special notes for delivery."
+                          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">{{ old('notes') }}</textarea>
             </div>
 
-            <button type="submit" data-loading="Placing order..." class="rounded-lg bg-brand hover:bg-brand-dark text-white px-5 py-2.5 text-sm font-medium" @disabled($addresses->isEmpty())>
+            <button type="submit" data-loading="Placing order..." class="rounded-lg bg-brand hover:bg-brand-dark text-white px-5 py-2.5 text-sm font-medium">
                 Place order
             </button>
         </form>
@@ -103,36 +194,8 @@
 
 @push('scripts')
 <script>
-document.getElementById('billing-same')?.addEventListener('change', function () {
-  document.getElementById('billing-box').classList.toggle('hidden', this.checked);
-});
-
-document.getElementById('quote-shipping')?.addEventListener('click', function () {
-  var pincode = document.getElementById('checkout-pincode').value.trim();
-  var cod = document.querySelector('input[name="payment_method"]:checked')?.value === 'cod';
-  AppAjax.request(@json(route('shipping.quote.cart')), {
-    method: 'POST',
-    body: { pincode: pincode, cod: cod ? 1 : 0 },
-    toast: false
-  }).then(function (result) {
-    var el = document.getElementById('quote-result');
-    if (!result.ok) {
-      el.textContent = result.data.message || 'Unable to quote shipping.';
-      el.className = 'text-sm text-rose-600 mt-2';
-      return;
-    }
-    var q = result.data.quote;
-    var s = result.data.summary;
-    el.textContent = '₹' + Number(q.rate).toFixed(2) + ' via ' + q.courier_name + ' · ETA ' + q.etd + ' days';
-    el.className = 'text-sm text-emerald-700 mt-2';
-    document.getElementById('shipping_rate').value = q.rate;
-    document.getElementById('courier_name').value = q.courier_name;
-    document.getElementById('estimated_delivery_days').value = q.etd;
-    document.getElementById('sum-subtotal').textContent = '₹' + Number(s.subtotal).toFixed(2);
-    document.getElementById('sum-shipping').textContent = '₹' + Number(s.shipping).toFixed(2);
-    document.getElementById('sum-tax').textContent = '₹' + Number(s.tax).toFixed(2);
-    document.getElementById('sum-total').textContent = '₹' + Number(s.total).toFixed(2);
-  });
+document.getElementById('ship-different')?.addEventListener('change', function () {
+    document.getElementById('shipping-box').classList.toggle('hidden', !this.checked);
 });
 </script>
 @endpush

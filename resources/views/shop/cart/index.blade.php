@@ -4,6 +4,8 @@
 
 @section('content')
 <div class="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+    <x-shop.breadcrumb-trail :items="[['label' => 'Cart']]" />
+
     <div id="cart-empty" class="text-center py-16 text-slate-500 {{ $summary['item_count'] ? 'hidden' : '' }}">
         <p>Your cart is empty.</p>
         <a href="{{ route('shop.catalog') }}" class="inline-flex mt-4 text-brand hover:underline text-sm">Continue shopping</a>
