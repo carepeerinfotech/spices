@@ -1,6 +1,6 @@
 @props(['items' => []])
 
-<nav aria-label="Breadcrumb" class="text-xs sm:text-sm text-stone-500 mb-5">
+<nav aria-label="Breadcrumb" class="text-xs sm:text-xl text-stone-500 mb-5">
     <ol class="flex flex-wrap items-center gap-1.5">
         <li class="flex items-center gap-1.5">
             <a href="{{ route('shop.home') }}" class="hover:text-brand transition-colors">Home</a>
