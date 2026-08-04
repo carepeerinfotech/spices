@@ -12,27 +12,29 @@
       <div>
         <h3>Quick Links</h3>
         <ul>
-          <li><a href="#">About</a></li>
-          <li><a href="#">Shop</a></li>
-          <li><a href=""> Contact </a></li>
-          <li><a href="">Blog</a></li>
+          <li><a href="{{ route('shop.home') }}">Home</a></li>
+          <li><a href="{{ route('shop.about') }}">About</a></li>
+          <li><a href="{{ route('shop.catalog') }}">Shop</a></li>
+          <li><a href="{{ route('shop.contact') }}">Contact</a></li>
+          <li><a href="{{ route('shop.page', 'shipping-policy') }}">Shipping Policy</a></li>
+          <li><a href="{{ route('shop.page', 'privacy-policy') }}">Privacy Policy</a></li>
         </ul>
       </div>
       <div>
         <h3>Categories</h3>
         <ul>
-          <li><a href="#">Blended Masala</a></li>
-          <li><a href="#">Pure Powder Spices</a></li>
-          <li><a href="#">Vrat Atta</a></li>
-          <li><a href="#">Salt</a></li>
+          <li><a href="{{ route('shop.catalog', ['category' => 'garam-masala']) }}">Blended Masala</a></li>
+          <li><a href="{{ route('shop.catalog', ['category' => 'turmeric']) }}">Pure Powder Spices</a></li>
+          <li><a href="{{ route('shop.catalog') }}">Vrat Atta</a></li>
+          <li><a href="{{ route('shop.catalog') }}">Salt</a></li>
         </ul>
       </div>
       <div>
         <h3>Contact Us</h3>
         <ul>
-          <li><a href="#">9876543210</a></li>
-          <li><a href="#">info@elephantspices.com</a></li>
-          <li><a href="#">India</a></li>
+          <li><a href="tel:9876543210">9876543210</a></li>
+          <li><a href="mailto:info@elephantspices.com">info@elephantspices.com</a></li>
+          <li>India</li>
         </ul>
       </div>
     </div>

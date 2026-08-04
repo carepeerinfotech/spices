@@ -33,6 +33,10 @@ toggle.addEventListener("click", () =>
   setMenu(!nav.classList.contains("open")),
 );
 backdrop.addEventListener("click", () => setMenu(false));
+const drawerClose = document.querySelector(".nav-drawer-close");
+if (drawerClose) {
+  drawerClose.addEventListener("click", () => setMenu(false));
+}
 nav
   .querySelectorAll("a")
   .forEach((link) =>

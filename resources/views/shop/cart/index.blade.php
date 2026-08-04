@@ -3,16 +3,14 @@
 @section('title', 'Cart — '.config('app.name'))
 
 @section('content')
-<div class="max-w-4xl mx-auto px-4 sm:px-6 py-10">
-    <h1 class="font-display text-3xl mb-8">Your cart</h1>
-
+<div class="max-w-6xl mx-auto px-4 sm:px-6 py-10">
     <div id="cart-empty" class="text-center py-16 text-slate-500 {{ $summary['item_count'] ? 'hidden' : '' }}">
         <p>Your cart is empty.</p>
         <a href="{{ route('shop.catalog') }}" class="inline-flex mt-4 text-brand hover:underline text-sm">Continue shopping</a>
     </div>
 
-    <div id="cart-content" class="{{ $summary['item_count'] ? '' : 'hidden' }}">
-        <div class="rounded-xl border border-slate-200 bg-white overflow-hidden mb-6">
+    <div id="cart-content" class="{{ $summary['item_count'] ? '' : 'hidden' }} lg:flex lg:gap-8 lg:items-start">
+        <div class="rounded-xl border border-slate-200 bg-white overflow-hidden mb-6 lg:mb-0 lg:flex-1">
             <div id="cart-items" class="divide-y divide-slate-100">
                 @foreach($summary['items'] as $item)
                     <div class="p-4 sm:p-5 flex flex-wrap sm:flex-nowrap gap-4 items-center" data-item-id="{{ $item['id'] }}">
@@ -37,7 +35,7 @@
             </div>
         </div>
 
-        <div class="rounded-xl border border-slate-200 bg-white p-5 space-y-2 text-sm max-w-sm ml-auto">
+        <div class="rounded-xl border border-slate-200 bg-white p-5 space-y-2 text-sm w-full lg:w-80 lg:shrink-0">
             <div class="flex justify-between"><span>Subtotal</span><span id="sum-subtotal">₹{{ number_format($summary['subtotal'], 2) }}</span></div>
             <div class="flex justify-between"><span>Shipping</span><span id="sum-shipping">₹{{ number_format($summary['shipping'], 2) }}</span></div>
             <div class="flex justify-between"><span>GST</span><span id="sum-tax">₹{{ number_format($summary['tax'], 2) }}</span></div>
