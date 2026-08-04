@@ -1,29 +1,29 @@
 /* Elephant Spices — storefront + shared admin styles */
 :root {
-  --brand: #7a1f2b;
-  --brand-dark: #5c1520;
-  --brand-light: #9b2d3a;
-  --gold: #c9a227;
-  --gold-dark: #a8841a;
-  --cream: #fbf6ee;
-  --cream-dark: #f3ead9;
-  --ink: #1c1917;
-  --muted: #78716c;
-  --surface: #fbf6ee;
-  --line: #e7dfd2;
+  --brand: #b82125;
+  --brand-dark: #981518;
+  --brand-light: #d84348;
+  --gold: #efa400;
+  --gold-dark: #c98700;
+  --cream: #fff7ec;
+  --cream-dark: #f5ead9;
+  --ink: #29272a;
+  --muted: #746e69;
+  --surface: #fff7ec;
+  --line: #eee9e2;
   --danger: #dc2626;
   --success: #15803d;
   --footer: #1a1714;
 }
 
 body {
-  font-family: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
   color: var(--ink);
-  background: var(--surface);
+  /* background: var(--surface); */
 }
 
 .font-display {
-  font-family: "Libre Baskerville", Georgia, "Times New Roman", serif;
+  font-family: "Playfair Display", Georgia, "Times New Roman", serif;
 }
 
 .toast-root {
@@ -770,7 +770,7 @@ body {
 }
 
 .page-shell {
-  background: var(--cream);
+  /* background: var(--cream); */
   min-height: 100%;
 }
 
@@ -783,4 +783,9 @@ body {
 .page-hero-band h1 {
   font-family: "Libre Baskerville", Georgia, serif;
   font-size: clamp(1.5rem, 3vw, 2rem);
+}
+
+/* —— Collapsible category list (mobile-only; always expanded on desktop) —— */
+.cat-toggle[aria-expanded="true"] .cat-chevron {
+  transform: rotate(180deg);
 }

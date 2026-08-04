@@ -4,7 +4,6 @@
 
 @section('content')
 <div class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
-    <h1 class="font-display text-3xl mb-8">Checkout</h1>
     @if($addresses->isEmpty())
         <div class="rounded-xl border border-amber-200 bg-amber-50 p-5 mb-6 text-sm">
             Please add a shipping address before checkout.

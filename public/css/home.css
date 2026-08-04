@@ -13,12 +13,12 @@
 }
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 body {
   font-family: "DM Sans", sans-serif;
   color: var(--ink);
   background: #fff;
-  overflow-x: hidden;
 }
 img {
   display: block;
@@ -68,7 +68,8 @@ header {
   align-items: center;
   justify-content: space-between;
   padding: 0 max(24px, calc((100vw - 1160px) / 2));
-  position: relative;
+  position: sticky;
+  top: 0;
   z-index: 30;
   box-shadow: 0 1px 5px #0000000b;
 }
@@ -100,6 +101,25 @@ header {
   padding: 3px;
   display: grid;
   place-items: center;
+  position: relative;
+}
+.cart-badge {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  border-radius: 9999px;
+  background: var(--red);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+}
+.cart-badge[hidden] {
+  display: none;
 }
 .icon-btn svg {
   width: 25px;
@@ -597,10 +617,23 @@ section.feature-collection {
   font-weight: 600;
   cursor: pointer;
 }
+.subscribe button:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+.newsletter-message {
+  margin-top: 14px;
+  font-size: 13px;
+  font-weight: 600;
+  min-height: 1.2em;
+}
+.newsletter-message.is-error {
+  color: #ffd9d9;
+}
 footer {
   background: #1c1c1c;
   color: #eee;
-  padding: 35px 0 15px;
+  padding: 35px 20px 15px 20px;
 }
 .footer-grid {
   display: grid;
@@ -856,6 +889,25 @@ footer {
   font-size: 15px;
 }
 
+@media (min-width: 1024px) {
+  .shop-category-scroll {
+    scrollbar-width: thin;
+  }
+
+  .shop-category-scroll::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .shop-category-scroll::-webkit-scrollbar-thumb {
+    background: #9ca3af;
+    border-radius: 9999px;
+  }
+
+  .shop-category-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
 @media (max-width: 760px) {
   .section-title {
     font-size: 30px;
@@ -892,6 +944,9 @@ footer {
     opacity 0.28s ease,
     visibility 0.28s ease;
 }
+.nav-drawer-head {
+  display: none;
+}
 @media (max-width: 960px) {
   header {
     position: sticky;
@@ -905,7 +960,7 @@ footer {
     inset: 0 auto 0 0;
     width: min(82vw, 350px);
     min-height: 100dvh;
-    padding: 92px 28px 32px;
+    padding: 24px 24px 32px;
     background: #fff;
     box-shadow: 8px 0 28px #0002;
     align-items: flex-start;
@@ -918,10 +973,33 @@ footer {
       transform 0.3s ease,
       visibility 0.3s ease;
   }
+  .nav-drawer-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding-bottom: 18px;
+    margin-bottom: 22px;
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-drawer-head img {
+    width: 120px;
+  }
+  .nav-drawer-close {
+    border: 0;
+    background: none;
+    color: var(--ink);
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
   .nav a {
     width: 100%;
     padding: 12px 0;
-    border-bottom: 1px solid var(--line);
+    /* border-bottom: 1px solid var(--line); */
   }
   .nav.open {
     display: flex;

@@ -7,6 +7,7 @@ use App\Http\Controllers\Account\PasswordResetController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\CmsPageController;
+use App\Http\Controllers\Admin\ContactMessageController as AdminContactMessageController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EmailTemplateController;
 use App\Http\Controllers\Admin\HomepageController;
@@ -20,6 +21,9 @@ use App\Http\Controllers\Admin\StorageLinkController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Shop\CartController;
 use App\Http\Controllers\Shop\CheckoutController;
+use App\Http\Controllers\Shop\AboutController;
+use App\Http\Controllers\Shop\ContactController;
+use App\Http\Controllers\Shop\NewsletterController;
 use App\Http\Controllers\Shop\HomeController;
 use App\Http\Controllers\Shop\PageController;
 use App\Http\Controllers\Shop\PaymentController;
@@ -34,6 +38,13 @@ Route::get('/', [HomeController::class, 'index'])->name('shop.home');
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.catalog');
 Route::get('/product/{slug}', [ShopController::class, 'show'])->name('shop.product');
 Route::get('/page/{slug}', [PageController::class, 'show'])->name('shop.page');
+
+Route::get('/about-us', [AboutController::class, 'show'])->name('shop.about');
+
+Route::get('/contact', [ContactController::class, 'show'])->name('shop.contact');
+Route::post('/contact', [ContactController::class, 'store'])->middleware('throttle:10,1')->name('shop.contact.store');
+
+Route::post('/newsletter/subscribe', [NewsletterController::class, 'store'])->middleware('throttle:10,1')->name('shop.newsletter.subscribe');
 
 Route::get('/cart', [CartController::class, 'index'])->name('shop.cart');
 Route::get('/cart/summary', [CartController::class, 'summary'])->name('shop.cart.summary');
@@ -119,6 +130,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         Route::middleware('permission:categories.manage')->group(function () {
             Route::resource('categories', AdminCategoryController::class)->except(['show']);
+        });
+        Route::middleware('permission:contact-messages.manage')->group(function () {
+            Route::get('contact-messages', [AdminContactMessageController::class, 'index'])->name('contact-messages.index');
+            Route::get('contact-messages/{contact_message}', [AdminContactMessageController::class, 'show'])->name('contact-messages.show');
+            Route::delete('contact-messages/{contact_message}', [AdminContactMessageController::class, 'destroy'])->name('contact-messages.destroy');
         });
         Route::middleware('permission:products.manage')->group(function () {
             Route::resource('products', AdminProductController::class)->except(['show']);

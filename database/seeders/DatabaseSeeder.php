@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Manage Users', 'slug' => 'users.manage', 'group' => 'Users'],
             ['name' => 'Manage Roles', 'slug' => 'roles.manage', 'group' => 'Roles'],
             ['name' => 'Manage CMS Pages', 'slug' => 'pages.manage', 'group' => 'CMS'],
+            ['name' => 'Manage Contact Messages', 'slug' => 'contact-messages.manage', 'group' => 'CMS'],
             ['name' => 'Manage Categories', 'slug' => 'categories.manage', 'group' => 'Catalog'],
             ['name' => 'Manage Products', 'slug' => 'products.manage', 'group' => 'Catalog'],
             ['name' => 'Manage Orders', 'slug' => 'orders.manage', 'group' => 'Orders'],
@@ -172,10 +173,8 @@ class DatabaseSeeder extends Seeder
         }
 
         foreach ([
-            ['title' => 'About Us', 'slug' => 'about-us', 'content' => '<p>Elephant Spices has been bringing authentic flavours to kitchens since 1974. Pure, lab-tested spices sourced from India’s renowned spice lands.</p>', 'status' => 'published'],
             ['title' => 'Shipping Policy', 'slug' => 'shipping-policy', 'content' => '<p>We ship spices across India via Shiprocket partners with pincode-based rates.</p>', 'status' => 'published'],
             ['title' => 'Privacy Policy', 'slug' => 'privacy-policy', 'content' => '<p>We respect your privacy and protect your account data.</p>', 'status' => 'published'],
-            ['title' => 'Contact', 'slug' => 'contact', 'content' => '<p>Email hello@elephantshop.test · Pan-India wholesale & retail enquiries welcome.</p>', 'status' => 'published'],
         ] as $page) {
             CmsPage::updateOrCreate(
                 ['slug' => $page['slug']],
