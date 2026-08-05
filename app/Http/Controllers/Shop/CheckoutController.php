@@ -28,7 +28,7 @@ class CheckoutController extends Controller
 
     public function index()
     {
-        $user = auth()->user()->load('addresses');
+        $user = auth()->user();
         $cart = $this->cartService->getCart();
         $summary = $this->cartService->summary($cart);
 
@@ -36,11 +36,12 @@ class CheckoutController extends Controller
             return redirect()->route('shop.cart')->with('error', 'Your cart is empty.');
         }
 
+        $address = $user->defaultShippingAddress() ?: $user->defaultBillingAddress();
+
         return view('shop.checkout.index', [
             'summary' => $summary,
-            'addresses' => $user->addresses,
-            'defaultShipping' => $user->defaultShippingAddress(),
-            'defaultBilling' => $user->defaultBillingAddress(),
+            'user' => $user,
+            'address' => $address,
             'codEnabled' => $this->settings->bool('payments', 'cod_enabled', true) && $summary['allow_cod'],
             'onlineEnabled' => $this->settings->bool('payments', 'online_enabled', true) && $summary['allow_online'],
             'cartCount' => $summary['item_count'],
@@ -52,9 +53,25 @@ class CheckoutController extends Controller
         $user = $request->user();
 
         $data = $request->validate([
-            'shipping_address_id' => ['required', 'exists:addresses,id'],
-            'billing_address_id' => ['nullable', 'exists:addresses,id'],
-            'billing_same_as_shipping' => ['sometimes', 'boolean'],
+            'billing_name' => ['required', 'string', 'max:255'],
+            'billing_email' => ['required', 'email', 'max:255'],
+            'billing_phone' => ['required', 'string', 'max:20'],
+            'billing_address_line1' => ['required', 'string', 'max:255'],
+            'billing_address_line2' => ['nullable', 'string', 'max:255'],
+            'billing_city' => ['required', 'string', 'max:100'],
+            'billing_state' => ['required', 'string', 'max:100'],
+            'billing_postal_code' => ['required', 'regex:/^\d{6}$/'],
+            'billing_country' => ['required', 'in:'.implode(',', array_keys(config('countries')))],
+
+            'ship_to_different_address' => ['sometimes', 'boolean'],
+            'shipping_name' => ['required_if:ship_to_different_address,1', 'nullable', 'string', 'max:255'],
+            'shipping_address_line1' => ['required_if:ship_to_different_address,1', 'nullable', 'string', 'max:255'],
+            'shipping_address_line2' => ['nullable', 'string', 'max:255'],
+            'shipping_city' => ['required_if:ship_to_different_address,1', 'nullable', 'string', 'max:100'],
+            'shipping_state' => ['required_if:ship_to_different_address,1', 'nullable', 'string', 'max:100'],
+            'shipping_postal_code' => ['required_if:ship_to_different_address,1', 'nullable', 'regex:/^\d{6}$/'],
+            'shipping_country' => ['nullable', 'in:'.implode(',', array_keys(config('countries')))],
+
             'payment_method' => ['required', 'in:cod,paytm'],
             'notes' => ['nullable', 'string', 'max:1000'],
             'shipping_rate' => ['nullable', 'numeric', 'min:0'],
@@ -62,11 +79,25 @@ class CheckoutController extends Controller
             'estimated_delivery_days' => ['nullable', 'integer', 'min:1', 'max:30'],
         ]);
 
-        $shippingAddress = Address::where('user_id', $user->id)->findOrFail($data['shipping_address_id']);
-        $billingSame = $request->boolean('billing_same_as_shipping', true);
-        $billingAddress = $billingSame
-            ? $shippingAddress
-            : Address::where('user_id', $user->id)->findOrFail($data['billing_address_id'] ?? 0);
+        $shipToDifferent = $request->boolean('ship_to_different_address');
+
+        $billingAddressLine = trim($data['billing_address_line1'].' '.($data['billing_address_line2'] ?? ''));
+
+        if ($shipToDifferent) {
+            $shippingName = $data['shipping_name'];
+            $shippingAddressLine = trim($data['shipping_address_line1'].' '.($data['shipping_address_line2'] ?? ''));
+            $shippingCity = $data['shipping_city'];
+            $shippingState = $data['shipping_state'];
+            $shippingPostal = $data['shipping_postal_code'];
+            $shippingCountry = $data['shipping_country'] ?? $data['billing_country'];
+        } else {
+            $shippingName = $data['billing_name'];
+            $shippingAddressLine = $billingAddressLine;
+            $shippingCity = $data['billing_city'];
+            $shippingState = $data['billing_state'];
+            $shippingPostal = $data['billing_postal_code'];
+            $shippingCountry = $data['billing_country'];
+        }
 
         $codEnabled = $this->settings->bool('payments', 'cod_enabled', true);
         $onlineEnabled = $this->settings->bool('payments', 'online_enabled', true);
@@ -87,7 +118,7 @@ class CheckoutController extends Controller
         $weight = max($this->cartService->summary($cart)['weight'], 0.5);
         $quote = $this->shipping->driver()->serviceability(
             $pickup,
-            $shippingAddress->postal_code,
+            $shippingPostal,
             $weight,
             $data['payment_method'] === 'cod' ? 1 : 0
         );
@@ -107,7 +138,10 @@ class CheckoutController extends Controller
         }
 
         try {
-            $order = DB::transaction(function () use ($data, $user, $cart, $summary, $shippingAddress, $billingAddress, $billingSame, $quote) {
+            $order = DB::transaction(function () use (
+                $data, $user, $cart, $summary, $quote, $shipToDifferent,
+                $billingAddressLine, $shippingName, $shippingAddressLine, $shippingCity, $shippingState, $shippingPostal, $shippingCountry
+            ) {
                 foreach ($cart->items as $item) {
                     $variant = ProductVariant::where('id', $item->product_variant_id)->lockForUpdate()->first();
                     if (! $variant || ! $variant->is_active || $variant->stock < $item->quantity) {
@@ -115,26 +149,45 @@ class CheckoutController extends Controller
                     }
                 }
 
+                Address::updateOrCreate(
+                    ['user_id' => $user->id, 'is_default_shipping' => true],
+                    [
+                        'label' => 'Home',
+                        'name' => $data['billing_name'],
+                        'phone' => $data['billing_phone'],
+                        'email' => $data['billing_email'],
+                        'address_line1' => $data['billing_address_line1'],
+                        'address_line2' => $data['billing_address_line2'] ?? null,
+                        'city' => $data['billing_city'],
+                        'state' => $data['billing_state'],
+                        'postal_code' => $data['billing_postal_code'],
+                        'country' => $data['billing_country'],
+                        'is_default_shipping' => true,
+                        'is_default_billing' => true,
+                    ]
+                );
+
                 $order = Order::create([
                     'order_number' => 'ELP-'.strtoupper(Str::random(8)),
                     'user_id' => $user->id,
-                    'customer_name' => $shippingAddress->name,
-                    'customer_email' => $shippingAddress->email ?: $user->email,
-                    'customer_phone' => $shippingAddress->phone,
-                    'billing_same_as_shipping' => $billingSame,
-                    'billing_name' => $billingAddress->name,
-                    'billing_email' => $billingAddress->email ?: $user->email,
-                    'billing_phone' => $billingAddress->phone,
-                    'billing_address' => trim($billingAddress->address_line1.' '.($billingAddress->address_line2 ?? '')),
-                    'billing_city' => $billingAddress->city,
-                    'billing_state' => $billingAddress->state,
-                    'billing_postal_code' => $billingAddress->postal_code,
-                    'billing_country' => $billingAddress->country ?: 'IN',
-                    'shipping_address' => trim($shippingAddress->address_line1.' '.($shippingAddress->address_line2 ?? '')),
-                    'shipping_city' => $shippingAddress->city,
-                    'shipping_state' => $shippingAddress->state,
-                    'shipping_postal_code' => $shippingAddress->postal_code,
-                    'shipping_country' => $shippingAddress->country ?: 'IN',
+                    'customer_name' => $data['billing_name'],
+                    'customer_email' => $data['billing_email'],
+                    'customer_phone' => $data['billing_phone'],
+                    'billing_same_as_shipping' => ! $shipToDifferent,
+                    'billing_name' => $data['billing_name'],
+                    'billing_email' => $data['billing_email'],
+                    'billing_phone' => $data['billing_phone'],
+                    'billing_address' => $billingAddressLine,
+                    'billing_city' => $data['billing_city'],
+                    'billing_state' => $data['billing_state'],
+                    'billing_postal_code' => $data['billing_postal_code'],
+                    'billing_country' => $data['billing_country'],
+                    'shipping_name' => $shippingName,
+                    'shipping_address' => $shippingAddressLine,
+                    'shipping_city' => $shippingCity,
+                    'shipping_state' => $shippingState,
+                    'shipping_postal_code' => $shippingPostal,
+                    'shipping_country' => $shippingCountry,
                     'subtotal' => $summary['subtotal'],
                     'shipping_amount' => $summary['shipping'],
                     'tax_amount' => $summary['tax'],

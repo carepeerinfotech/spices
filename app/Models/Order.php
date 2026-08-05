@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
     'order_number', 'user_id', 'customer_name', 'customer_email', 'customer_phone',
     'billing_name', 'billing_email', 'billing_phone', 'billing_address',
     'billing_city', 'billing_state', 'billing_postal_code', 'billing_country',
-    'billing_same_as_shipping',
+    'billing_same_as_shipping', 'shipping_name',
     'shipping_address', 'shipping_city', 'shipping_state', 'shipping_postal_code',
     'shipping_country', 'subtotal', 'shipping_amount', 'tax_amount', 'tax_percent',
     'total', 'currency', 'payment_method', 'payment_status', 'status', 'notes',

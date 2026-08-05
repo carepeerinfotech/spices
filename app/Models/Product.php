@@ -120,7 +120,6 @@ class Product extends Model
         if (str_starts_with($this->image, 'http')) {
             return $this->image;
         }
-
         return MediaUrl::public($this->image);
     }
 }
