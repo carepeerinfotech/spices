@@ -8,6 +8,7 @@
     <div class="collections" style="margin-top: 32px">
       @foreach($categories as $category)
         <article class="collection">
+           <a href="{{ route('shop.catalog', ['category' => $category->slug]) }}">
           <img
             src="{{ $category->imageUrl() ?: asset('assets/images/'.$fallbackImages[$loop->index % count($fallbackImages)]) }}"
             alt="{{ $category->name }}"
@@ -16,6 +17,7 @@
             <h3>{{ $category->name }}</h3>
             <a href="{{ route('shop.catalog', ['category' => $category->slug]) }}">Shop Now →</a>
           </div>
+          </a>
         </article>
       @endforeach
     </div>

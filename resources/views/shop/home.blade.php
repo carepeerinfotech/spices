@@ -17,6 +17,7 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
+     <link rel="icon" type="image/x-icon" href="assets/images/elephant-fav.png">
     <link rel="stylesheet" href="{{ asset('css/home.css') }}" />
   </head>
   <body>
@@ -33,5 +34,6 @@
     </main>
     <x-home.footer />
     <script src="{{ asset('js/home.js') }}"></script>
+    <script src="{{ asset('js/search.js') }}"></script>
   </body>
 </html>

@@ -11,8 +11,8 @@
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg>
       </button>
     </div>
-    <a href="{{ route('shop.home') }}">Home</a><a href="{{ route('shop.about') }}">About</a
-    ><a href="{{ route('shop.catalog') }}">Shop</a><a href="{{ route('shop.contact') }}">Contact</a>
+    <a href="{{ route('shop.home') }}">Home</a><a href="{{ route('shop.about') }}">About Us</a
+    ><a href="{{ route('shop.catalog') }}">Shop</a><a href="{{ route('shop.contact') }}">Contact Us</a>
   </nav>
   <div class="icons">
     <a class="icon-btn" href="{{ route('shop.cart') }}" aria-label="Cart">
@@ -22,11 +22,11 @@
         <circle cx="18" cy="20" r="1" />
       </svg>
       <span class="cart-badge" data-cart-count @if($cartCount < 1) hidden @endif>{{ $cartCount }}</span></a
-    ><a class="icon-btn" href="{{ route('shop.catalog') }}" aria-label="Search products">
+    ><button type="button" class="icon-btn" data-search-toggle aria-label="Search products" aria-haspopup="dialog" aria-expanded="false" aria-controls="search-modal">
       <svg viewBox="0 0 24 24">
         <circle cx="11" cy="11" r="6" />
         <path d="m16 16 5 5" />
-      </svg></a
+      </svg></button
     ><a class="icon-btn" href="{{ auth()->check() ? route('account.dashboard') : route('login') }}" aria-label="{{ auth()->check() ? 'My account' : 'Login' }}">
       <svg viewBox="0 0 24 24">
         <circle cx="12" cy="8" r="4" />
@@ -42,3 +42,17 @@
   </div>
 </header>
 <div class="nav-backdrop" aria-hidden="true"></div>
+
+<div id="search-modal" class="search-modal" role="dialog" aria-modal="true" aria-label="Search products" hidden>
+  <div class="search-modal__backdrop" data-search-close></div>
+  <div class="search-modal__panel">
+    <form class="search-modal__form" action="{{ route('shop.catalog') }}" method="GET">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input type="search" name="q" data-search-input placeholder="Search for spices, masala, atta..." autocomplete="off">
+      <button type="button" class="search-modal__close" data-search-close aria-label="Close search">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </form>
+    <div class="search-modal__results" data-search-results></div>
+  </div>
+</div>

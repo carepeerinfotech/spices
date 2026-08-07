@@ -30,7 +30,7 @@
           abroad
         </p>
       </div>
-      <a href="#" class="btn outline-btn">Read More</a>
+      <a href="about-us" class="btn outline-btn">Read More</a>
     </div>
   </div>
 </section>
