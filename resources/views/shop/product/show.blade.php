@@ -80,22 +80,32 @@
                 </button>
             </div>
 
-            <div class="mt-8 rounded-xl border border-slate-200 p-4">
+            <!-- <div class="mt-8 rounded-xl border border-slate-200 p-4">
                 <h3 class="font-medium mb-2">Check delivery</h3>
                 <div class="flex gap-2">
                     <input id="pincode" type="text" maxlength="6" placeholder="Enter pincode" class="rounded-lg border border-slate-300 px-3 py-2 text-sm w-40">
                     <button type="button" id="check-pincode" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">Check</button>
                 </div>
                 <p id="pincode-result" class="text-sm text-slate-600 mt-2"></p>
-            </div>
+            </div> -->
 
-            <div class="mt-8 text-sm text-slate-500 space-y-1">
+            <!-- <div class="mt-8 text-sm text-slate-500 space-y-1">
                 <p>COD: {{ $product->allow_cod ? 'Available' : 'Not available' }}</p>
                 <p>Online payment: {{ $product->allow_online ? 'Available' : 'Not available' }}</p>
-            </div>
+            </div> -->
 
-            <div class="mt-10 prose prose-slate max-w-none text-slate-600 text-sm leading-relaxed">
-                {!! nl2br(e($product->description)) !!}
+            <div class="mt-10 border-t border-[var(--line)]">
+                <button type="button" class="accordion-trigger w-full flex items-center justify-between py-4 cursor-pointer" aria-expanded="true" aria-controls="description-content">
+                    <span class="font-display text-lg text-stone-900">Description</span>
+                    <svg class="accordion-chevron w-4 h-4 text-stone-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <div id="description-content" class="accordion-content is-open">
+                    <div class="accordion-inner">
+                        <div class="prose prose-slate max-w-none text-slate-600 text-sm leading-relaxed pb-4">
+                            {!! nl2br(e($product->description)) !!}
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -107,6 +117,15 @@
 (function () {
   var productId = {{ $product->id }};
   var variantId = {{ $defaultVariant?->id ?? 'null' }};
+
+  document.querySelectorAll('.accordion-trigger').forEach(function (trigger) {
+    trigger.addEventListener('click', function () {
+      var expanded = trigger.getAttribute('aria-expanded') === 'true';
+      var content = document.getElementById(trigger.getAttribute('aria-controls'));
+      trigger.setAttribute('aria-expanded', String(!expanded));
+      if (content) content.classList.toggle('is-open', !expanded);
+    });
+  });
 
   document.querySelectorAll('.thumb').forEach(function (btn) {
     btn.addEventListener('click', function () {

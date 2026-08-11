@@ -207,6 +207,139 @@ header {
   transform: translateY(-2px);
   background: #981518;
 }
+.search-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+}
+.search-modal[hidden] {
+  display: none;
+}
+.search-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(41, 39, 42, 0.55);
+  animation: search-fade 0.18s ease;
+}
+.search-modal__panel {
+  position: relative;
+  width: min(680px, calc(100% - 32px));
+  margin: 90px auto 0;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  animation: search-drop 0.2s ease;
+}
+@keyframes search-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes search-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
+.search-modal__form {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+}
+.search-modal__form input {
+  flex: 1;
+  border: 0;
+  outline: 0;
+  font-size: 16px;
+  font-family: inherit;
+  color: var(--ink);
+}
+.search-modal__close {
+  border: 0;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  padding: 2px;
+}
+.search-modal__close:hover {
+  color: var(--red);
+}
+.search-modal__results {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+.search-result {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--line);
+}
+.search-result:last-child {
+  border-bottom: 0;
+}
+.search-result:hover {
+  background: var(--cream);
+}
+.search-result img {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--cream);
+}
+.search-result__name {
+  font-size: 14px;
+  font-weight: 600;
+}
+.search-result__price {
+  font-size: 12px;
+  color: var(--muted);
+}
+.search-modal__hint,
+.search-modal__empty {
+  padding: 28px 20px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+.search-modal__viewall {
+  display: block;
+  padding: 12px 20px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--red);
+  border-top: 1px solid var(--line);
+}
+body.search-open {
+  overflow: hidden;
+}
+.accordion-content {
+  display: grid;
+  grid-template-rows: 0fr;
+  overflow: hidden;
+  transition: grid-template-rows 0.3s ease;
+}
+.accordion-content.is-open {
+  grid-template-rows: 1fr;
+}
+.accordion-content > .accordion-inner {
+  overflow: hidden;
+}
+.accordion-chevron {
+  transition: transform 0.25s ease;
+}
+.accordion-trigger[aria-expanded="true"] .accordion-chevron {
+  transform: rotate(180deg);
+}
 .slider-dots {
   position: absolute;
   z-index: 5;
@@ -313,9 +446,10 @@ header {
   width: 100%;
   transition: transform 0.35s ease;
 }
+.product-content {
+  padding: 15px 12px 10px 12px;
+}
 .product h3 {
-  font-size: 9px;
-  margin: 9px 0 5px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -531,6 +665,7 @@ section.feature-collection {
 .collection h3 {
   font-size: 20px;
   margin-bottom: 8px;
+  color: var(--ink);
 }
 .collection a {
   font-size: 14px;
@@ -595,7 +730,7 @@ section.feature-collection {
   place-content: center;
   text-align: center;
   box-shadow: 0 6px 15px #0002;
-  padding: 50px 0;
+  padding: 50px 10px;
 }
 .newsletter h2 {
   font:
@@ -747,14 +882,21 @@ footer {
   .icons {
     gap: 8px;
   }
-  .icons .icon-btn:not(.menu-toggle):not(:first-child) {
+  /* .icons .icon-btn:not(.menu-toggle):not(:first-child) {
     display: none;
+  } */
+   .collections h3 {
+    font-size: 16px;
+  }
+  footer {
+    padding-left: 6px;
+    padding-right: 6px;
   }
   .menu-toggle {
     display: grid;
   }
   .hero {
-    height: 410px;
+    height: 220px;
   }
   .hero-copy {
     width: calc(100% - 32px);
@@ -847,6 +989,7 @@ footer {
   }
   .footer-base {
     flex-direction: column;
+    align-items: center;
     gap: 10px;
   }
 
@@ -867,10 +1010,6 @@ footer {
 }
 .product h3 {
   font-size: 16px;
-  margin: 14px 0 8px;
-}
-.rating {
-  font-size: 12px;
 }
 .price {
   font-size: 18px;
@@ -929,12 +1068,6 @@ footer {
   }
   .section-sub {
     font-size: 13px;
-  }
-  .product h3 {
-    font-size: 14px;
-  }
-  .rating {
-    font-size: 10px;
   }
   .price {
     font-size: 15px;

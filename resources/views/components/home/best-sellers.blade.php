@@ -14,23 +14,17 @@
               alt="{{ $product->name }}"
             />
           </div>
+          <div class="product-content">
           <h3>{{ $product->name }}</h3>
-          <p class="rating">★★★★★ (4.8 · 2,340 reviews)</p>
-          @if($product->hasRunningOffer())
-            <p class="price">
-              ₹{{ number_format($product->offerPrice(), 0) }}
-              <del>₹{{ number_format($product->minPrice(), 0) }}</del>
-            </p>
-            <p class="offer-tag">{{ $product->activeOffer()->label() }}</p>
-          @else
-            <p class="price">
-              ₹{{ number_format($product->minPrice(), 0) }}
-              @if($product->compare_price && (float) $product->compare_price > $product->minPrice())
-                <del>₹{{ number_format($product->compare_price, 0) }}</del>
-              @endif
-            </p>
-          @endif
+          <!-- <p class="rating">★★★★★ (4.8 · 2,340 reviews)</p> -->
+          <p class="price">
+            ₹{{ number_format($product->minPrice(), 0) }}
+            @if($product->compare_price && (float) $product->compare_price > $product->minPrice())
+              <del>₹{{ number_format($product->compare_price, 0) }}</del>
+            @endif
+          </p>
           <button class="btn">Add to Cart</button>
+          </div>
         </article>
       @endforeach
     </div>

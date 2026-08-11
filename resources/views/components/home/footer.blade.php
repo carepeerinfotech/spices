@@ -13,20 +13,22 @@
         <h3>Quick Links</h3>
         <ul>
           <li><a href="{{ route('shop.home') }}">Home</a></li>
-          <li><a href="{{ route('shop.about') }}">About</a></li>
+          <li><a href="{{ route('shop.about') }}">About Us</a></li>
           <li><a href="{{ route('shop.catalog') }}">Shop</a></li>
-          <li><a href="{{ route('shop.contact') }}">Contact</a></li>
-          <li><a href="{{ route('shop.page', 'shipping-policy') }}">Shipping Policy</a></li>
-          <li><a href="{{ route('shop.page', 'privacy-policy') }}">Privacy Policy</a></li>
+          <li><a href="{{ route('shop.contact') }}">Contact Us</a></li>
+          <li><a href="{{ route('shop.shipping-policy') }}">Shipping Policy</a></li>
+          <li><a href="{{ route('shop.privacy-policy') }}">Privacy Policy</a></li>
+          <li><a href="{{ route('shop.refund-policy') }}">Refund &amp; Cancellation Policy</a></li>
+          <li><a href="{{ route('shop.terms') }}">Terms &amp; Conditions</a></li>
         </ul>
       </div>
       <div>
         <h3>Categories</h3>
         <ul>
-          <li><a href="{{ route('shop.catalog', ['category' => 'garam-masala']) }}">Blended Masala</a></li>
-          <li><a href="{{ route('shop.catalog', ['category' => 'turmeric']) }}">Pure Powder Spices</a></li>
-          <li><a href="{{ route('shop.catalog') }}">Vrat Atta</a></li>
-          <li><a href="{{ route('shop.catalog') }}">Salt</a></li>
+          <li><a href="{{ route('shop.catalog', ['category' => 'blended-masala']) }}">Blended Masala</a></li>
+          <li><a href="{{ route('shop.catalog', ['category' => 'pure-powder-spices']) }}">Pure Powder Spices</a></li>
+          <li><a href="{{ route('shop.catalog', ['category' => 'vrat-atta']) }}">Vrat Atta</a></li>
+          <li><a href="{{ route('shop.catalog', ['category' => 'salt']) }}">Salt</a></li>
         </ul>
       </div>
       <div>
