@@ -24,15 +24,76 @@
                         <td class="px-5 py-3">
                             <div class="font-medium">{{ $item->product_name }}</div>
                             <div class="text-xs text-slate-500">{{ $item->product_sku }} @if($item->variant_label) · {{ $item->variant_label }} @endif</div>
+                            @if($item->offer)
+                                <span class="inline-block mt-1 text-xs rounded bg-teal-50 text-teal-800 border border-teal-200 px-1.5 py-0.5">
+                                    {{ $item->offer->label() }} applied · −₹{{ number_format($item->offer->discount_amount, 2) }}
+                                </span>
+                            @endif
                         </td>
                         <td class="px-5 py-3">{{ $item->quantity }}</td>
-                        <td class="px-5 py-3">₹{{ number_format($item->price, 2) }}</td>
+                        <td class="px-5 py-3">
+                            @if($item->offer && $item->offer->unit_discount > 0)
+                                <span class="text-xs text-slate-400 line-through mr-1">₹{{ number_format($item->price + $item->offer->unit_discount, 2) }}</span>
+                            @endif
+                            ₹{{ number_format($item->price, 2) }}
+                        </td>
                         <td class="px-5 py-3">₹{{ number_format($item->total, 2) }}</td>
                     </tr>
                 @endforeach
                 </tbody>
             </table>
         </div>
+
+        @if($order->offers->isNotEmpty())
+            <div class="rounded-xl bg-white border border-slate-200 overflow-hidden">
+                <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+                    <span class="font-medium">Offers applied</span>
+                    <span class="text-xs text-slate-500">Recorded when the order was placed</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead class="bg-slate-50 text-slate-500 text-left">
+                        <tr>
+                            <th class="px-5 py-3 font-medium">Product</th>
+                            <th class="px-5 py-3 font-medium">Offer</th>
+                            <th class="px-5 py-3 font-medium">Discount</th>
+                            <th class="px-5 py-3 font-medium">Per unit</th>
+                            <th class="px-5 py-3 font-medium">Valid</th>
+                        </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                        @foreach($order->offers as $offer)
+                            <tr>
+                                <td class="px-5 py-3">{{ $offer->orderItem?->product_name ?? '—' }}</td>
+                                <td class="px-5 py-3">
+                                    <div>{{ $offer->name ?: '—' }}</div>
+                                    <div class="text-xs text-slate-500">
+                                        {{ $offer->discount_type === 'percentage' ? rtrim(rtrim($offer->value, '0'), '.').'%' : '₹'.number_format($offer->value, 2) }}
+                                        {{ $offer->discount_type === 'percentage' ? 'of line price' : 'flat' }}
+                                    </div>
+                                </td>
+                                <td class="px-5 py-3">−₹{{ number_format($offer->discount_amount, 2) }}</td>
+                                <td class="px-5 py-3 text-slate-500">−₹{{ number_format($offer->unit_discount, 2) }}</td>
+                                <td class="px-5 py-3 text-xs text-slate-500">
+                                    {{ \App\Support\LocalTime::display($offer->starts_at, 'd M Y H:i') ?? '—' }}<br>
+                                    to {{ \App\Support\LocalTime::display($offer->ends_at, 'd M Y H:i') ?? '—' }}
+                                </td>
+                            </tr>
+                        @endforeach
+                        </tbody>
+                        <tfoot>
+                        <tr class="bg-slate-50">
+                            <td class="px-5 py-3 font-medium" colspan="2">Total recorded discount</td>
+                            <td class="px-5 py-3 font-medium" colspan="3">−₹{{ number_format($order->offersDiscount(), 2) }}</td>
+                        </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <p class="px-5 py-3 text-xs text-slate-500 bg-slate-50 border-t border-slate-100">
+                    Already deducted — the item prices and order totals shown are after these offers.
+                </p>
+            </div>
+        @endif
 
         <div class="rounded-xl bg-white border border-slate-200 p-5 space-y-3">
             <h3 class="font-medium">Shiprocket fulfillment</h3>
@@ -76,6 +137,10 @@
         </div>
 
         <div class="rounded-xl bg-white border border-slate-200 p-5 space-y-2 text-sm">
+            @if($order->offersDiscount() > 0)
+                <div class="flex justify-between text-slate-500"><span>Items before offers</span><span>₹{{ number_format($order->subtotal + $order->offersDiscount(), 2) }}</span></div>
+                <div class="flex justify-between text-emerald-700"><span>Offer savings</span><span>−₹{{ number_format($order->offersDiscount(), 2) }}</span></div>
+            @endif
             <div class="flex justify-between"><span>Subtotal</span><span>₹{{ number_format($order->subtotal, 2) }}</span></div>
             <div class="flex justify-between"><span>Shipping</span><span>₹{{ number_format($order->shipping_amount, 2) }}</span></div>
             <div class="flex justify-between"><span>GST</span><span>₹{{ number_format($order->tax_amount, 2) }}</span></div>

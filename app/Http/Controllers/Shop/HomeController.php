@@ -13,7 +13,7 @@ class HomeController extends Controller
     {
         $categories = Category::active()->orderBy('sort_order')->take(4)->get();
 
-        $featuredProducts = Product::active()->with('images')->latest()->take(4)->get();
+        $featuredProducts = Product::active()->with(['images', 'variants', 'offers'])->latest()->take(4)->get();
 
         return view('shop.home', [
             'categories' => $categories,

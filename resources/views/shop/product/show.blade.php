@@ -21,12 +21,29 @@
         <div>
             <p class="text-sm text-stone-500 mb-2">{{ $product->category?->name }}</p>
             <h1 class="font-display text-3xl sm:text-4xl tracking-tight text-stone-900">{{ $product->name }}</h1>
+            @php
+                $offer = $product->activeOffer();
+                $basePrice = (float) ($defaultVariant?->price ?? $product->price);
+                $offerPrice = $offer ? $offer->applyTo($basePrice) : $basePrice;
+            @endphp
             <div class="mt-4 flex items-baseline gap-3">
-                <span id="variant-price" class="text-2xl font-semibold text-brand">{{ $defaultVariant?->formattedPrice() ?: $product->formattedPrice() }}</span>
-                <span id="variant-compare" class="text-stone-400 line-through {{ $defaultVariant?->compare_price ? '' : 'hidden' }}">
-                    @if($defaultVariant?->compare_price) ₹{{ number_format($defaultVariant->compare_price, 2) }} @endif
+                <span id="variant-price" class="text-2xl font-semibold text-brand">₹{{ number_format($offerPrice, 2) }}</span>
+                <span id="variant-was" class="text-stone-400 line-through {{ $offer ? '' : 'hidden' }}">
+                    @if($offer) ₹{{ number_format($basePrice, 2) }} @endif
+                </span>
+                <span id="variant-compare" class="text-stone-400 line-through {{ (! $offer && $defaultVariant?->compare_price) ? '' : 'hidden' }}">
+                    @if(! $offer && $defaultVariant?->compare_price) ₹{{ number_format($defaultVariant->compare_price, 2) }} @endif
                 </span>
             </div>
+            @if($offer)
+                <div class="mt-2 flex flex-wrap items-center gap-2">
+                    <span class="inline-flex items-center rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-1 text-xs font-medium">
+                        @if($offer->name){{ $offer->name }} · @endif{{ $offer->label() }}
+                    </span>
+                    <span id="variant-saving" class="text-xs text-emerald-700">You save ₹{{ number_format($basePrice - $offerPrice, 2) }}</span>
+                </div>
+                <p class="mt-1 text-xs text-stone-500">Offer ends {{ \App\Support\LocalTime::display($offer->ends_at) ?? 'soon' }}</p>
+            @endif
             <p class="mt-4 text-stone-600 leading-relaxed">{{ $product->short_description }}</p>
             <p id="variant-stock" class="mt-2 text-sm {{ ($defaultVariant?->inStock() ?? false) ? 'text-emerald-700' : 'text-rose-600' }}">
                 {{ ($defaultVariant?->inStock() ?? false) ? ($defaultVariant->stock.' in stock') : 'Out of stock' }}
@@ -40,8 +57,10 @@
                             <button type="button"
                                     class="variant-btn rounded-lg border px-3 py-2 text-sm {{ $defaultVariant?->id === $variant->id ? 'border-brand bg-cream-dark text-brand' : 'border-[var(--line)]' }}"
                                     data-id="{{ $variant->id }}"
-                                    data-price="{{ $variant->formattedPrice() }}"
-                                    data-compare="{{ $variant->compare_price ? '₹'.number_format($variant->compare_price, 2) : '' }}"
+                                    data-price="₹{{ number_format($offer ? $offer->applyTo((float) $variant->price) : (float) $variant->price, 2) }}"
+                                    data-was="{{ $offer ? '₹'.number_format((float) $variant->price, 2) : '' }}"
+                                    data-saving="{{ $offer ? '₹'.number_format($offer->discountFor((float) $variant->price), 2) : '' }}"
+                                    data-compare="{{ (! $offer && $variant->compare_price) ? '₹'.number_format($variant->compare_price, 2) : '' }}"
                                     data-stock="{{ $variant->stock }}"
                                     data-active="{{ $variant->inStock() ? 1 : 0 }}"
                                     data-image="{{ $variant->imageUrl() }}">
@@ -103,10 +122,18 @@
       btn.className = 'variant-btn rounded-lg border px-3 py-2 text-sm border-brand bg-cream-dark text-brand';
       variantId = parseInt(btn.getAttribute('data-id'), 10);
       document.getElementById('variant-price').textContent = btn.getAttribute('data-price');
-      var compare = btn.getAttribute('data-compare');
-      var compareEl = document.getElementById('variant-compare');
-      if (compare) { compareEl.textContent = compare; compareEl.classList.remove('hidden'); }
-      else { compareEl.classList.add('hidden'); }
+
+      function setText(id, value) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        if (value) { el.textContent = value; el.classList.remove('hidden'); }
+        else { el.classList.add('hidden'); }
+      }
+
+      setText('variant-was', btn.getAttribute('data-was'));
+      setText('variant-compare', btn.getAttribute('data-compare'));
+      var saving = btn.getAttribute('data-saving');
+      setText('variant-saving', saving ? 'You save ' + saving : '');
       var active = btn.getAttribute('data-active') === '1';
       var stockEl = document.getElementById('variant-stock');
       stockEl.textContent = active ? (btn.getAttribute('data-stock') + ' in stock') : 'Out of stock';

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable([
     'order_id', 'product_id', 'product_variant_id', 'product_name', 'product_sku',
@@ -36,5 +37,10 @@ class OrderItem extends Model
     public function variant(): BelongsTo
     {
         return $this->belongsTo(ProductVariant::class, 'product_variant_id');
+    }
+
+    public function offer(): HasOne
+    {
+        return $this->hasOne(OrderOffer::class);
     }
 }

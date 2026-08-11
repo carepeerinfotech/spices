@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Address;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\OrderOffer;
 use App\Models\ProductVariant;
 use App\Services\CartService;
 use App\Services\Mail\TemplateMailer;
@@ -206,7 +207,12 @@ class CheckoutController extends Controller
                 foreach ($cart->items as $item) {
                     $variant = ProductVariant::where('id', $item->product_variant_id)->lockForUpdate()->firstOrFail();
 
-                    OrderItem::create([
+                    // Price the line the same way the cart summary did.
+                    $offer = $item->product?->activeOffer();
+                    $unitDiscount = $offer?->discountFor((float) $variant->price) ?? 0.0;
+                    $unitPrice = round((float) $variant->price - $unitDiscount, 2);
+
+                    $orderItem = OrderItem::create([
                         'order_id' => $order->id,
                         'product_id' => $item->product_id,
                         'product_variant_id' => $variant->id,
@@ -215,17 +221,22 @@ class CheckoutController extends Controller
                         'variant_label' => $variant->option_label,
                         'variant_options' => $variant->option_values,
                         'quantity' => $item->quantity,
-                        'price' => $variant->price,
-                        'total' => (float) $variant->price * $item->quantity,
+                        'price' => $unitPrice,
+                        'total' => round($unitPrice * $item->quantity, 2),
                         'weight' => $variant->shippingWeight(),
                     ]);
+
+                    // Snapshot the offer that produced the discount just charged.
+                    if ($offer) {
+                        OrderOffer::captureFor($orderItem, $offer, $unitDiscount);
+                    }
 
                     $variant->decrement('stock', $item->quantity);
                 }
 
                 $this->cartService->clear();
 
-                return $order->load('items');
+                return $order->load('items', 'offers');
             });
 
             $this->mailer->send('order_placed', $order->customer_email, [

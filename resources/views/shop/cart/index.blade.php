@@ -23,7 +23,17 @@
                         </div>
                         <div class="flex-1 min-w-0">
                             <a href="{{ route('shop.product', $item['slug']) }}" class="font-medium hover:text-brand">{{ $item['name'] }}</a>
-                            <p class="text-sm text-slate-500 mt-0.5">₹{{ number_format($item['price'], 2) }} each</p>
+                            <p class="text-sm text-slate-500 mt-0.5">
+                                ₹{{ number_format($item['price'], 2) }} each
+                                @if($item['discount'] > 0)
+                                    <span class="line-through text-slate-400 ml-1">₹{{ number_format($item['original_price'], 2) }}</span>
+                                @endif
+                            </p>
+                            @if($item['offer'])
+                                <span class="inline-block mt-1 text-xs text-emerald-800 bg-emerald-50 border border-emerald-200 rounded px-1.5 py-0.5">
+                                    @if($item['offer']['name']){{ $item['offer']['name'] }} · @endif{{ $item['offer']['label'] }}
+                                </span>
+                            @endif
                         </div>
                         <div class="flex items-center gap-2">
                             <input type="number" min="0" max="{{ $item['stock'] }}" value="{{ $item['quantity'] }}"
@@ -38,6 +48,12 @@
         </div>
 
         <div class="rounded-xl border border-slate-200 bg-white p-5 space-y-2 text-sm w-full lg:w-80 lg:shrink-0">
+            <div id="row-gross" class="flex justify-between text-slate-500 {{ $summary['discount'] > 0 ? '' : 'hidden' }}">
+                <span>Items</span><span id="sum-gross">₹{{ number_format($summary['gross_subtotal'], 2) }}</span>
+            </div>
+            <div id="row-discount" class="flex justify-between text-emerald-700 {{ $summary['discount'] > 0 ? '' : 'hidden' }}">
+                <span>Offer savings</span><span id="sum-discount">−₹{{ number_format($summary['discount'], 2) }}</span>
+            </div>
             <div class="flex justify-between"><span>Subtotal</span><span id="sum-subtotal">₹{{ number_format($summary['subtotal'], 2) }}</span></div>
             <div class="flex justify-between"><span>Shipping</span><span id="sum-shipping">₹{{ number_format($summary['shipping'], 2) }}</span></div>
             <div class="flex justify-between"><span>GST</span><span id="sum-tax">₹{{ number_format($summary['tax'], 2) }}</span></div>
@@ -59,6 +75,10 @@
 
     function render(summary) {
         AppAjax.updateCartBadge(summary.item_count);
+        document.getElementById('sum-gross').textContent = money(summary.gross_subtotal);
+        document.getElementById('sum-discount').textContent = '−' + money(summary.discount);
+        document.getElementById('row-gross').classList.toggle('hidden', !(summary.discount > 0));
+        document.getElementById('row-discount').classList.toggle('hidden', !(summary.discount > 0));
         document.getElementById('sum-subtotal').textContent = money(summary.subtotal);
         document.getElementById('sum-shipping').textContent = money(summary.shipping);
         document.getElementById('sum-tax').textContent = money(summary.tax);
@@ -81,7 +101,12 @@
                 (item.image ? '<img src="' + item.image + '" alt="" class="w-full h-full object-cover">' : '') +
                 '</div>' +
                 '<div class="flex-1 min-w-0"><a href="/product/' + item.slug + '" class="font-medium hover:text-brand">' + item.name + '</a>' +
-                '<p class="text-sm text-slate-500 mt-0.5">' + money(item.price) + ' each</p></div>' +
+                '<p class="text-sm text-slate-500 mt-0.5">' + money(item.price) + ' each' +
+                (item.discount > 0 ? '<span class="line-through text-slate-400 ml-1">' + money(item.original_price) + '</span>' : '') +
+                '</p>' +
+                (item.offer ? '<span class="inline-block mt-1 text-xs text-emerald-800 bg-emerald-50 border border-emerald-200 rounded px-1.5 py-0.5">' +
+                  (item.offer.name ? item.offer.name + ' · ' : '') + item.offer.label + '</span>' : '') +
+                '</div>' +
                 '<div class="flex items-center gap-2">' +
                 '<input type="number" min="0" max="' + item.stock + '" value="' + item.quantity + '" class="qty-input w-16 rounded-lg border border-slate-300 px-2 py-1.5 text-sm" data-item="' + item.id + '">' +
                 '<button type="button" class="remove-item text-sm text-rose-600 hover:underline" data-item="' + item.id + '">Remove</button></div>' +

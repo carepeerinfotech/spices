@@ -8,7 +8,17 @@
         <a href="{{ route('shop.product', $product->slug) }}">
             <h3 class="product-card__title">{{ $product->name }}</h3>
             <p class="product-card__meta">{{ $product->short_description ?: 'Authentic, Fresh and Pure' }}</p>
-            <p class="product-card__price">{{ $product->formattedPrice() }}</p>
+            @if($product->hasRunningOffer())
+                <p class="product-card__price">
+                    {{ $product->formattedOfferPrice() }}
+                    <span class="text-stone-400 line-through text-sm font-normal ml-1">{{ $product->formattedPrice() }}</span>
+                </p>
+                <span class="inline-flex items-center rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 text-xs font-medium">
+                    {{ $product->activeOffer()->label() }}
+                </span>
+            @else
+                <p class="product-card__price">{{ $product->formattedPrice() }}</p>
+            @endif
         </a>
         <div class="product-card__cta">
             <form data-ajax method="POST" action="{{ route('shop.cart.store') }}"

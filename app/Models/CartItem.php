@@ -32,8 +32,36 @@ class CartItem extends Model
         return $this->belongsTo(ProductVariant::class, 'product_variant_id');
     }
 
+    public function offer(): ?ProductOffer
+    {
+        return $this->product?->activeOffer();
+    }
+
+    /** Discount taken off a single unit by the running offer. */
+    public function unitDiscount(): float
+    {
+        return $this->offer()?->discountFor((float) $this->price) ?? 0.0;
+    }
+
+    public function discountedPrice(): float
+    {
+        return round((float) $this->price - $this->unitDiscount(), 2);
+    }
+
+    public function lineDiscount(): float
+    {
+        return round($this->unitDiscount() * $this->quantity, 2);
+    }
+
+    /** What the line is charged at, after any running offer. */
     public function lineTotal(): float
     {
-        return (float) $this->price * $this->quantity;
+        return round($this->discountedPrice() * $this->quantity, 2);
+    }
+
+    /** What the line would cost without the offer. */
+    public function lineSubtotal(): float
+    {
+        return round((float) $this->price * $this->quantity, 2);
     }
 }

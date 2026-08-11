@@ -68,6 +68,14 @@ return [
     'timezone' => 'UTC',
 
     /*
+    | Timezone the store operates in. Timestamps stay in UTC; this is only used
+    | when reading and showing times an admin or customer types or reads,
+    | such as offer start/end windows.
+    */
+
+    'display_timezone' => env('APP_DISPLAY_TIMEZONE', 'Asia/Kolkata'),
+
+    /*
     |--------------------------------------------------------------------------
     | Application Locale Configuration
     |--------------------------------------------------------------------------
