@@ -60,12 +60,12 @@
                 @if($activeCategory?->description)
                     <p class="text-stone-500 text-sm mb-6">{{ $activeCategory->description }}</p>
                 @endif
-                @if(!empty($activeCategory?->bannerUrl()))
+                <!-- @if(!empty($activeCategory?->bannerUrl()))
                     <div class="rounded-2xl overflow-hidden mb-6 h-32 sm:h-44 shadow-md shadow-stone-900/5">
                         <img src="{{ $activeCategory->bannerUrl() }}" alt="{{ $activeCategory->name }}"
                             class="w-full h-full object-cover">
                     </div>
-                @endif
+                @endif -->
 
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5">
                     @forelse($products as $product)

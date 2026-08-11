@@ -27,8 +27,13 @@ use App\Http\Controllers\Shop\NewsletterController;
 use App\Http\Controllers\Shop\HomeController;
 use App\Http\Controllers\Shop\PageController;
 use App\Http\Controllers\Shop\PaymentController;
+use App\Http\Controllers\Shop\PrivacyPolicyController;
+use App\Http\Controllers\Shop\RefundPolicyController;
+use App\Http\Controllers\Shop\SearchController;
+use App\Http\Controllers\Shop\ShippingPolicyController;
 use App\Http\Controllers\Shop\ShippingQuoteController;
 use App\Http\Controllers\Shop\ShopController;
+use App\Http\Controllers\Shop\TermsController;
 use App\Http\Middleware\EnsureAdmin;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
@@ -38,11 +43,17 @@ Route::get('/', [HomeController::class, 'index'])->name('shop.home');
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.catalog');
 Route::get('/product/{slug}', [ShopController::class, 'show'])->name('shop.product');
 Route::get('/page/{slug}', [PageController::class, 'show'])->name('shop.page');
+Route::get('/search/suggest', [SearchController::class, 'suggest'])->name('search.suggest');
 
 Route::get('/about-us', [AboutController::class, 'show'])->name('shop.about');
 
 Route::get('/contact', [ContactController::class, 'show'])->name('shop.contact');
 Route::post('/contact', [ContactController::class, 'store'])->middleware('throttle:10,1')->name('shop.contact.store');
+
+Route::get('/shipping-policy', [ShippingPolicyController::class, 'show'])->name('shop.shipping-policy');
+Route::get('/privacy-policy', [PrivacyPolicyController::class, 'show'])->name('shop.privacy-policy');
+Route::get('/refund-and-return-policy', [RefundPolicyController::class, 'show'])->name('shop.refund-policy');
+Route::get('/terms-and-conditions', [TermsController::class, 'show'])->name('shop.terms');
 
 Route::post('/newsletter/subscribe', [NewsletterController::class, 'store'])->middleware('throttle:10,1')->name('shop.newsletter.subscribe');
 

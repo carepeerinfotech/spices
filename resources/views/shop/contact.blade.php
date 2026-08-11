@@ -46,7 +46,7 @@
                         <p class="font-medium">India</p>
                     </div>
                 </div>
-                <div class="flex items-start gap-3">
+                <!-- <div class="flex items-start gap-3">
                     <span class="shrink-0 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
                     </span>
@@ -54,7 +54,7 @@
                         <p class="text-xs uppercase tracking-wide text-white/60 mb-0.5">Hours</p>
                         <p class="font-medium">Mon – Sat, 9:00 AM – 6:00 PM IST</p>
                     </div>
-                </div>
+                </div> -->
             </div>
         </div>
 
@@ -80,8 +80,10 @@
                         @error('email')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
                     </div>
                     <div>
-                        <label for="phone" class="block text-sm mb-1 text-stone-700">Phone <span class="text-stone-400">(optional)</span></label>
-                        <input id="phone" type="text" name="phone" value="{{ old('phone') }}"
+                        <label for="phone" class="block text-sm mb-1 text-stone-700">Phone
+                             <!-- <span class="text-stone-400">(optional)</span> -->
+                            </label>
+                        <input id="phone" type="text" name="phone" required value="{{ old('phone') }}"
                                class="w-full rounded-lg border border-stone-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand transition-colors">
                         @error('phone')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
                     </div>
@@ -89,7 +91,7 @@
 
                 <div>
                     <label for="message" class="block text-sm mb-1 text-stone-700">Message</label>
-                    <textarea id="message" name="message" rows="5" required
+                    <textarea id="message" name="message" rows="5"
                               class="w-full rounded-lg border border-stone-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand transition-colors">{{ old('message') }}</textarea>
                     @error('message')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>

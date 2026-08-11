@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Outfit:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+     <link rel="icon" type="image/x-icon" href="assets/images/elephant-fav.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -50,6 +51,7 @@
 
 <script src="{{ asset('js/app-ajax.js') }}" defer></script>
 <script src="{{ asset('js/home.js') }}" defer></script>
+<script src="{{ asset('js/search.js') }}" defer></script>
 @stack('scripts')
 </body>
 </html>

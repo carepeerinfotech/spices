@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\CmsPage;
 use App\Models\EmailTemplate;
 use App\Models\Permission;
 use App\Models\Role;
@@ -170,16 +169,6 @@ class DatabaseSeeder extends Seeder
             ],
         ] as $template) {
             EmailTemplate::updateOrCreate(['slug' => $template['slug']], $template + ['is_active' => true]);
-        }
-
-        foreach ([
-            ['title' => 'Shipping Policy', 'slug' => 'shipping-policy', 'content' => '<p>We ship spices across India via Shiprocket partners with pincode-based rates.</p>', 'status' => 'published'],
-            ['title' => 'Privacy Policy', 'slug' => 'privacy-policy', 'content' => '<p>We respect your privacy and protect your account data.</p>', 'status' => 'published'],
-        ] as $page) {
-            CmsPage::updateOrCreate(
-                ['slug' => $page['slug']],
-                [...$page, 'created_by' => $adminUser->id, 'published_at' => now(), 'meta_title' => $page['title']]
-            );
         }
 
         $this->call(SpiceCatalogSeeder::class);

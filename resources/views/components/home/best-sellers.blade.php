@@ -14,8 +14,9 @@
               alt="{{ $product->name }}"
             />
           </div>
+          <div class="product-content">
           <h3>{{ $product->name }}</h3>
-          <p class="rating">★★★★★ (4.8 · 2,340 reviews)</p>
+          <!-- <p class="rating">★★★★★ (4.8 · 2,340 reviews)</p> -->
           <p class="price">
             ₹{{ number_format($product->minPrice(), 0) }}
             @if($product->compare_price && (float) $product->compare_price > $product->minPrice())
@@ -23,6 +24,7 @@
             @endif
           </p>
           <button class="btn">Add to Cart</button>
+          </div>
         </article>
       @endforeach
     </div>
