@@ -1,6 +1,6 @@
 <section class="section cream">
   <div class="container">
-    <h2 class="section-title">Our Manufacturing Process</h2>
+    <h2 class="section-title heading-center">Our Manufacturing Process</h2>
     <div class="process" style="margin-top: 28px">
       <div class="process-item"><b class="process-num">1</b>Farm</div>
       <i class="process-line"></i>

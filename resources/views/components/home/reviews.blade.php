@@ -1,6 +1,6 @@
 <section class="section">
   <div class="container">
-    <h2 class="section-title">What Our Customers Say</h2>
+    <h2 class="section-title heading-center">What Our Customers Say</h2>
     <div class="reviews" style="margin-top: 33px">
       <article class="review">
         <div class="person">

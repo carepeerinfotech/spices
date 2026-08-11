@@ -6,6 +6,7 @@
   --muted: #746e69;
   --line: #eee9e2;
 }
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -16,7 +17,8 @@ html {
   overflow-x: hidden;
 }
 body {
-  font-family: "DM Sans", sans-serif;
+  /* font-family: "DM Sans", sans-serif; */
+  font-family: 'Montserrat';
   color: var(--ink);
   background: #fff;
 }
@@ -47,9 +49,12 @@ button {
   padding: 78px 0;
 }
 .section-title {
-  font:
-    700 38px "Playfair Display",
-    serif;
+    font: 600 38px "Montserrat", serif;
+  /* font: 600 38px "Playfair Display", serif; */
+  /* text-align: center; */
+  /* font-family: "Montserrat", sans-serif !important; */
+}
+.section-title.heading-center {
   text-align: center;
 }
 .section-sub {
@@ -83,7 +88,9 @@ header {
 }
 .nav a {
   font-size: 16px;
-  font-weight: 600;
+    font-weight: 600;
+    font-family: 'Montserrat';
+    text-transform: uppercase;
 }
 .nav a:hover {
   color: var(--red);
@@ -340,6 +347,153 @@ body.search-open {
 .accordion-trigger[aria-expanded="true"] .accordion-chevron {
   transform: rotate(180deg);
 }
+.cart-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  visibility: hidden;
+  pointer-events: none;
+}
+.cart-drawer.is-open {
+  visibility: visible;
+  pointer-events: auto;
+}
+.cart-drawer__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(41, 39, 42, 0.55);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.cart-drawer.is-open .cart-drawer__backdrop {
+  opacity: 1;
+}
+.cart-drawer__panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: min(420px, 100%);
+  background: #fff;
+  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+}
+.cart-drawer.is-open .cart-drawer__panel {
+  transform: translateX(0);
+}
+.cart-drawer__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--line);
+}
+.cart-drawer__header h2 {
+  font:
+    700 18px "Playfair Display",
+    serif;
+}
+.cart-drawer__close {
+  border: 0;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  padding: 2px;
+}
+.cart-drawer__close:hover {
+  color: var(--red);
+}
+.cart-drawer__items {
+  flex: 1;
+  overflow-y: auto;
+}
+.cart-drawer__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--line);
+}
+.cart-drawer__item img,
+.cart-drawer__item-noimg {
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--cream);
+}
+.cart-drawer__item-body {
+  flex: 1;
+  min-width: 0;
+}
+.cart-drawer__item-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+.cart-drawer__item-variant,
+.cart-drawer__item-meta {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.cart-drawer__item-remove {
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px;
+}
+.cart-drawer__item-remove:hover {
+  color: var(--red);
+}
+.cart-drawer__empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+.cart-drawer__footer {
+  padding: 18px 20px;
+  border-top: 1px solid var(--line);
+}
+.cart-drawer__subtotal {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+.cart-drawer__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.cart-drawer__actions a {
+  text-align: center;
+  border-radius: 100px;
+  padding: 11px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.cart-drawer__actions .cart-drawer__view {
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+.cart-drawer__actions .cart-drawer__checkout {
+  background: var(--red);
+  color: #fff;
+}
+body.cart-drawer-open {
+  overflow: hidden;
+}
 .slider-dots {
   position: absolute;
   z-index: 5;
@@ -449,6 +603,11 @@ body.search-open {
 .product-content {
   padding: 15px 12px 10px 12px;
 }
+
+.product-content:not(:has(.variant-chips)) form {
+  margin-top: 48px;
+}
+
 .product h3 {
   white-space: nowrap;
   overflow: hidden;
@@ -472,8 +631,38 @@ body.search-open {
 }
 .product .btn {
   width: 100%;
-  font-size: 8px;
+  font-size: 15px;
   padding: 7px;
+}
+.variant-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 6px;
+  margin-bottom: 15px;
+}
+.variant-chip {
+  border: 1px solid var(--line);
+  border-radius: 100px;
+  background: #fff;
+  font-size: 8px;
+  font-weight: 600;
+  padding: 3px 8px;
+  cursor: pointer;
+  color: var(--ink);
+  transition:
+    border-color 0.2s,
+    color 0.2s,
+    background 0.2s;
+}
+.variant-chip.active {
+  border-color: var(--red);
+  background: var(--cream);
+  color: var(--red);
+}
+.variant-chip:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 .features {
   display: grid;
@@ -512,6 +701,7 @@ body.search-open {
   font-size: 17px;
   margin-bottom: 6px;
   margin-top: 10px;
+  font-weight: 600;
 }
 .feature p {
   font-size: 12px;
@@ -539,12 +729,12 @@ body.search-open {
   height: 126px;
   object-fit: contain;
 }
-.story h2 {
+/* .story h2 {
   font:
     700 25px/1.2 "Playfair Display",
     serif;
   margin: 8px 0;
-}
+} */
 .story > div > p:not(.eyebrow) {
   font-size: 10px;
   line-height: 1.55;
@@ -655,6 +845,7 @@ section.feature-collection {
   font-size: 20px;
   margin-bottom: 8px;
   color: var(--ink);
+  font-weight: 600;
 }
 .collection a {
   font-size: 14px;
@@ -772,13 +963,13 @@ footer {
 }
 .footer-grid {
   display: grid;
-  grid-template-columns: 2.4fr repeat(3, 1fr);
+  grid-template-columns: 1.8fr repeat(3, 1fr);
   gap: 33px;
   padding-bottom: 23px;
   border-bottom: 1px solid #ffffff38;
 }
 .footer-brand img {
-  width: 135px;
+  width: 145px;
   object-position: left;
 }
 .footer-brand p {
@@ -1008,12 +1199,15 @@ footer {
   font-size: 12px;
 }
 .product .btn {
-  font-size: 13px;
   padding: 11px;
 }
-.story h2 {
-  font-size: 31px;
+.variant-chip {
+  font-size: 11px;
+  padding: 4px 10px;
 }
+/* .story h2 {
+  font-size: 31px;
+} */
 .story > div > p:not(.eyebrow) {
   font-size: 15px;
 }
@@ -1026,6 +1220,22 @@ footer {
 .footer-grid li,
 .footer-base {
   font-size: 15px;
+}
+
+.register-btn-login  {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.register-btn-login a {
+  font-size: 14px;
+  padding: 10px 18px;
+  background: var(--red);
+  color: #fff;
+  border-radius: 20px;
+  font-weight: 700;
+  transition: all 0.3s ease;
+  margin-left: 20px;
 }
 
 @media (min-width: 1024px) {

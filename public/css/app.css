@@ -23,7 +23,8 @@ body {
 }
 
 .font-display {
-  font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+  /* font-family: "Playfair Display", Georgia, "Times New Roman", serif; */
+  font-family: "Montserrat", serif;
 }
 
 .toast-root {

@@ -8,7 +8,7 @@
     </div>
     <div>
       <p class="eyebrow">Our story</p>
-      <h2>Three Generations of Flavour, Since 1974</h2>
+      <h2 class="section-title" style="margin-top: 10px;">Three Generations of Flavour, Since 1974</h2>
       <p>
         What began as a small family stall in a spice market has grown
         into a name trusted by millions — without ever compromising on the

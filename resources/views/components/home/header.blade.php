@@ -56,3 +56,25 @@
     <div class="search-modal__results" data-search-results></div>
   </div>
 </div>
+
+<div id="cart-drawer" class="cart-drawer" role="dialog" aria-modal="true" aria-label="Your cart">
+  <div class="cart-drawer__backdrop" data-cart-drawer-close></div>
+  <div class="cart-drawer__panel">
+    <div class="cart-drawer__header">
+      <h2>Your Cart</h2>
+      <button type="button" class="cart-drawer__close" data-cart-drawer-close aria-label="Close cart">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="cart-drawer__items" data-cart-drawer-items>
+      <p class="cart-drawer__empty">Your cart is empty.</p>
+    </div>
+    <div class="cart-drawer__footer">
+      <div class="cart-drawer__subtotal"><span>Subtotal</span><span data-cart-drawer-subtotal>₹0.00</span></div>
+      <div class="cart-drawer__actions">
+        <a href="{{ route('shop.cart') }}" class="cart-drawer__view">View Cart</a>
+        <a href="{{ route('shop.checkout') }}" class="cart-drawer__checkout">Checkout</a>
+      </div>
+    </div>
+  </div>
+</div>

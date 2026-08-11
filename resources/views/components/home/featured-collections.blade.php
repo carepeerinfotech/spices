@@ -4,7 +4,7 @@
 @endphp
 <section class="section feature-collection">
   <div class="container">
-    <h2 class="section-title">Featured Collections</h2>
+    <h2 class="section-title heading-center">Featured Collections</h2>
     <div class="collections" style="margin-top: 32px">
       @foreach($categories as $category)
         <article class="collection">
