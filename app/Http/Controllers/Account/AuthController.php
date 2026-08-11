@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Account;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\CartService;
+use App\Support\Features;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -77,16 +78,24 @@ class AuthController extends Controller
         ]);
 
         $guestSessionId = $request->session()->getId();
+        $verificationEnabled = Features::emailVerification();
 
-        event(new Registered($user));
+        if ($verificationEnabled) {
+            event(new Registered($user));
+        }
+
         Auth::login($user);
         $cartService->mergeSessionCartIntoUser($user->id, $guestSessionId);
         $request->session()->regenerate();
 
         return response()->json([
             'success' => true,
-            'message' => 'Account created. Please verify your email.',
-            'redirect' => route('verification.notice'),
+            'message' => $verificationEnabled
+                ? 'Account created. Please verify your email.'
+                : 'Account created.',
+            'redirect' => $verificationEnabled
+                ? route('verification.notice')
+                : route('account.dashboard'),
         ]);
     }
 

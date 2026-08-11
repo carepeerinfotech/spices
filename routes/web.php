@@ -60,26 +60,31 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AccountAuthController::class, 'login'])->middleware('throttle:10,1')->name('login.submit');
     Route::get('/register', [AccountAuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AccountAuthController::class, 'register'])->middleware('throttle:10,1')->name('register.submit');
-    Route::get('/forgot-password', [PasswordResetController::class, 'showLinkRequest'])->name('password.request');
-    Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink'])->middleware('throttle:6,1')->name('password.email');
-    Route::get('/reset-password/{token}', [PasswordResetController::class, 'showReset'])->name('password.reset');
-    Route::post('/reset-password', [PasswordResetController::class, 'reset'])->middleware('throttle:6,1')->name('password.update');
+
+    Route::middleware('feature:password_reset')->group(function () {
+        Route::get('/forgot-password', [PasswordResetController::class, 'showLinkRequest'])->name('password.request');
+        Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink'])->middleware('throttle:6,1')->name('password.email');
+        Route::get('/reset-password/{token}', [PasswordResetController::class, 'showReset'])->name('password.reset');
+        Route::post('/reset-password', [PasswordResetController::class, 'reset'])->middleware('throttle:6,1')->name('password.update');
+    });
 });
 
 Route::post('/logout', [AccountAuthController::class, 'logout'])->middleware('auth')->name('logout');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/email/verify', fn () => view('account.auth.verify'))->name('verification.notice');
-    Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
-        $request->fulfill();
+    Route::middleware('feature:email_verification')->group(function () {
+        Route::get('/email/verify', fn () => view('account.auth.verify'))->name('verification.notice');
+        Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+            $request->fulfill();
 
-        return redirect()->route('account.dashboard')->with('success', 'Email verified.');
-    })->middleware(['signed', 'throttle:6,1'])->name('verification.verify');
-    Route::post('/email/verification-notification', function (Request $request) {
-        $request->user()->sendEmailVerificationNotification();
+            return redirect()->route('account.dashboard')->with('success', 'Email verified.');
+        })->middleware(['signed', 'throttle:6,1'])->name('verification.verify');
+        Route::post('/email/verification-notification', function (Request $request) {
+            $request->user()->sendEmailVerificationNotification();
 
-        return response()->json(['success' => true, 'message' => 'Verification link sent.']);
-    })->middleware('throttle:6,1')->name('verification.send');
+            return response()->json(['success' => true, 'message' => 'Verification link sent.']);
+        })->middleware('throttle:6,1')->name('verification.send');
+    });
 
     Route::prefix('account')->name('account.')->group(function () {
         Route::get('/', [AccountDashboardController::class, 'index'])->name('dashboard');

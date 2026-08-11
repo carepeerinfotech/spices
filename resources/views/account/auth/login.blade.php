@@ -17,6 +17,8 @@
         <button class="w-full rounded-lg bg-brand text-white py-2.5 text-sm">Sign in</button>
     </form>
     <p class="text-sm text-slate-500 mt-4">No account? <a href="{{ route('register') }}" class="text-brand">Register</a></p>
-    <p class="text-sm text-slate-500 mt-2"><a href="{{ route('password.request') }}" class="text-brand">Forgot password?</a></p>
+    @if(\App\Support\Features::passwordReset())
+        <p class="text-sm text-slate-500 mt-2"><a href="{{ route('password.request') }}" class="text-brand">Forgot password?</a></p>
+    @endif
 </div>
 @endsection

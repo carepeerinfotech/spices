@@ -2,11 +2,12 @@
 
 @section('title', 'Settings')
 @section('heading', 'Settings')
-@section('subtitle', 'Payments, email, shipping and notifications')
+@section('subtitle', 'Features, payments, email, shipping and notifications')
 
 @section('content')
 <div class="space-y-6">
     @foreach([
+        'features' => 'Features',
         'commerce' => 'General commerce',
         'payments' => 'Payment modes',
         'paytm' => 'Paytm configuration',
@@ -20,7 +21,10 @@
             <input type="hidden" name="group" value="{{ $group }}">
             <h2 class="font-medium text-lg">{{ $title }}</h2>
 
-            @if($group === 'commerce')
+            @if($group === 'features')
+                <label class="inline-flex items-center gap-2 text-sm"><input type="checkbox" name="email_verification" value="1" data-bool @checked($features['email_verification'] ?? \App\Support\Features::DEFAULTS['email_verification'])> Email verification (customers must verify before checkout)</label>
+                <label class="inline-flex items-center gap-2 text-sm block"><input type="checkbox" name="password_reset" value="1" data-bool @checked($features['password_reset'] ?? \App\Support\Features::DEFAULTS['password_reset'])> Forgot / reset password</label>
+            @elseif($group === 'commerce')
                 <div class="grid sm:grid-cols-2 gap-4">
                     <div><label class="text-sm">Store name</label><input name="store_name" value="{{ $commerce['store_name'] ?? 'Elephant Shop' }}" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></div>
                     <div><label class="text-sm">Support email</label><input name="support_email" value="{{ $commerce['support_email'] ?? '' }}" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></div>
