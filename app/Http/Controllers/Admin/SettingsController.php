@@ -15,6 +15,7 @@ class SettingsController extends Controller
     public function index()
     {
         return view('admin.settings.index', [
+            'features' => $this->settings->group('features'),
             'commerce' => $this->settings->group('commerce'),
             'payments' => $this->settings->group('payments'),
             'paytm' => $this->settings->group('paytm'),
@@ -35,6 +36,13 @@ class SettingsController extends Controller
         $group = $request->validate(['group' => ['required', 'string']])['group'];
 
         match ($group) {
+            'features' => $this->settings->setMany('features', [
+                'email_verification' => $request->boolean('email_verification'),
+                'password_reset' => $request->boolean('password_reset'),
+            ], [
+                'email_verification' => ['type' => 'boolean'],
+                'password_reset' => ['type' => 'boolean'],
+            ]),
             'commerce' => $this->settings->setMany('commerce', [
                 'currency' => $request->input('currency', 'INR'),
                 'gst_percent' => (float) $request->input('gst_percent', 18),

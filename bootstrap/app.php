@@ -15,6 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' => \App\Http\Middleware\EnsureAdmin::class,
             'permission' => \App\Http\Middleware\EnsurePermission::class,
+            'feature' => \App\Http\Middleware\EnsureFeatureEnabled::class,
+            // Overrides the framework alias so the email verification feature flag applies.
+            'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
         ]);
 
         $middleware->redirectGuestsTo(function (Request $request) {

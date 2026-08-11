@@ -25,24 +25,17 @@
     </script>
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
 </head>
-<body class="min-h-screen bg-slate-950 text-white antialiased">
-<div class="min-h-screen grid lg:grid-cols-2">
-    <div class="hidden lg:flex flex-col justify-between p-12 bg-gradient-to-br from-teal-900 via-slate-900 to-slate-950">
-        <div>
+<body class="min-h-screen bg-gradient-to-br from-teal-900 via-slate-900 to-slate-950 text-white antialiased">
+<div class="min-h-screen flex items-center justify-center p-6 sm:p-10">
+    <div class="w-full max-w-md">
+        <div class="text-center mb-8">
             <p class="font-display text-4xl tracking-tight">Elephant</p>
             <p class="text-teal-200/80 mt-2 text-sm uppercase tracking-[0.2em]">Commerce Admin</p>
         </div>
-        <div>
-            <h2 class="font-display text-3xl leading-tight max-w-md">Run products, orders, and content from one calm workspace.</h2>
-            <p class="mt-4 text-slate-300 max-w-sm">Modern Tailwind admin with lightweight AJAX — no npm build step required.</p>
-        </div>
-        <p class="text-slate-500 text-sm">© {{ date('Y') }} Elephant Shop</p>
-    </div>
 
-    <div class="flex items-center justify-center p-6 sm:p-10">
-        <div class="w-full max-w-md">
-            <h1 class="font-display text-3xl mb-2">Sign in</h1>
-            <p class="text-slate-400 mb-8 text-sm">Use your admin credentials to continue.</p>
+        <div class="rounded-2xl bg-slate-950/60 border border-slate-800 p-6 sm:p-8">
+            <h1 class="font-display text-3xl mb-2 text-center">Sign in</h1>
+            <p class="text-slate-400 mb-8 text-sm text-center">Use your admin credentials to continue.</p>
 
             <form data-ajax method="POST" action="{{ route('admin.login.submit') }}" class="space-y-5">
                 @csrf
@@ -65,8 +58,10 @@
                     Sign in
                 </button>
             </form>
-            <p class="mt-6 text-xs text-slate-500">Default: admin@elephant.com / password</p>
+            <p class="mt-6 text-xs text-slate-500 text-center">Default: admin@elephant.com / password</p>
         </div>
+
+        <p class="text-slate-500 text-sm text-center mt-8">© {{ date('Y') }} Elephant Shop</p>
     </div>
 </div>
 <script src="{{ asset('js/app-ajax.js') }}" defer></script>

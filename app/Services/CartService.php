@@ -32,7 +32,7 @@ class CartService
             ]);
         }
 
-        return $cart->load(['items.product.images', 'items.variant']);
+        return $cart->load(['items.product.images', 'items.product.offers', 'items.variant']);
     }
 
     public function mergeSessionCartIntoUser(int $userId, ?string $guestSessionId = null): Cart
@@ -85,7 +85,7 @@ class CartService
 
             $userCart->update(['session_id' => $sessionId]);
 
-            return $userCart->load(['items.product.images', 'items.variant']);
+            return $userCart->load(['items.product.images', 'items.product.offers', 'items.variant']);
         });
     }
 
@@ -172,7 +172,10 @@ class CartService
 
     public function summary(Cart $cart, ?float $shippingOverride = null): array
     {
-        $subtotal = (float) $cart->items->sum(fn (CartItem $item) => $item->price * $item->quantity);
+        // Offers come off before tax and before the free-shipping threshold.
+        $grossSubtotal = (float) $cart->items->sum(fn (CartItem $item) => $item->lineSubtotal());
+        $discount = (float) $cart->items->sum(fn (CartItem $item) => $item->lineDiscount());
+        $subtotal = round($grossSubtotal - $discount, 2);
         $taxPercent = $this->settings->float('commerce', 'gst_percent', 18);
         $shippingEnabled = $this->settings->bool('shipping', 'charges_enabled', true);
         $freeAbove = $this->settings->float('shipping', 'free_above', 999);
@@ -193,6 +196,8 @@ class CartService
 
         return [
             'item_count' => (int) $cart->items->sum('quantity'),
+            'gross_subtotal' => round($grossSubtotal, 2),
+            'discount' => round($discount, 2),
             'subtotal' => round($subtotal, 2),
             'shipping' => round($shipping, 2),
             'tax' => $tax,
@@ -202,19 +207,32 @@ class CartService
             'weight' => round($weight, 3),
             'allow_cod' => $cart->items->every(fn (CartItem $i) => (bool) ($i->product?->allow_cod ?? true)),
             'allow_online' => $cart->items->every(fn (CartItem $i) => (bool) ($i->product?->allow_online ?? true)),
-            'items' => $cart->items->map(fn (CartItem $item) => [
-                'id' => $item->id,
-                'product_id' => $item->product_id,
-                'variant_id' => $item->product_variant_id,
-                'name' => $item->product?->name,
-                'variant_label' => $item->variant?->option_label,
-                'slug' => $item->product?->slug,
-                'image' => $item->variant?->imageUrl() ?: $item->product?->primaryImageUrl(),
-                'quantity' => $item->quantity,
-                'price' => (float) $item->price,
-                'line_total' => $item->lineTotal(),
-                'stock' => $item->variant?->stock,
-            ]),
+            'items' => $cart->items->map(function (CartItem $item) {
+                $offer = $item->offer();
+
+                return [
+                    'id' => $item->id,
+                    'product_id' => $item->product_id,
+                    'variant_id' => $item->product_variant_id,
+                    'name' => $item->product?->name,
+                    'variant_label' => $item->variant?->option_label,
+                    'slug' => $item->product?->slug,
+                    'image' => $item->variant?->imageUrl() ?: $item->product?->primaryImageUrl(),
+                    'quantity' => $item->quantity,
+                    'original_price' => (float) $item->price,
+                    'price' => $item->discountedPrice(),
+                    'discount' => $item->lineDiscount(),
+                    'offer' => $offer ? [
+                        'name' => $offer->name,
+                        'label' => $offer->label(),
+                        'discount_type' => $offer->discount_type,
+                        'value' => (float) $offer->value,
+                    ] : null,
+                    'line_subtotal' => $item->lineSubtotal(),
+                    'line_total' => $item->lineTotal(),
+                    'stock' => $item->variant?->stock,
+                ];
+            }),
         ];
     }
 }

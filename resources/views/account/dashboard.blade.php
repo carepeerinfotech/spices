@@ -7,7 +7,7 @@
         <form method="POST" action="{{ route('logout') }}">@csrf<button class="text-sm text-rose-600">Logout</button></form>
     </div>
 
-    @if(! auth()->user()->hasVerifiedEmail())
+    @if(\App\Support\Features::emailVerification() && ! auth()->user()->hasVerifiedEmail())
         <div class="rounded-lg bg-amber-50 border border-amber-200 p-4 text-sm">
             Email not verified.
             <a href="{{ route('verification.notice') }}" class="text-brand underline">Verify now</a>

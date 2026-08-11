@@ -12,7 +12,7 @@
     @if($product->exists) @method('PUT') @endif
 
     <div class="border-b border-slate-200 px-4 pt-3 flex flex-wrap gap-2" role="tablist">
-        @foreach(['basic' => 'Basic Info', 'variants' => 'Variations & Pricing', 'media' => 'Media', 'shipping' => 'Shipping', 'purchase' => 'Purchase Modes', 'seo' => 'SEO / Status'] as $key => $label)
+        @foreach(['basic' => 'Basic Info', 'variants' => 'Variations & Pricing', 'media' => 'Media', 'shipping' => 'Shipping', 'purchase' => 'Purchase Modes', 'offers' => 'Offers', 'seo' => 'SEO / Status'] as $key => $label)
             <button type="button" data-tab="{{ $key }}" role="tab"
                     class="tab-btn px-3 py-2 text-sm rounded-t-lg border border-b-0 {{ $key === 'basic' ? 'bg-slate-50 border-slate-200 text-teal-800 font-medium' : 'border-transparent text-slate-500' }}">
                 {{ $label }}
@@ -193,6 +193,70 @@
             </div>
         </div>
 
+        <div data-tab-panel="offers" class="hidden space-y-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="font-medium">Offers</h3>
+                    <p class="text-xs text-slate-500">
+                        Discounts applied to this product.
+                        Start and end dates are required; a new offer defaults to running from now until the end of today.
+                        Ticking <em>apply to all products of this category</em> copies the offer onto every other product in the
+                        product's category when you save (it needs a category set on the Basic Info tab).
+                    </p>
+                </div>
+                <button type="button" id="add-offer" class="text-sm text-teal-700">+ Add offer</button>
+            </div>
+
+            <div id="offers-list" class="space-y-3">
+                @foreach(($product->offers ?? collect()) as $offerIndex => $offer)
+                    <div class="offer-row rounded-lg border border-slate-200 p-3">
+                        <input type="hidden" name="offers[{{ $offerIndex }}][id]" value="{{ $offer->id }}">
+                        @if($offer->isCopy())
+                            <p class="hidden text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 mb-3">
+                                Part of a category-wide offer started on {{ $offer->sourceOffer?->product?->name ?? 'another product' }}.
+                                Saving with the box below ticked updates it on every product in the category; untick it to keep your changes on this product only.
+                            </p>
+                        @endif
+                        <div class="mb-3">
+                            <label class="block text-xs font-medium mb-1.5 text-slate-500">Name <span class="text-slate-400">(optional)</span></label>
+                            <input name="offers[{{ $offerIndex }}][name]" value="{{ $offer->name }}" placeholder="e.g. Diwali sale" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                        </div>
+                        <div class="grid sm:grid-cols-4 gap-3">
+                            <div>
+                                <label class="block text-xs font-medium mb-1.5 text-slate-500">Discount type</label>
+                                <select name="offers[{{ $offerIndex }}][discount_type]" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                                    <option value="flat" @selected($offer->discount_type === 'flat')>Flat (₹)</option>
+                                    <option value="percentage" @selected($offer->discount_type === 'percentage')>Percentage (%)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium mb-1.5 text-slate-500">Value</label>
+                                <input name="offers[{{ $offerIndex }}][value]" type="number" step="0.01" min="0" value="{{ $offer->value }}" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium mb-1.5 text-slate-500">Starts at <span class="text-rose-500">*</span></label>
+                                <input name="offers[{{ $offerIndex }}][starts_at]" type="datetime-local" value="{{ \App\Support\LocalTime::forInput($offer->starts_at ?? now()) }}" class="offer-date w-full rounded-lg border border-slate-300 px-3 py-2">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium mb-1.5 text-slate-500">Ends at <span class="text-rose-500">*</span></label>
+                                <input name="offers[{{ $offerIndex }}][ends_at]" type="datetime-local" value="{{ \App\Support\LocalTime::forInput($offer->ends_at) ?? now(\App\Support\LocalTime::zone())->endOfDay()->format('Y-m-d\TH:i') }}" class="offer-date w-full rounded-lg border border-slate-300 px-3 py-2">
+                            </div>
+                        </div>
+                        <label class="inline-flex items-center gap-2 text-sm mt-3">
+                            <input type="checkbox" name="offers[{{ $offerIndex }}][apply_to_category]" value="1" @checked($offer->apply_to_category)>
+                            Apply to all products of this category
+                        </label>
+                        <div class="flex items-center justify-between mt-2">
+                            <span class="text-xs text-slate-500">Created by {{ $offer->user?->name ?? '—' }} on {{ $offer->created_at?->format('d M Y') }}</span>
+                            <button type="button" class="remove-offer text-xs text-rose-600">Remove</button>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            <p id="offers-empty" class="text-sm text-slate-500 {{ ($product->offers ?? collect())->isNotEmpty() ? 'hidden' : '' }}">No offers yet.</p>
+        </div>
+
         <div data-tab-panel="seo" class="hidden space-y-4">
             <div>
                 <label class="block text-sm font-medium mb-1.5">Meta title</label>
@@ -243,6 +307,83 @@
       '<input name="options[' + optionIndex + '][values][]" placeholder="Values comma separated" class="rounded-lg border border-slate-300 px-3 py-2 option-values">';
     wrap.appendChild(div);
     optionIndex++;
+  });
+
+  var offersList = document.getElementById('offers-list');
+  var offersEmpty = document.getElementById('offers-empty');
+  var offerIndex = offersList ? offersList.querySelectorAll('.offer-row').length : 0;
+
+  function toggleOffersEmpty() {
+    if (!offersEmpty) return;
+    offersEmpty.classList.toggle('hidden', offersList.querySelectorAll('.offer-row').length > 0);
+  }
+
+  // Store time, from the server — the browser's own clock may be in another
+  // zone, which would silently start offers hours early or late.
+  var STORE_NOW = @json(now(\App\Support\LocalTime::zone())->format('Y-m-d\TH:i'));
+  var STORE_END_OF_DAY = @json(now(\App\Support\LocalTime::zone())->endOfDay()->format('Y-m-d\TH:i'));
+
+  document.getElementById('add-offer')?.addEventListener('click', function () {
+    var i = offerIndex++;
+    // Defaults: starts now, ends at the close of today.
+    var startsAt = STORE_NOW;
+    var endsAt = STORE_END_OF_DAY;
+    var div = document.createElement('div');
+    div.className = 'offer-row rounded-lg border border-slate-200 p-3';
+    div.innerHTML =
+      '<div class="mb-3"><label class="block text-xs font-medium mb-1.5 text-slate-500">Name <span class="text-slate-400">(optional)</span></label>' +
+        '<input name="offers[' + i + '][name]" placeholder="e.g. Diwali sale" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>' +
+      '<div class="grid sm:grid-cols-4 gap-3">' +
+        '<div><label class="block text-xs font-medium mb-1.5 text-slate-500">Discount type</label>' +
+          '<select name="offers[' + i + '][discount_type]" class="w-full rounded-lg border border-slate-300 px-3 py-2">' +
+            '<option value="flat">Flat (₹)</option><option value="percentage">Percentage (%)</option>' +
+          '</select></div>' +
+        '<div><label class="block text-xs font-medium mb-1.5 text-slate-500">Value</label>' +
+          '<input name="offers[' + i + '][value]" type="number" step="0.01" min="0" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>' +
+        '<div><label class="block text-xs font-medium mb-1.5 text-slate-500">Starts at <span class="text-rose-500">*</span></label>' +
+          '<input name="offers[' + i + '][starts_at]" type="datetime-local" value="' + startsAt + '" class="offer-date w-full rounded-lg border border-slate-300 px-3 py-2"></div>' +
+        '<div><label class="block text-xs font-medium mb-1.5 text-slate-500">Ends at <span class="text-rose-500">*</span></label>' +
+          '<input name="offers[' + i + '][ends_at]" type="datetime-local" value="' + endsAt + '" class="offer-date w-full rounded-lg border border-slate-300 px-3 py-2"></div>' +
+      '</div>' +
+      '<label class="inline-flex items-center gap-2 text-sm mt-3">' +
+        '<input type="checkbox" name="offers[' + i + '][apply_to_category]" value="1"> Apply to all products of this category' +
+      '</label>' +
+      '<div class="flex items-center justify-end mt-2"><button type="button" class="remove-offer text-xs text-rose-600">Remove</button></div>';
+    offersList.appendChild(div);
+    toggleOffersEmpty();
+  });
+
+  offersList?.addEventListener('click', function (e) {
+    var btn = e.target.closest('.remove-offer');
+    if (!btn) return;
+    btn.closest('.offer-row').remove();
+    toggleOffersEmpty();
+  });
+
+  // The dates are required server-side. The inputs live in a hidden panel, so
+  // native `required` cannot be used — validate on submit before the AJAX
+  // handler bound on `document` gets the event.
+  document.getElementById('product-form')?.addEventListener('submit', function (e) {
+    var invalid = null;
+
+    document.querySelectorAll('.offer-row').forEach(function (row) {
+      var starts = row.querySelector('input[name*="[starts_at]"]');
+      var ends = row.querySelector('input[name*="[ends_at]"]');
+      var bad = ! starts.value ? starts : (! ends.value ? ends : (ends.value < starts.value ? ends : null));
+      row.querySelectorAll('.offer-date').forEach(function (input) {
+        input.classList.toggle('border-rose-400', input === bad);
+        input.classList.toggle('border-slate-300', input !== bad);
+      });
+      if (bad && ! invalid) invalid = bad;
+    });
+
+    if (! invalid) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+    document.querySelector('.tab-btn[data-tab="offers"]')?.click();
+    invalid.focus();
+    AppAjax.toast('Every offer needs a start date and an end date that follows it.', 'error');
   });
 
   function cartesian(arrays) {

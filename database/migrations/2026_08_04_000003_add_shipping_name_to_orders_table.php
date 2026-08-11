@@ -8,8 +8,20 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
-            $table->string('shipping_name')->nullable()->after('billing_same_as_shipping');
+        if (Schema::hasColumn('orders', 'shipping_name')) {
+            return;
+        }
+
+        $anchor = Schema::hasColumn('orders', 'billing_same_as_shipping')
+            ? 'billing_same_as_shipping'
+            : null;
+
+        Schema::table('orders', function (Blueprint $table) use ($anchor) {
+            $column = $table->string('shipping_name')->nullable();
+
+            if ($anchor) {
+                $column->after($anchor);
+            }
         });
     }
 

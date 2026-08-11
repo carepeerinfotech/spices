@@ -175,12 +175,28 @@
                 <div class="space-y-3 text-sm mb-4">
                     @foreach($summary['items'] as $item)
                         <div class="flex justify-between gap-3">
-                            <span class="text-slate-600">{{ $item['name'] }} @if($item['variant_label']) ({{ $item['variant_label'] }}) @endif × {{ $item['quantity'] }}</span>
-                            <span>₹{{ number_format($item['line_total'], 2) }}</span>
+                            <span class="text-slate-600">
+                                {{ $item['name'] }} @if($item['variant_label']) ({{ $item['variant_label'] }}) @endif × {{ $item['quantity'] }}
+                                @if($item['offer'])
+                                    <span class="block mt-0.5 text-xs text-emerald-700">
+                                        @if($item['offer']['name']){{ $item['offer']['name'] }} · @endif{{ $item['offer']['label'] }}
+                                    </span>
+                                @endif
+                            </span>
+                            <span class="text-right whitespace-nowrap">
+                                @if($item['discount'] > 0)
+                                    <span class="block text-xs text-slate-400 line-through">₹{{ number_format($item['line_subtotal'], 2) }}</span>
+                                @endif
+                                ₹{{ number_format($item['line_total'], 2) }}
+                            </span>
                         </div>
                     @endforeach
                 </div>
                 <div class="space-y-2 text-sm border-t border-slate-100 pt-4">
+                    @if($summary['discount'] > 0)
+                        <div class="flex justify-between text-slate-500"><span>Items</span><span>₹{{ number_format($summary['gross_subtotal'], 2) }}</span></div>
+                        <div class="flex justify-between text-emerald-700"><span>Offer savings</span><span id="sum-discount">−₹{{ number_format($summary['discount'], 2) }}</span></div>
+                    @endif
                     <div class="flex justify-between"><span>Subtotal</span><span id="sum-subtotal">₹{{ number_format($summary['subtotal'], 2) }}</span></div>
                     <div class="flex justify-between"><span>Shipping</span><span id="sum-shipping">₹{{ number_format($summary['shipping'], 2) }}</span></div>
                     <div class="flex justify-between"><span>GST ({{ $summary['tax_percent'] }}%)</span><span id="sum-tax">₹{{ number_format($summary['tax'], 2) }}</span></div>

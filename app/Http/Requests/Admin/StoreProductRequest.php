@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -50,11 +51,41 @@ class StoreProductRequest extends FormRequest
             'variants.*.option_label' => ['nullable', 'string', 'max:255'],
             'variants.*.is_default' => ['sometimes', 'boolean'],
             'variants.*.is_active' => ['sometimes', 'boolean'],
+            'offers' => ['nullable', 'array'],
+            'offers.*.id' => ['nullable', 'integer'],
+            'offers.*.name' => ['nullable', 'string', 'max:255'],
+            'offers.*.discount_type' =>['required_with:offers', Rule::in(['flat', 'percentage'])],
+            'offers.*.value' => ['required_with:offers', 'numeric', 'min:0'],
+            'offers.*.apply_to_category' => ['sometimes', 'boolean'],
+            'offers.*.starts_at' => ['required_with:offers', 'date'],
+            'offers.*.ends_at' => ['required_with:offers', 'date', 'after_or_equal:offers.*.starts_at'],
             'images' => ['nullable', 'array'],
             'images.*' => ['image', 'max:4096'],
             'existing_images' => ['nullable', 'array'],
             'existing_images.*' => ['integer'],
             'primary_image_id' => ['nullable', 'integer'],
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'offers.*.starts_at' => 'offer start date',
+            'offers.*.ends_at' => 'offer end date',
+            'offers.*.value' => 'offer value',
+        ];
+    }
+
+    public function after(): array
+    {
+        return [
+            function (Validator $validator) {
+                foreach ((array) $this->input('offers', []) as $index => $offer) {
+                    if (($offer['discount_type'] ?? null) === 'percentage' && (float) ($offer['value'] ?? 0) > 100) {
+                        $validator->errors()->add("offers.$index.value", 'A percentage discount cannot exceed 100.');
+                    }
+                }
+            },
         ];
     }
 }

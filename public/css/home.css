@@ -629,6 +629,17 @@ body.cart-drawer-open {
   font-weight: 400;
   margin-left: 3px;
 }
+.offer-tag {
+  display: inline-block;
+  font-size: 7px;
+  font-weight: 600;
+  color: #1c6b4a;
+  background: #e9f6ef;
+  border: 1px solid #bfe3d0;
+  border-radius: 999px;
+  padding: 2px 6px;
+  margin: 0 0 6px;
+}
 .product .btn {
   width: 100%;
   font-size: 15px;
@@ -1197,6 +1208,10 @@ footer {
 }
 .price del {
   font-size: 12px;
+}
+.offer-tag {
+  font-size: 11px;
+  padding: 3px 9px;
 }
 .product .btn {
   padding: 11px;

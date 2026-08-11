@@ -47,6 +47,16 @@ class Order extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function offers(): HasMany
+    {
+        return $this->hasMany(OrderOffer::class);
+    }
+
+    public function offersDiscount(): float
+    {
+        return (float) $this->offers->sum('discount_amount');
+    }
+
     public function payments(): HasMany
     {
         return $this->hasMany(PaymentTransaction::class);

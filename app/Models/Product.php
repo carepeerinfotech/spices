@@ -67,6 +67,32 @@ class Product extends Model
         return $this->hasMany(ProductImage::class)->orderBy('sort_order');
     }
 
+    public function offers(): HasMany
+    {
+        return $this->hasMany(ProductOffer::class)->orderByDesc('id');
+    }
+
+    public function activeOffer(): ?ProductOffer
+    {
+        return $this->offers->first(fn (ProductOffer $offer) => $offer->isRunning());
+    }
+
+    public function hasRunningOffer(): bool
+    {
+        return (bool) $this->activeOffer();
+    }
+
+    /** Price after the running offer, falling back to the plain price. */
+    public function offerPrice(): float
+    {
+        return $this->activeOffer()?->applyTo($this->minPrice()) ?? $this->minPrice();
+    }
+
+    public function formattedOfferPrice(): string
+    {
+        return '₹'.number_format($this->offerPrice(), 2);
+    }
+
     public function defaultVariant(): ?ProductVariant
     {
         return $this->variants->firstWhere('is_default', true)

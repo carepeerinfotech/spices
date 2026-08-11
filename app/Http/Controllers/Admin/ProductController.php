@@ -49,7 +49,9 @@ class ProductController extends Controller
             $request->input('options', []),
             $request->input('variants', []),
             $request->file('images', []) ?: [],
-            $request->input('existing_images', [])
+            $request->input('existing_images', []),
+            $request->input('offers', []),
+            $request->user()?->id
         );
 
         if ($request->filled('primary_image_id')) {
@@ -61,7 +63,7 @@ class ProductController extends Controller
 
     public function edit(Product $product)
     {
-        $product->load(['options.values', 'variants', 'images', 'category']);
+        $product->load(['options.values', 'variants', 'images', 'category', 'offers.user', 'offers.sourceOffer.product']);
 
         return view('admin.products.form', [
             'product' => $product,
@@ -77,7 +79,9 @@ class ProductController extends Controller
             $request->input('options', []),
             $request->input('variants', []),
             $request->file('images', []) ?: [],
-            $request->input('existing_images', $product->images()->pluck('id')->all())
+            $request->input('existing_images', $product->images()->pluck('id')->all()),
+            $request->input('offers', []),
+            $request->user()?->id
         );
 
         if ($request->filled('primary_image_id')) {
