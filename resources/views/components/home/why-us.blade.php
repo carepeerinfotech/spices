@@ -1,6 +1,6 @@
 <section class="section cream">
   <div class="container">
-    <h2 class="section-title">Why Elephant Spices</h2>
+    <h2 class="section-title heading-center">Why Elephant Spices</h2>
     <div class="features" style="margin-top: 34px">
       <article class="feature">
         <div class="feature-icon">⌂</div>

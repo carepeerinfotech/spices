@@ -2,7 +2,7 @@
   <div class="container">
     <div class="footer-grid">
       <div class="footer-brand">
-        <img src="{{ asset('assets/images/logo.png') }}" alt="Elephant Spices" />
+        <img src="{{ asset('assets/images/logo-bg.png') }}" alt="Elephant Spices" />
         <p>
           We are the leading manufacturer and supplier of spices because our
           products' quality derives from control of the entire production

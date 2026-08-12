@@ -3,9 +3,9 @@
 @section('title', 'Checkout — '.config('app.name'))
 
 @section('content')
-<div class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
-    <x-shop.breadcrumb-trail :items="[['label' => 'Cart', 'url' => route('shop.cart')], ['label' => 'Checkout']]" />
+<x-shop.breadcrumb title="Checkout" />
 
+<div class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
     <div class="grid lg:grid-cols-5 gap-8">
         <form data-ajax method="POST" action="{{ route('shop.checkout.store') }}" class="lg:col-span-3 rounded-xl border border-slate-200 bg-white p-6 space-y-6" id="checkout-form">
             @csrf

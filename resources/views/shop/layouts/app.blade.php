@@ -52,6 +52,8 @@
 <script src="{{ asset('js/app-ajax.js') }}" defer></script>
 <script src="{{ asset('js/home.js') }}" defer></script>
 <script src="{{ asset('js/search.js') }}" defer></script>
+<script src="{{ asset('js/cart-drawer.js') }}" defer></script>
+<script src="{{ asset('js/product-variants.js') }}" defer></script>
 @stack('scripts')
 </body>
 </html>

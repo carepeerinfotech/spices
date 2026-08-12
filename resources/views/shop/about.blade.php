@@ -10,7 +10,7 @@
     <div class="max-w-6xl mx-auto px-4 sm:px-6">
         <div class="text-center max-w-2xl mx-auto mb-10 sm:mb-14">
             <p class="text-brand text-xs font-semibold tracking-widest uppercase mb-2">Our Story</p>
-            <h2 class="font-display text-2xl sm:text-3xl tracking-tight mb-3">Pure Spices, Honestly Sourced</h2>
+            <h2 class="tracking-tight mb-3 section-title heading-center">Pure Spices, Honestly Sourced</h2>
             <p class="text-stone-600 leading-relaxed">Since 1974, Elephant Spices has been bringing authentic Indian flavours to kitchens across the country — one lab-tested batch at a time.</p>
         </div>
         <div class="rounded-2xl overflow-hidden shadow-md shadow-stone-900/5">
@@ -27,7 +27,7 @@
             </div>
             <div class="order-1 lg:order-2">
                 <p class="text-brand text-xs font-semibold tracking-widest uppercase mb-2">Since 1974</p>
-                <h2 class="font-display text-2xl sm:text-3xl tracking-tight mb-4">Three generations of flavour</h2>
+                <h2 class="section-title mb-4">Three generations of flavour</h2>
                 <p class="text-stone-600 leading-relaxed mb-4">What began as a single family stall trading pepper and turmeric has grown into a trusted, ISO 9001:2008 certified name across India — without ever losing sight of what made us different in the first place: real spices, honestly sourced.</p>
                 <p class="text-stone-600 leading-relaxed mb-6">We work directly with farmers across India's renowned spice-growing belts, so every batch that carries the Elephant name can be traced back to where it was grown, cleaned and packed under strict hygiene standards.</p>
                 <div class="grid grid-cols-3 gap-4 text-center">
@@ -73,7 +73,7 @@
 <section class="py-14 sm:py-20 bg-cream">
     <div class="max-w-6xl mx-auto px-4 sm:px-6">
         <div class="text-center mb-10">
-            <h2 class="font-display text-2xl sm:text-3xl tracking-tight mb-3">What we stand for</h2>
+            <h2 class="section-title heading-center mb-3">What we stand for</h2>
             <p class="text-stone-500 max-w-xl mx-auto">The principles behind every packet that leaves our facility.</p>
         </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">

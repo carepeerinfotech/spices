@@ -29,7 +29,7 @@
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     @stack('styles')
 </head>
-<body class="bg-slate-50 text-ink antialiased">
+<body class="bg-slate-50 text-ink antialiased"> 
 <div class="admin-shell">
     <aside class="admin-sidebar p-5">
         <div class="mb-8">

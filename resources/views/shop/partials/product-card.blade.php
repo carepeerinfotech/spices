@@ -9,7 +9,7 @@
             <h3 class="product-card__title">{{ $product->name }}</h3>
             <p class="product-card__meta">{{ $product->short_description ?: 'Authentic, Fresh and Pure' }}</p>
             @if($product->hasRunningOffer())
-                <p class="product-card__price">
+                <p class="product-card__price" data-price>
                     {{ $product->formattedOfferPrice() }}
                     <span class="text-stone-400 line-through text-sm font-normal ml-1">{{ $product->formattedPrice() }}</span>
                 </p>
@@ -17,9 +17,23 @@
                     {{ $product->activeOffer()->label() }}
                 </span>
             @else
-                <p class="product-card__price">{{ $product->formattedPrice() }}</p>
+                <p class="product-card__price" data-price>{{ $product->defaultVariant()?->formattedPrice() ?: $product->formattedPrice() }}</p>
             @endif
         </a>
+        @if($product->variants->count() > 1)
+            <div class="flex flex-wrap gap-1.5 my-2" role="group" aria-label="Choose a size">
+                @foreach($product->variants as $variant)
+                    <button type="button"
+                            class="variant-chip px-2 py-1 rounded-full border text-[11px] font-medium transition-colors {{ $product->defaultVariant()?->id === $variant->id ? 'is-active border-brand bg-cream text-brand' : 'border-[var(--line)] text-stone-600 hover:border-brand' }} disabled:opacity-40 disabled:cursor-not-allowed"
+                            data-variant-chip
+                            data-id="{{ $variant->id }}"
+                            data-price="{{ $variant->formattedPrice() }}"
+                            @disabled(!$variant->inStock())>
+                        {{ $variant->option_label ?: $variant->sku }}
+                    </button>
+                @endforeach
+            </div>
+        @endif
         <div class="product-card__cta">
             <form data-ajax method="POST" action="{{ route('shop.cart.store') }}"
                   onsubmit="this.addEventListener('ajax:done', function (e) { if (e.detail.ok && e.detail.data.data && window.AppAjax) { AppAjax.updateCartBadge(e.detail.data.data.item_count || e.detail.data.data.count); } }, { once: true });">

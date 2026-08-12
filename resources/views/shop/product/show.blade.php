@@ -4,6 +4,8 @@
 @section('meta_description', $product->meta_description ?: $product->short_description)
 
 @section('content')
+<x-shop.breadcrumb :title="$product->name" />
+
 <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
     <div class="grid lg:grid-cols-2 gap-8 lg:gap-10">
         <div>
@@ -169,7 +171,10 @@
       method: 'POST',
       body: { product_id: productId, variant_id: variantId, quantity: qty }
     }).then(function (result) {
-      if (result.ok && result.data.data) AppAjax.updateCartBadge(result.data.data.item_count);
+      if (result.ok && result.data.data && window.CartDrawer) {
+        CartDrawer.render(result.data.data);
+        CartDrawer.open();
+      }
     });
   });
 
