@@ -63,7 +63,10 @@ class ProductController extends Controller
 
     public function edit(Product $product)
     {
-        $product->load(['options.values', 'variants', 'images', 'category', 'offers.user', 'offers.sourceOffer.product']);
+        $product->load([
+            'options.values', 'variants.images', 'images', 'category',
+            'offers.user', 'offers.sourceOffer.product',
+        ]);
 
         return view('admin.products.form', [
             'product' => $product,

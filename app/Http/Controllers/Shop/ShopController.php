@@ -36,7 +36,11 @@ class ShopController extends Controller
     {
         $product = Product::active()
             ->where('slug', $slug)
-            ->with(['category', 'images', 'offers', 'options.values', 'variants' => fn ($q) => $q->where('is_active', true)])
+            ->with([
+                'category', 'images', 'offers', 'options.values',
+                // variants.images: the switcher calls imageUrl() on every variant.
+                'variants' => fn ($q) => $q->where('is_active', true)->with('images'),
+            ])
             ->firstOrFail();
 
         return view('shop.product.show', [

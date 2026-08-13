@@ -269,7 +269,7 @@ class SpiceCatalogSeeder extends Seeder
                 ]
             );
 
-            ProductVariant::updateOrCreate(
+            $variant = ProductVariant::updateOrCreate(
                 ['sku' => $product->sku],
                 [
                     'product_id' => $product->id,
@@ -279,7 +279,6 @@ class SpiceCatalogSeeder extends Seeder
                     'price' => $product->price,
                     'compare_price' => $product->compare_price,
                     'stock' => $product->stock,
-                    'image' => $image,
                     'weight' => $product->weight,
                     'is_default' => true,
                     'is_active' => true,
@@ -288,6 +287,10 @@ class SpiceCatalogSeeder extends Seeder
 
             if ($image && $product->imagesIn('gallery')->isEmpty()) {
                 $this->images->attach($product, 'gallery', $image, ['alt' => $product->name]);
+            }
+
+            if ($image && $variant->imagesIn('image')->isEmpty()) {
+                $this->images->attach($variant, 'image', $image, ['alt' => $variant->name]);
             }
 
             if ($product->is_featured) {

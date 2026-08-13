@@ -2,6 +2,7 @@
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\ProductVariant;
 
 return [
 
@@ -68,6 +69,19 @@ return [
                     'label' => 'Product images',
                     'directory' => 'products/{id}',
                     'multiple' => true,
+                    'max_kb' => 4096,
+                ],
+            ],
+        ],
+
+        'product_variant' => [
+            'model' => ProductVariant::class,
+            'permission' => 'products.manage',
+            'collections' => [
+                'image' => [
+                    'label' => 'Variant image',
+                    'directory' => 'products/variants/{id}',
+                    'multiple' => false,
                     'max_kb' => 4096,
                 ],
             ],

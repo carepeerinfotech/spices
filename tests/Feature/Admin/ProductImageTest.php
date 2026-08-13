@@ -239,6 +239,86 @@ class ProductImageTest extends TestCase
             ->assertDontSee('primary_image_id', false);
     }
 
+    public function test_variant_image_is_uploaded_and_replaced_through_its_own_field(): void
+    {
+        Storage::fake('public');
+        $admin = $this->admin();
+
+        $product = $this->createProductWith($admin, 1);
+        $variant = $product->variants()->sole();
+
+        $first = app(ImageService::class)->attach($variant, 'image', UploadedFile::fake()->image('v1.jpg'));
+
+        $variant->refresh()->unsetRelation('images');
+        $this->assertSame($first->url(), $variant->imageUrl());
+        $this->assertStringStartsWith('products/variants/'.$variant->id.'/', $first->path);
+        Storage::disk('public')->assertExists($first->path);
+
+        // A single collection replaces, taking the old file with it.
+        $second = app(ImageService::class)->replace($variant, 'image', UploadedFile::fake()->image('v2.jpg'));
+
+        $variant->refresh()->unsetRelation('images');
+        $this->assertCount(1, $variant->imagesIn('image'));
+        $this->assertSame($second->url(), $variant->imageUrl());
+        Storage::disk('public')->assertMissing($first->path);
+    }
+
+    public function test_a_variant_without_an_image_falls_back_to_the_product_primary(): void
+    {
+        Storage::fake('public');
+
+        $product = $this->createProductWith($this->admin(), 1);
+        $variant = $product->variants()->sole();
+
+        $this->assertTrue($variant->imagesIn('image')->isEmpty());
+        $this->assertSame($product->primaryImageUrl(), $variant->fresh()->imageUrl());
+    }
+
+    public function test_deleting_a_variant_image_is_permission_checked_and_removes_the_file(): void
+    {
+        Storage::fake('public');
+        $admin = $this->admin();
+
+        $product = $this->createProductWith($admin, 1);
+        $variant = $product->variants()->sole();
+        $image = app(ImageService::class)->attach($variant, 'image', UploadedFile::fake()->image('v.jpg'));
+
+        $this->actingAs($this->admin('categories.manage', 'admin'))
+            ->deleteJson(route('admin.images.destroy', $image))
+            ->assertForbidden();
+
+        $this->actingAs($admin)
+            ->deleteJson(route('admin.images.destroy', $image))
+            ->assertOk();
+
+        $this->assertDatabaseMissing('images', ['id' => $image->id]);
+        Storage::disk('public')->assertMissing($image->path);
+    }
+
+    public function test_media_tab_lists_a_field_per_saved_variant(): void
+    {
+        Storage::fake('public');
+        $admin = $this->admin();
+
+        $product = $this->createProductWith($admin, 1);
+        $variant = $product->variants()->sole();
+
+        $this->actingAs($admin)
+            ->get(route('admin.products.edit', $product))
+            ->assertOk()
+            ->assertSee('Variant images')
+            ->assertSee($variant->sku)
+            ->assertSee('name="image_file"', false);
+    }
+
+    public function test_create_page_tells_you_to_save_before_adding_variant_images(): void
+    {
+        $this->actingAs($this->admin())
+            ->get(route('admin.products.create'))
+            ->assertOk()
+            ->assertSee('Save the product first to add images to its variants.');
+    }
+
     public function test_oversized_uploads_are_rejected_by_the_config_driven_rules(): void
     {
         Storage::fake('public');

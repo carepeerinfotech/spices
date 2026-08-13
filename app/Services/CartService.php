@@ -32,7 +32,7 @@ class CartService
             ]);
         }
 
-        return $cart->load(['items.product.images', 'items.product.offers', 'items.variant']);
+        return $cart->load(['items.product.images', 'items.product.offers', 'items.variant.images']);
     }
 
     public function mergeSessionCartIntoUser(int $userId, ?string $guestSessionId = null): Cart
@@ -85,7 +85,7 @@ class CartService
 
             $userCart->update(['session_id' => $sessionId]);
 
-            return $userCart->load(['items.product.images', 'items.product.offers', 'items.variant']);
+            return $userCart->load(['items.product.images', 'items.product.offers', 'items.variant.images']);
         });
     }
 

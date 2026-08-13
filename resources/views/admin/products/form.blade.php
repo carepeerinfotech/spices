@@ -135,9 +135,37 @@
             </div>
         </div>
 
-        <div data-tab-panel="media" class="hidden space-y-4">
+        <div data-tab-panel="media" class="hidden space-y-6">
             <x-image-upload :owner="$product" collection="gallery"
                             help="Drag thumbnails to reorder. The starred image is used on listings." />
+
+            @if($product->exists && $product->variants->isNotEmpty())
+                <div class="border-t border-slate-200 pt-5">
+                    <h3 class="font-medium">Variant images</h3>
+                    <p class="text-xs text-slate-500 mt-0.5 mb-3">
+                        Shown when a shopper picks that variant. Without one, the product's starred image is used.
+                    </p>
+
+                    <div class="grid sm:grid-cols-2 gap-5">
+                        @foreach($product->variants as $variant)
+                            <div class="rounded-lg border border-slate-200 p-3">
+                                <p class="text-sm font-medium">{{ $variant->option_label ?: $variant->name }}</p>
+                                <p class="text-xs text-slate-400 mb-2">{{ $variant->sku }}</p>
+                                <x-image-upload :owner="$variant" collection="image" label="Image"
+                                                help="Replaces this variant's current image." />
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @elseif($product->exists)
+                <p class="border-t border-slate-200 pt-5 text-xs text-slate-400">
+                    This product has no variants yet.
+                </p>
+            @else
+                <p class="border-t border-slate-200 pt-5 text-xs text-slate-400">
+                    Save the product first to add images to its variants.
+                </p>
+            @endif
         </div>
 
         <div data-tab-panel="shipping" class="hidden space-y-4">
