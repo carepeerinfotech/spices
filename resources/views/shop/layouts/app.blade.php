@@ -29,8 +29,8 @@
             }
         }
     </script>
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/home.css') }}">
+    <link rel="stylesheet" href="@asset('css/app.css')">
+    <link rel="stylesheet" href="@asset('css/home.css')">
     @stack('styles')
 </head>
 <body class="text-stone-900 antialiased min-h-screen flex flex-col">
@@ -49,11 +49,11 @@
 
 <x-home.footer />
 
-<script src="{{ asset('js/app-ajax.js') }}" defer></script>
-<script src="{{ asset('js/home.js') }}" defer></script>
-<script src="{{ asset('js/search.js') }}" defer></script>
-<script src="{{ asset('js/cart-drawer.js') }}" defer></script>
-<script src="{{ asset('js/product-variants.js') }}" defer></script>
+<script src="@asset('js/app-ajax.js')" defer></script>
+<script src="@asset('js/home.js')" defer></script>
+<script src="@asset('js/search.js')" defer></script>
+<script src="@asset('js/cart-drawer.js')" defer></script>
+<script src="@asset('js/product-variants.js')" defer></script>
 @stack('scripts')
 </body>
 </html>

@@ -1,6 +1,6 @@
 @once
     @push('scripts')
-        <script src="{{ asset('js/image-upload.js') }}" defer></script>
+        <script src="@asset('js/image-upload.js')" defer></script>
     @endpush
 @endonce
 

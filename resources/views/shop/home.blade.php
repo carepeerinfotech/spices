@@ -19,7 +19,7 @@
       referrerpolicy="no-referrer"
     />
      <link rel="icon" type="image/x-icon" href="assets/images/elephant-fav.png">
-    <link rel="stylesheet" href="{{ asset('css/home.css') }}" />
+    <link rel="stylesheet" href="@asset('css/home.css')" />
   </head>
   <body>
     <x-home.header :cart-count="$cartCount" />
@@ -34,10 +34,10 @@
       <x-home.newsletter />
     </main>
     <x-home.footer />
-    <script src="{{ asset('js/app-ajax.js') }}"></script>
-    <script src="{{ asset('js/home.js') }}"></script>
-    <script src="{{ asset('js/search.js') }}"></script>
-    <script src="{{ asset('js/cart-drawer.js') }}"></script>
-    <script src="{{ asset('js/product-variants.js') }}"></script>
+    <script src="@asset('js/app-ajax.js')"></script>
+    <script src="@asset('js/home.js')"></script>
+    <script src="@asset('js/search.js')"></script>
+    <script src="@asset('js/cart-drawer.js')"></script>
+    <script src="@asset('js/product-variants.js')"></script>
   </body>
 </html>

@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Support\PublicStorageLink;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -25,6 +26,13 @@ class AppServiceProvider extends ServiceProvider
             collect(config('media.owners', []))
                 ->map(fn (array $owner) => $owner['model'])
                 ->all()
+        );
+
+        // @asset('css/home.css') — like asset(), plus a ?v= mtime stamp so a deploy
+        // invalidates the browser cache instead of waiting out the host's max-age.
+        Blade::directive(
+            'asset',
+            fn (string $expression) => "<?php echo e(\App\Support\AssetVersion::url({$expression})); ?>"
         );
     }
 }

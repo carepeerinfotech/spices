@@ -26,7 +26,7 @@
             }
         }
     </script>
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <link rel="stylesheet" href="@asset('css/app.css')">
     @stack('styles')
 </head>
 <body class="bg-slate-50 text-ink antialiased"> 
@@ -79,7 +79,7 @@
         </main>
     </div>
 </div>
-<script src="{{ asset('js/app-ajax.js') }}" defer></script>
+<script src="@asset('js/app-ajax.js')" defer></script>
 @stack('scripts')
 </body>
 </html>
