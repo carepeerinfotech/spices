@@ -136,21 +136,8 @@
         </div>
 
         <div data-tab-panel="media" class="hidden space-y-4">
-            <div>
-                <label class="block text-sm font-medium mb-1.5">Upload images</label>
-                <input type="file" name="images[]" accept="image/*" multiple class="block w-full text-sm">
-            </div>
-            <div class="grid sm:grid-cols-4 gap-3">
-                @foreach(($product->images ?? collect()) as $image)
-                    <label class="border rounded-lg p-2 block">
-                        <img src="{{ $image->url() }}" alt="" class="w-full h-28 object-cover rounded mb-2">
-                        <input type="hidden" name="existing_images[]" value="{{ $image->id }}">
-                        <span class="text-xs flex items-center gap-1">
-                            <input type="radio" name="primary_image_id" value="{{ $image->id }}" @checked($image->is_primary)> Primary
-                        </span>
-                    </label>
-                @endforeach
-            </div>
+            <x-image-upload :owner="$product" collection="gallery"
+                            help="Drag thumbnails to reorder. The starred image is used on listings." />
         </div>
 
         <div data-tab-panel="shipping" class="hidden space-y-4">

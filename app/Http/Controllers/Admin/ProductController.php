@@ -7,11 +7,15 @@ use App\Http\Requests\Admin\StoreProductRequest;
 use App\Models\Category;
 use App\Models\Product;
 use App\Services\Catalog\ProductCatalogService;
+use App\Services\Media\ImageService;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    public function __construct(private ProductCatalogService $catalog) {}
+    public function __construct(
+        private ProductCatalogService $catalog,
+        private ImageService $images,
+    ) {}
 
     public function index(Request $request)
     {
@@ -48,15 +52,11 @@ class ProductController extends Controller
             $this->productData($request),
             $request->input('options', []),
             $request->input('variants', []),
-            $request->file('images', []) ?: [],
-            $request->input('existing_images', []),
             $request->input('offers', []),
             $request->user()?->id
         );
 
-        if ($request->filled('primary_image_id')) {
-            $this->catalog->setPrimaryImage($product, (int) $request->input('primary_image_id'));
-        }
+        $this->images->syncFromRequest($product, $request);
 
         return $this->respond($request, 'Product created successfully.');
     }
@@ -78,15 +78,11 @@ class ProductController extends Controller
             $this->productData($request),
             $request->input('options', []),
             $request->input('variants', []),
-            $request->file('images', []) ?: [],
-            $request->input('existing_images', $product->images()->pluck('id')->all()),
             $request->input('offers', []),
             $request->user()?->id
         );
 
-        if ($request->filled('primary_image_id')) {
-            $this->catalog->setPrimaryImage($product, (int) $request->input('primary_image_id'));
-        }
+        $this->images->syncFromRequest($product, $request);
 
         return $this->respond($request, 'Product updated successfully.');
     }

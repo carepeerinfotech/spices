@@ -145,7 +145,7 @@ class OfferCheckoutTest extends TestCase
         app(\App\Services\Catalog\ProductCatalogService::class)->save(
             $product,
             $product->only(['category_id', 'name', 'slug', 'sku', 'price', 'stock']),
-            [], [], [], [],
+            [], [],
             [['discount_type' => 'flat', 'value' => 50, 'starts_at' => '2026-08-11T15:50', 'ends_at' => '2026-08-16T15:50']],
             null
         );

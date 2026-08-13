@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Models\Product;
+use App\Services\Media\ImageService;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -59,12 +61,9 @@ class StoreProductRequest extends FormRequest
             'offers.*.apply_to_category' => ['sometimes', 'boolean'],
             'offers.*.starts_at' => ['required_with:offers', 'date'],
             'offers.*.ends_at' => ['required_with:offers', 'date', 'after_or_equal:offers.*.starts_at'],
-            'images' => ['nullable', 'array'],
-            'images.*' => ['image', 'max:4096'],
-            'existing_images' => ['nullable', 'array'],
-            'existing_images.*' => ['integer'],
-            'primary_image_id' => ['nullable', 'integer'],
-        ];
+            // Upload rules come from config/media.php; removal and ordering are
+            // applied instantly through the images endpoints, not on save.
+        ] + app(ImageService::class)->rules(Product::class);
     }
 
     public function attributes(): array

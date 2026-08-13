@@ -3,21 +3,22 @@
 namespace App\Services\Catalog;
 
 use App\Models\Product;
-use App\Models\ProductImage;
 use App\Models\ProductOffer;
 use App\Models\ProductOption;
 use App\Models\ProductVariant;
 use App\Support\LocalTime;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ProductCatalogService
 {
-    public function save(Product $product, array $data, array $options = [], array $variants = [], array $uploads = [], array $existingImageIds = [], array $offers = [], ?int $offerAuthorId = null): Product
+    /**
+     * Images are not handled here — the caller applies them through
+     * ImageService once the product has an id.
+     */
+    public function save(Product $product, array $data, array $options = [], array $variants = [], array $offers = [], ?int $offerAuthorId = null): Product
     {
-        return DB::transaction(function () use ($product, $data, $options, $variants, $uploads, $existingImageIds, $offers, $offerAuthorId) {
+        return DB::transaction(function () use ($product, $data, $options, $variants, $offers, $offerAuthorId) {
             $isNew = ! $product->exists;
 
             $product->fill($data);
@@ -27,7 +28,6 @@ class ProductCatalogService
 
             $this->syncOptions($product, $options);
             $this->syncVariants($product, $variants, $isNew);
-            $this->syncImages($product, $uploads, $existingImageIds);
             $this->syncOffers($product, $offers, $offerAuthorId);
 
             // Keep product-level price/stock synced from default variant
@@ -40,7 +40,6 @@ class ProductCatalogService
                     'price' => $default->price,
                     'compare_price' => $default->compare_price,
                     'stock' => $product->variants()->sum('stock'),
-                    'image' => $default->image ?: $product->image,
                 ]);
             }
 
@@ -276,57 +275,5 @@ class ProductCatalogService
 
         // Products that have since left the category lose their copy.
         $offer->copies()->whereNotIn('product_id', $siblingIds)->delete();
-    }
-
-    private function syncImages(Product $product, array $uploads, array $existingImageIds): void
-    {
-        if (! empty($existingImageIds)) {
-            $product->images()->whereNotIn('id', $existingImageIds)->each(function (ProductImage $image) {
-                $this->deleteStoredFile($image->path);
-                $image->delete();
-            });
-        }
-
-        foreach ($uploads as $index => $file) {
-            if (! $file instanceof UploadedFile) {
-                continue;
-            }
-
-            $path = $file->store('products/'.$product->id, 'public');
-            $product->images()->create([
-                'path' => $path,
-                'alt' => $product->name,
-                'sort_order' => $product->images()->count() + $index,
-                'is_primary' => $product->images()->count() === 0 && $index === 0,
-            ]);
-        }
-
-        if (! $product->images()->where('is_primary', true)->exists()) {
-            $first = $product->images()->orderBy('sort_order')->first();
-            if ($first) {
-                $first->update(['is_primary' => true]);
-                $product->update(['image' => $first->path]);
-            }
-        } else {
-            $primary = $product->images()->where('is_primary', true)->first();
-            if ($primary) {
-                $product->update(['image' => $primary->path]);
-            }
-        }
-    }
-
-    public function setPrimaryImage(Product $product, int $imageId): void
-    {
-        $product->images()->update(['is_primary' => false]);
-        $image = $product->images()->where('id', $imageId)->firstOrFail();
-        $image->update(['is_primary' => true]);
-        $product->update(['image' => $image->path]);
-    }
-
-    private function deleteStoredFile(?string $path): void
-    {
-        if ($path && ! str_starts_with($path, 'http') && Storage::disk('public')->exists($path)) {
-            Storage::disk('public')->delete($path);
-        }
     }
 }

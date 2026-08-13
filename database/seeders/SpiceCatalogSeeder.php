@@ -7,10 +7,14 @@ use App\Models\HomepageSection;
 use App\Models\HomepageSlide;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Services\Media\ImageService;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Arr;
 
 class SpiceCatalogSeeder extends Seeder
 {
+    public function __construct(private readonly ImageService $images) {}
+
     public function run(): void
     {
         $categories = [
@@ -74,10 +78,21 @@ class SpiceCatalogSeeder extends Seeder
 
         $categoryModels = [];
         foreach ($categories as $data) {
-            $categoryModels[$data['slug']] = Category::updateOrCreate(
+            // Images live in the polymorphic images table, not on the model.
+            $media = Arr::only($data, ['image', 'banner']);
+
+            $category = Category::updateOrCreate(
                 ['slug' => $data['slug']],
-                array_merge($data, ['is_active' => true])
+                array_merge(Arr::except($data, ['image', 'banner']), ['is_active' => true])
             );
+
+            foreach ($media as $collection => $url) {
+                if ($url && $category->imagesIn($collection)->isEmpty()) {
+                    $this->images->attach($category, $collection, $url);
+                }
+            }
+
+            $categoryModels[$data['slug']] = $category;
         }
 
         // Hide legacy demo categories from the spice storefront
@@ -234,7 +249,8 @@ class SpiceCatalogSeeder extends Seeder
 
         foreach ($products as $row) {
             $category = $categoryModels[$row['category']];
-            unset($row['category']);
+            $image = $row['image'] ?? null;
+            unset($row['category'], $row['image']);
 
             $product = Product::updateOrCreate(
                 ['sku' => $row['sku']],
@@ -263,17 +279,16 @@ class SpiceCatalogSeeder extends Seeder
                     'price' => $product->price,
                     'compare_price' => $product->compare_price,
                     'stock' => $product->stock,
-                    'image' => $product->image,
+                    'image' => $image,
                     'weight' => $product->weight,
                     'is_default' => true,
                     'is_active' => true,
                 ]
             );
 
-            $product->images()->updateOrCreate(
-                ['path' => $product->image],
-                ['alt' => $product->name, 'sort_order' => 0, 'is_primary' => true]
-            );
+            if ($image && $product->imagesIn('gallery')->isEmpty()) {
+                $this->images->attach($product, 'gallery', $image, ['alt' => $product->name]);
+            }
 
             if ($product->is_featured) {
                 $featuredIds[] = $product->id;

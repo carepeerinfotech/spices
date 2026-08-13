@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EmailTemplateController;
 use App\Http\Controllers\Admin\HomepageController;
 use App\Http\Controllers\Admin\HomepageSlideController;
+use App\Http\Controllers\Admin\ImageController as AdminImageController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\RoleController;
@@ -127,6 +128,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('logout', [AdminAuthController::class, 'logout'])->name('logout');
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
         Route::post('storage-link', [StorageLinkController::class, 'store'])->name('storage-link');
+
+        // Shared by every module using HasImages; each image is guarded by the
+        // permission its owner declares in config/media.php.
+        Route::get('images/{image}/download', [AdminImageController::class, 'download'])->name('images.download');
+        Route::post('images/reorder', [AdminImageController::class, 'reorder'])->name('images.reorder');
+        Route::delete('images/{image}', [AdminImageController::class, 'destroy'])->name('images.destroy');
+        Route::post('images/{image}/primary', [AdminImageController::class, 'primary'])->name('images.primary');
 
         Route::middleware('permission:users.manage')->group(function () {
             Route::resource('users', UserController::class)->except(['show']);

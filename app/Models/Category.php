@@ -2,20 +2,21 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasImages;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
-use App\Support\MediaUrl;
 
 #[Fillable([
-    'name', 'slug', 'description', 'image', 'banner',
+    'name', 'slug', 'description',
     'meta_title', 'meta_description', 'sort_order', 'is_active',
 ])]
 class Category extends Model
 {
     use HasFactory;
+    use HasImages;
 
     protected function casts(): array
     {
@@ -46,11 +47,11 @@ class Category extends Model
 
     public function imageUrl(): ?string
     {
-        return MediaUrl::public($this->image);
+        return $this->imageUrlFor('image');
     }
 
     public function bannerUrl(): ?string
     {
-        return MediaUrl::public($this->banner);
+        return $this->imageUrlFor('banner');
     }
 }
