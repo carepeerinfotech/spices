@@ -80,7 +80,7 @@ $statusClass = $statusColors[$order->status] ?? 'bg-stone-100 text-stone-700';
                     {{ $order->shipping_city }}, {{ $order->shipping_state }} {{ $order->shipping_postal_code }}<br>
                     India
                 </p>
-                @if($order->courier_name || $order->estimated_delivery_days)
+                @if($showDeliveryDetails && ($order->courier_name || $order->estimated_delivery_days))
                     <div class="mt-4 pt-4 border-t border-[var(--line)] text-sm text-stone-600 space-y-1">
                         @if($order->courier_name)
                             <p>Courier: <span class="font-medium text-stone-800">{{ $order->courier_name }}</span></p>

@@ -9,6 +9,7 @@ use App\Models\OrderItem;
 use App\Models\OrderOffer;
 use App\Models\ProductVariant;
 use App\Services\CartService;
+use App\Services\Mail\OrderMailData;
 use App\Services\Mail\TemplateMailer;
 use App\Services\Payments\PaymentGatewayManager;
 use App\Services\Settings\SettingsService;
@@ -239,11 +240,7 @@ class CheckoutController extends Controller
                 return $order->load('items', 'offers');
             });
 
-            $this->mailer->send('order_placed', $order->customer_email, [
-                'customer_name' => $order->customer_name,
-                'order_number' => $order->order_number,
-                'total' => '₹'.number_format((float) $order->total, 2),
-            ]);
+            $this->sendOrderNotifications($order);
 
             if ($data['payment_method'] === 'paytm') {
                 $payment = $this->payments->paytm()->initiate($order);
@@ -281,6 +278,31 @@ class CheckoutController extends Controller
         return view('shop.checkout.success', [
             'order' => $order,
             'cartCount' => 0,
+            'showDeliveryDetails' => $this->settings->bool('shipping', 'show_delivery_details', false),
         ]);
+    }
+
+    /**
+     * Notify the customer, then send the store owners their own copy.
+     * Mail failures must never roll back a paid-for order.
+     */
+    private function sendOrderNotifications(Order $order): void
+    {
+        try {
+            $this->mailer->send('order_placed', $order->customer_email, OrderMailData::customer($order));
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
+        $admins = $this->mailer->adminRecipients();
+        if ($admins === []) {
+            return;
+        }
+
+        try {
+            $this->mailer->send('order_placed_admin', $admins, OrderMailData::admin($order));
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 }

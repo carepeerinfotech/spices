@@ -78,6 +78,7 @@ class SettingsController extends Controller
                 'encryption' => $request->input('encryption', 'tls'),
                 'from_address' => $request->input('from_address'),
                 'from_name' => $request->input('from_name'),
+                'admin_email' => $request->input('admin_email'),
             ], [
                 'port' => ['type' => 'integer'],
                 'password' => ['encrypted' => true],
@@ -85,12 +86,18 @@ class SettingsController extends Controller
             'notifications' => $this->settings->setMany('notifications', [
                 'enabled' => $request->boolean('enabled'),
                 'notify_order_placed' => $request->boolean('notify_order_placed'),
+                'notify_order_placed_admin' => $request->boolean('notify_order_placed_admin'),
+                'notify_contact_message_admin' => $request->boolean('notify_contact_message_admin'),
+                'notify_newsletter_signup_admin' => $request->boolean('notify_newsletter_signup_admin'),
                 'notify_payment_result' => $request->boolean('notify_payment_result'),
                 'notify_shipment_update' => $request->boolean('notify_shipment_update'),
                 'notify_verify_email' => $request->boolean('notify_verify_email'),
             ], [
                 'enabled' => ['type' => 'boolean'],
                 'notify_order_placed' => ['type' => 'boolean'],
+                'notify_order_placed_admin' => ['type' => 'boolean'],
+                'notify_contact_message_admin' => ['type' => 'boolean'],
+                'notify_newsletter_signup_admin' => ['type' => 'boolean'],
                 'notify_payment_result' => ['type' => 'boolean'],
                 'notify_shipment_update' => ['type' => 'boolean'],
                 'notify_verify_email' => ['type' => 'boolean'],
@@ -99,10 +106,12 @@ class SettingsController extends Controller
                 'charges_enabled' => $request->boolean('charges_enabled'),
                 'flat_rate' => (float) $request->input('flat_rate', 49),
                 'free_above' => (float) $request->input('free_above', 999),
+                'show_delivery_details' => $request->boolean('show_delivery_details'),
             ], [
                 'charges_enabled' => ['type' => 'boolean'],
                 'flat_rate' => ['type' => 'float'],
                 'free_above' => ['type' => 'float'],
+                'show_delivery_details' => ['type' => 'boolean'],
             ]),
             'shiprocket' => $this->settings->setMany('shiprocket', [
                 'enabled' => $request->boolean('enabled'),

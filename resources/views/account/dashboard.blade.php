@@ -52,9 +52,15 @@
         <h2 class="font-medium mb-3">Recent orders</h2>
         <div class="space-y-2 text-sm">
             @forelse($user->orders as $order)
-                <div class="flex justify-between border-b pb-2">
-                    <span>{{ $order->order_number }}</span>
-                    <span>₹{{ number_format($order->total, 2) }} · {{ $order->status }}</span>
+                <div class="flex items-center justify-between gap-3 border-b pb-2">
+                    <div class="min-w-0">
+                        <p class="font-medium truncate">{{ $order->order_number }}</p>
+                        <p class="text-xs text-slate-500">{{ $order->created_at->format('M j, Y') }} · {{ ucfirst($order->status) }}</p>
+                    </div>
+                    <div class="flex items-center gap-4 shrink-0">
+                        <span>₹{{ number_format($order->total, 2) }}</span>
+                        <a href="{{ route('shop.checkout.success', $order->order_number) }}" class="text-brand whitespace-nowrap">View details</a>
+                    </div>
                 </div>
             @empty
                 <p class="text-slate-500">No orders yet.</p>

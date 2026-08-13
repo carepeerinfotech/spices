@@ -7,6 +7,7 @@ use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\Settings\SettingsService;
+use App\Support\OrderEmailTemplates;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -115,16 +116,23 @@ class DatabaseSeeder extends Seeder
             'encryption' => 'tls',
             'from_address' => 'hello@elephantshop.test',
             'from_name' => 'Elephant Shop',
+            'admin_email' => '',
         ], ['port' => ['type' => 'integer']]);
         $settings->setMany('notifications', [
             'enabled' => true,
             'notify_order_placed' => true,
+            'notify_order_placed_admin' => true,
+            'notify_contact_message_admin' => true,
+            'notify_newsletter_signup_admin' => true,
             'notify_payment_result' => true,
             'notify_shipment_update' => true,
             'notify_verify_email' => true,
         ], [
             'enabled' => ['type' => 'boolean'],
             'notify_order_placed' => ['type' => 'boolean'],
+            'notify_order_placed_admin' => ['type' => 'boolean'],
+            'notify_contact_message_admin' => ['type' => 'boolean'],
+            'notify_newsletter_signup_admin' => ['type' => 'boolean'],
             'notify_payment_result' => ['type' => 'boolean'],
             'notify_shipment_update' => ['type' => 'boolean'],
             'notify_verify_email' => ['type' => 'boolean'],
@@ -133,8 +141,10 @@ class DatabaseSeeder extends Seeder
             'charges_enabled' => true,
             'flat_rate' => 49,
             'free_above' => 999,
+            'show_delivery_details' => false,
         ], [
             'charges_enabled' => ['type' => 'boolean'],
+            'show_delivery_details' => ['type' => 'boolean'],
             'flat_rate' => ['type' => 'float'],
             'free_above' => ['type' => 'float'],
         ]);
@@ -145,13 +155,29 @@ class DatabaseSeeder extends Seeder
             'email' => '',
         ], ['enabled' => ['type' => 'boolean']]);
 
+        $orderTemplates = [];
+        foreach (OrderEmailTemplates::all() as $slug => $template) {
+            $orderTemplates[] = ['slug' => $slug] + $template;
+        }
+
         foreach ([
+            ...$orderTemplates,
             [
-                'slug' => 'order_placed',
-                'name' => 'Order Placed',
-                'subject' => 'Order {{order_number}} confirmed',
-                'body' => '<p>Hi {{customer_name}},</p><p>Your order <strong>{{order_number}}</strong> totaling {{total}} has been placed.</p>',
-                'placeholders' => ['customer_name', 'order_number', 'total'],
+                'slug' => 'contact_message_admin',
+                'name' => 'Contact Enquiry (Admin)',
+                'subject' => 'New enquiry from {{name}}',
+                'body' => '<p>A new enquiry arrived on {{received_at}}.</p>'
+                    .'<p>Name: {{name}}<br>Email: {{email}}<br>Phone: {{phone}}</p>'
+                    .'<p>Message:<br>{{message}}</p>',
+                'placeholders' => ['name', 'email', 'phone', 'message', 'received_at'],
+            ],
+            [
+                'slug' => 'newsletter_signup_admin',
+                'name' => 'Newsletter Signup (Admin)',
+                'subject' => 'New newsletter subscriber',
+                'body' => '<p><strong>{{email}}</strong> subscribed to the newsletter on {{subscribed_at}}.</p>'
+                    .'<p>That makes {{total_subscribers}} subscribers in total.</p>',
+                'placeholders' => ['email', 'subscribed_at', 'total_subscribers'],
             ],
             [
                 'slug' => 'payment_result',
