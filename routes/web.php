@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\EmailTemplateController;
 use App\Http\Controllers\Admin\HomepageController;
 use App\Http\Controllers\Admin\HomepageSlideController;
 use App\Http\Controllers\Admin\ImageController as AdminImageController;
+use App\Http\Controllers\Admin\NewsletterSubscriberController as AdminNewsletterSubscriberController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\RoleController;
@@ -20,12 +21,12 @@ use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\ShipmentController;
 use App\Http\Controllers\Admin\StorageLinkController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Shop\AboutController;
 use App\Http\Controllers\Shop\CartController;
 use App\Http\Controllers\Shop\CheckoutController;
-use App\Http\Controllers\Shop\AboutController;
 use App\Http\Controllers\Shop\ContactController;
-use App\Http\Controllers\Shop\NewsletterController;
 use App\Http\Controllers\Shop\HomeController;
+use App\Http\Controllers\Shop\NewsletterController;
 use App\Http\Controllers\Shop\PageController;
 use App\Http\Controllers\Shop\PaymentController;
 use App\Http\Controllers\Shop\PrivacyPolicyController;
@@ -159,6 +160,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('contact-messages', [AdminContactMessageController::class, 'index'])->name('contact-messages.index');
             Route::get('contact-messages/{contact_message}', [AdminContactMessageController::class, 'show'])->name('contact-messages.show');
             Route::delete('contact-messages/{contact_message}', [AdminContactMessageController::class, 'destroy'])->name('contact-messages.destroy');
+
+            // Newsletter signups come from the same storefront forms, so they sit
+            // behind the permission that already covers storefront enquiries.
+            Route::get('newsletter-subscribers', [AdminNewsletterSubscriberController::class, 'index'])->name('newsletter-subscribers.index');
+            Route::get('newsletter-subscribers/export', [AdminNewsletterSubscriberController::class, 'export'])->name('newsletter-subscribers.export');
+            Route::delete('newsletter-subscribers/{newsletter_subscriber}', [AdminNewsletterSubscriberController::class, 'destroy'])->name('newsletter-subscribers.destroy');
         });
         Route::middleware('permission:products.manage')->group(function () {
             Route::resource('products', AdminProductController::class)->except(['show']);

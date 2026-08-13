@@ -41,10 +41,8 @@
             <a href="{{ route('admin.orders.index') }}" class="{{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">Orders</a>
             <a href="{{ route('admin.products.index') }}" class="{{ request()->routeIs('admin.products.*') ? 'active' : '' }}">Products</a>
             <a href="{{ route('admin.categories.index') }}" class="{{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">Categories</a>
-            <a href="{{ route('admin.pages.index') }}" class="{{ request()->routeIs('admin.pages.*') ? 'active' : '' }}">CMS Pages</a>
             <a href="{{ route('admin.contact-messages.index') }}" class="{{ request()->routeIs('admin.contact-messages.*') ? 'active' : '' }}">Contact Messages</a>
-            <a href="{{ route('admin.homepage.edit') }}" class="{{ request()->routeIs('admin.homepage.*') ? 'active' : '' }}">Homepage</a>
-            <a href="{{ route('admin.homepage-slides.index') }}" class="{{ request()->routeIs('admin.homepage-slides.*') ? 'active' : '' }}">Hero Slider</a>
+            <a href="{{ route('admin.newsletter-subscribers.index') }}" class="{{ request()->routeIs('admin.newsletter-subscribers.*') ? 'active' : '' }}">Subscribers</a>
             <a href="{{ route('admin.email-templates.index') }}" class="{{ request()->routeIs('admin.email-templates.*') ? 'active' : '' }}">Email templates</a>
             <a href="{{ route('admin.settings.index') }}" class="{{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">Settings</a>
             <a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">Users</a>
