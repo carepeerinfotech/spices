@@ -24,7 +24,7 @@ class ShippingQuoteController extends Controller
             'product_id' => ['required', 'exists:products,id'],
             'variant_id' => ['nullable', 'exists:product_variants,id'],
             'pincode' => ['required', 'regex:/^\d{6}$/'],
-            'qty' => ['nullable', 'integer', 'min:1', 'max:99'],
+            'qty' => ['nullable', 'integer', 'min:1'],
         ]);
 
         $product = Product::active()->findOrFail($data['product_id']);

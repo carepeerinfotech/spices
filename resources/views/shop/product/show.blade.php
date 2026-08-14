@@ -75,7 +75,7 @@
 
             <div class="mt-8 flex flex-wrap items-center gap-3">
                 <label class="text-sm text-slate-600">Qty
-                    <input id="qty" type="number" min="1" value="1" class="ml-2 w-20 rounded-lg border border-slate-300 px-2 py-2 text-sm">
+                    <input id="qty" type="number" min="1" max="{{ max((int) ($defaultVariant?->stock ?? 1), 1) }}" value="1" class="ml-2 w-20 rounded-lg border border-slate-300 px-2 py-2 text-sm">
                 </label>
                 <button type="button" id="add-to-cart" class="btn-brand">
                     Add to Cart
@@ -114,6 +114,27 @@
 (function () {
   var productId = {{ $product->id }};
   var variantId = {{ $defaultVariant?->id ?? 'null' }};
+  var qtyInput = document.getElementById('qty');
+
+  // Quantity can never exceed the selected variant's stock; the server enforces
+  // the same ceiling in CartService.
+  function setQtyMax(stock) {
+    if (!qtyInput) return;
+    var max = Math.max(stock, 1);
+    qtyInput.max = max;
+    if (parseInt(qtyInput.value, 10) > max) qtyInput.value = max;
+  }
+
+  function currentQty() {
+    if (!qtyInput) return 1;
+    var max = parseInt(qtyInput.max, 10) || 1;
+    var qty = Math.min(Math.max(parseInt(qtyInput.value, 10) || 1, 1), max);
+    qtyInput.value = qty;
+
+    return qty;
+  }
+
+  qtyInput?.addEventListener('change', currentQty);
 
   document.querySelectorAll('.accordion-trigger').forEach(function (trigger) {
     trigger.addEventListener('click', function () {
@@ -154,6 +175,7 @@
       var stockEl = document.getElementById('variant-stock');
       stockEl.textContent = active ? (btn.getAttribute('data-stock') + ' in stock') : 'Out of stock';
       stockEl.className = 'mt-2 text-sm ' + (active ? 'text-emerald-700' : 'text-rose-600');
+      setQtyMax(parseInt(btn.getAttribute('data-stock'), 10) || 0);
       if (btn.getAttribute('data-image')) {
         document.getElementById('main-image').src = btn.getAttribute('data-image');
       }
@@ -161,7 +183,7 @@
   });
 
   document.getElementById('add-to-cart')?.addEventListener('click', function () {
-    var qty = parseInt(document.getElementById('qty').value, 10) || 1;
+    var qty = currentQty();
     AppAjax.request(@json(route('shop.cart.store')), {
       method: 'POST',
       body: { product_id: productId, variant_id: variantId, quantity: qty }
@@ -175,7 +197,7 @@
 
   document.getElementById('check-pincode')?.addEventListener('click', function () {
     var pincode = document.getElementById('pincode').value.trim();
-    var qty = parseInt(document.getElementById('qty').value, 10) || 1;
+    var qty = currentQty();
     AppAjax.request(@json(route('shipping.quote.product')), {
       method: 'POST',
       body: { product_id: productId, variant_id: variantId, pincode: pincode, qty: qty },

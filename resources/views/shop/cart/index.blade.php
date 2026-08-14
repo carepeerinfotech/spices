@@ -118,7 +118,9 @@
         var input = e.target.closest('.qty-input');
         if (!input) return;
         var id = input.getAttribute('data-item');
+        var max = parseInt(input.max, 10);
         var qty = parseInt(input.value, 10) || 0;
+        if (max > 0 && qty > max) { qty = max; input.value = max; }
         AppAjax.request('/cart/' + id, { method: 'PUT', body: { quantity: qty } }).then(function (r) {
             if (r.ok) render(r.data.data);
         });

@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Session;
 
 class CartService
 {
+    private ?string $notice = null;
+
     public function __construct(private SettingsService $settings) {}
 
     public function getCart(): Cart
@@ -91,6 +93,8 @@ class CartService
 
     public function add(Product $product, ?ProductVariant $variant = null, int $quantity = 1): Cart
     {
+        $this->notice = null;
+
         if (! $product->is_active) {
             throw new \RuntimeException('Product is not available.');
         }
@@ -104,8 +108,9 @@ class CartService
             throw new \InvalidArgumentException('Quantity must be at least 1.');
         }
 
-        if ($variant->stock < $quantity) {
-            throw new \RuntimeException('Insufficient stock available.');
+        $stock = (int) $variant->stock;
+        if ($stock < 1) {
+            throw new \RuntimeException('This item is out of stock.');
         }
 
         $cart = $this->getCart();
@@ -114,17 +119,28 @@ class CartService
             ->where('product_variant_id', $variant->id)
             ->first();
 
+        // Asking for more than we have is not an error — the line is merged up to
+        // whatever stock allows and the shopper is told what landed.
+        $current = (int) ($item?->quantity ?? 0);
+        $newQty = min($current + $quantity, $stock);
+
+        if ($newQty === $current) {
+            $this->notice = "Your cart already has all {$stock} we have in stock.";
+
+            return $this->getCart();
+        }
+
+        if ($newQty < $current + $quantity) {
+            $this->notice = "Only {$stock} in stock — cart updated to the maximum available.";
+        }
+
         if ($item) {
-            $newQty = $item->quantity + $quantity;
-            if ($variant->stock < $newQty) {
-                throw new \RuntimeException('Insufficient stock available.');
-            }
             $item->update(['quantity' => $newQty, 'price' => $variant->price]);
         } else {
             $cart->items()->create([
                 'product_id' => $product->id,
                 'product_variant_id' => $variant->id,
-                'quantity' => $quantity,
+                'quantity' => $newQty,
                 'price' => $variant->price,
             ]);
         }
@@ -134,6 +150,7 @@ class CartService
 
     public function update(int $itemId, int $quantity): Cart
     {
+        $this->notice = null;
         $cart = $this->getCart();
         $item = $cart->items()->where('id', $itemId)->firstOrFail();
 
@@ -143,9 +160,14 @@ class CartService
             return $this->getCart();
         }
 
-        $stock = $item->variant?->stock ?? 0;
-        if ($stock < $quantity) {
-            throw new \RuntimeException('Insufficient stock available.');
+        $stock = (int) ($item->variant?->stock ?? 0);
+        if ($stock < 1) {
+            throw new \RuntimeException('This item is out of stock.');
+        }
+
+        if ($quantity > $stock) {
+            $quantity = $stock;
+            $this->notice = "Only {$stock} in stock — quantity set to the maximum available.";
         }
 
         $item->update([
@@ -154,6 +176,15 @@ class CartService
         ]);
 
         return $this->getCart();
+    }
+
+    /**
+     * Message describing any clamping the last add()/update() applied, so the
+     * caller can report it as a success notice rather than an error.
+     */
+    public function notice(): ?string
+    {
+        return $this->notice;
     }
 
     public function remove(int $itemId): Cart
