@@ -46,6 +46,7 @@ class StoreProductRequest extends FormRequest
             'variants.*.id' => ['nullable', 'integer'],
             'variants.*.sku' => ['required_with:variants', 'string', 'max:100'],
             'variants.*.price' => ['required_with:variants', 'numeric', 'min:0'],
+            'variants.*.compare_price' => ['nullable', 'numeric', 'min:0'],
             'variants.*.stock' => ['required_with:variants', 'integer', 'min:0'],
             'variants.*.option_label' => ['nullable', 'string', 'max:255'],
             'variants.*.is_default' => ['sometimes', 'boolean'],

@@ -108,6 +108,7 @@
                             <th class="px-3 py-2">Label</th>
                             <th class="px-3 py-2">SKU</th>
                             <th class="px-3 py-2">Price</th>
+                            <th class="px-3 py-2">Compare price</th>
                             <th class="px-3 py-2">Stock</th>
                             <th class="px-3 py-2">Default</th>
                             <th class="px-3 py-2">Active</th>
@@ -122,6 +123,7 @@
                                 </td>
                                 <td class="px-3 py-2"><input name="variants[{{ $vIndex }}][sku]" value="{{ $variant->sku }}" class="w-36 rounded border border-slate-300 px-2 py-1"></td>
                                 <td class="px-3 py-2"><input name="variants[{{ $vIndex }}][price]" type="number" step="0.01" value="{{ $variant->price }}" class="w-24 rounded border border-slate-300 px-2 py-1"></td>
+                                <td class="px-3 py-2"><input name="variants[{{ $vIndex }}][compare_price]" type="number" step="0.01" min="0" value="{{ $variant->compare_price }}" class="w-24 rounded border border-slate-300 px-2 py-1"></td>
                                 <td class="px-3 py-2"><input name="variants[{{ $vIndex }}][stock]" type="number" value="{{ $variant->stock }}" class="w-20 rounded border border-slate-300 px-2 py-1"></td>
                                 <td class="px-3 py-2"><input type="checkbox" name="variants[{{ $vIndex }}][is_default]" value="1" @checked($variant->is_default)></td>
                                 <td class="px-3 py-2"><input type="checkbox" name="variants[{{ $vIndex }}][is_active]" value="1" data-bool @checked($variant->is_active)></td>
@@ -403,6 +405,7 @@
     var combos = cartesian(groups);
     var baseSku = document.querySelector('input[name="sku"]').value || 'SKU';
     var basePrice = document.querySelector('input[name="price"]').value || '0';
+    var baseCompare = document.querySelector('input[name="compare_price"]').value || '';
     var baseStock = document.querySelector('input[name="stock"]').value || '0';
     var body = document.getElementById('variants-body');
     body.innerHTML = '';
@@ -413,6 +416,7 @@
       tr.innerHTML = '<td class="px-3 py-2"><input name="variants[' + i + '][option_label]" value="' + label + '" class="w-36 rounded border border-slate-300 px-2 py-1"></td>' +
         '<td class="px-3 py-2"><input name="variants[' + i + '][sku]" value="' + sku + '" class="w-36 rounded border border-slate-300 px-2 py-1"></td>' +
         '<td class="px-3 py-2"><input name="variants[' + i + '][price]" type="number" step="0.01" value="' + basePrice + '" class="w-24 rounded border border-slate-300 px-2 py-1"></td>' +
+        '<td class="px-3 py-2"><input name="variants[' + i + '][compare_price]" type="number" step="0.01" min="0" value="' + baseCompare + '" class="w-24 rounded border border-slate-300 px-2 py-1"></td>' +
         '<td class="px-3 py-2"><input name="variants[' + i + '][stock]" type="number" value="' + baseStock + '" class="w-20 rounded border border-slate-300 px-2 py-1"></td>' +
         '<td class="px-3 py-2"><input type="checkbox" name="variants[' + i + '][is_default]" value="1"' + (i === 0 ? ' checked' : '') + '></td>' +
         '<td class="px-3 py-2"><input type="checkbox" name="variants[' + i + '][is_active]" value="1" data-bool checked></td>';

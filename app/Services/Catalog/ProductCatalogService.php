@@ -122,13 +122,21 @@ class ProductCatalogService
                     $hasDefault = true;
                 }
 
+                // A blank compare price on the default row falls back to the base
+                // compare price from the Basic Info tab — that row is mirrored
+                // back onto the product once the sync is done.
+                $comparePrice = $variantData['compare_price'] ?? null;
+                $comparePrice = ($comparePrice === null || $comparePrice === '')
+                    ? ($isDefault ? $product->compare_price : null)
+                    : (float) $comparePrice;
+
                 $payload = [
                     'sku' => $sku,
                     'name' => $variantData['name'] ?? $product->name,
                     'option_label' => $variantData['option_label'] ?? null,
                     'option_values' => $variantData['option_values'] ?? [],
                     'price' => (float) ($variantData['price'] ?? 0),
-                    'compare_price' => $variantData['compare_price'] ?? null,
+                    'compare_price' => $comparePrice,
                     'stock' => (int) ($variantData['stock'] ?? 0),
                     'weight' => $variantData['weight'] ?? $product->weight,
                     'length' => $variantData['length'] ?? $product->length,
