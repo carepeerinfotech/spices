@@ -84,13 +84,15 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AccountAuthController::class, 'login'])->middleware('throttle:10,1')->name('login.submit');
     Route::get('/register', [AccountAuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AccountAuthController::class, 'register'])->middleware('throttle:10,1')->name('register.submit');
+});
 
-    Route::middleware('feature:password_reset')->group(function () {
-        Route::get('/forgot-password', [PasswordResetController::class, 'showLinkRequest'])->name('password.request');
-        Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink'])->middleware('throttle:6,1')->name('password.email');
-        Route::get('/reset-password/{token}', [PasswordResetController::class, 'showReset'])->name('password.reset');
-        Route::post('/reset-password', [PasswordResetController::class, 'reset'])->middleware('throttle:6,1')->name('password.update');
-    });
+// Not guest-only: a signed-in customer requests a reset link from their account
+// page, and `guest` would bounce them off their own link when they open it.
+Route::middleware('feature:password_reset')->group(function () {
+    Route::get('/forgot-password', [PasswordResetController::class, 'showLinkRequest'])->name('password.request');
+    Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink'])->middleware('throttle:6,1')->name('password.email');
+    Route::get('/reset-password/{token}', [PasswordResetController::class, 'showReset'])->name('password.reset');
+    Route::post('/reset-password', [PasswordResetController::class, 'reset'])->middleware('throttle:6,1')->name('password.update');
 });
 
 Route::post('/logout', [AccountAuthController::class, 'logout'])->middleware('auth')->name('logout');
@@ -114,6 +116,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [AccountDashboardController::class, 'index'])->name('dashboard');
         Route::put('/profile', [AccountDashboardController::class, 'updateProfile'])->name('profile');
         Route::put('/password', [AccountDashboardController::class, 'updatePassword'])->name('password');
+        Route::post('/password/reset-link', [AccountDashboardController::class, 'sendPasswordResetLink'])
+            ->middleware(['feature:password_reset', 'throttle:6,1'])
+            ->name('password.link');
         Route::get('/addresses', [AddressController::class, 'index'])->name('addresses.index');
         Route::post('/addresses', [AddressController::class, 'store'])->name('addresses.store');
         Route::put('/addresses/{address}', [AddressController::class, 'update'])->name('addresses.update');

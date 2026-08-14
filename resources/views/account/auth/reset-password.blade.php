@@ -8,7 +8,10 @@
         <input type="hidden" name="token" value="{{ $token }}">
         <div>
             <label class="text-sm">Email</label>
-            <input type="email" name="email" value="{{ $email }}" required class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2">
+            {{-- Readonly rather than disabled: a disabled field is not submitted,
+                 and the reset is validated against this address. --}}
+            <input type="email" name="email" value="{{ $email }}" required readonly
+                   class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-100 text-slate-500 cursor-not-allowed px-3 py-2">
         </div>
         <div>
             <label class="text-sm">New password</label>
