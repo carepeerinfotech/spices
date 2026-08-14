@@ -23,7 +23,7 @@
                     },
                     fontFamily: {
                         sans: ['DM Sans', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-                        display: ['Playfair Display', 'Georgia', 'serif']
+                        display: ['Montserrat', 'serif']
                     }
                 }
             }

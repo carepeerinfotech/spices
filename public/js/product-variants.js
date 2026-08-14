@@ -8,10 +8,25 @@
     var card = chip.closest('.product-card, .product');
     if (!card) return;
 
+    var isProductCard = card.classList.contains('product-card');
+    var activeClasses = ['is-active', 'border-brand', 'bg-cream', 'text-brand'];
+    var inactiveClasses = ['border-[var(--line)]', 'text-stone-600'];
+
     card.querySelectorAll('[data-variant-chip]').forEach(function (btn) {
-      btn.classList.remove('is-active', 'active');
+      if (isProductCard) {
+        btn.classList.remove.apply(btn.classList, activeClasses);
+        btn.classList.add.apply(btn.classList, inactiveClasses);
+      } else {
+        btn.classList.remove('active');
+      }
     });
-    chip.classList.add(card.classList.contains('product-card') ? 'is-active' : 'active');
+
+    if (isProductCard) {
+      chip.classList.remove.apply(chip.classList, inactiveClasses);
+      chip.classList.add.apply(chip.classList, activeClasses);
+    } else {
+      chip.classList.add('active');
+    }
 
     var variantInput = card.querySelector('input[name="variant_id"]');
     if (variantInput) variantInput.value = chip.getAttribute('data-id');

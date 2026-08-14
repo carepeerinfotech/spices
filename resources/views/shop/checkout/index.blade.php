@@ -7,7 +7,7 @@
 
 <div class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
     <div class="grid lg:grid-cols-5 gap-8">
-        <form data-ajax method="POST" action="{{ route('shop.checkout.store') }}" class="lg:col-span-3 rounded-xl border border-slate-200 bg-white p-6 space-y-6" id="checkout-form">
+        <form data-ajax method="POST" action="{{ route('shop.checkout.store') }}" class="lg:col-span-3 rounded-xl border border-slate-200 bg-white p-6 space-y-6" id="checkout-form" novalidate>
             @csrf
 
             <div>
@@ -16,71 +16,71 @@
 
                 <div class="grid sm:grid-cols-2 gap-4">
                     <div class="sm:col-span-2">
-                        <label class="block text-sm mb-1">Full Name</label>
-                        <input name="billing_name" required value="{{ old('billing_name', $address?->name ?: $user->name) }}"
+                        <label for="billing_name" class="block text-sm mb-1 required">Full Name</label>
+                        <input id="billing_name" name="billing_name" required value="{{ old('billing_name', $address?->name ?: $user->name) }}"
                                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
-                        @error('billing_name')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
+                        <p id="error-billing_name" class="field-error text-xs mt-1 {{ $errors->has('billing_name') ? '' : 'hidden' }}">{{ $errors->first('billing_name') }}</p>
                     </div>
 
                     <div>
-                        <label class="block text-sm mb-1">Email address</label>
-                        <input type="email" name="billing_email" required value="{{ old('billing_email', $address?->email ?: $user->email) }}"
+                        <label for="billing_email" class="block text-sm mb-1 required">Email address</label>
+                        <input type="email" id="billing_email" name="billing_email" required value="{{ old('billing_email', $address?->email ?: $user->email) }}"
                                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
-                        @error('billing_email')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
+                        <p id="error-billing_email" class="field-error text-xs mt-1 {{ $errors->has('billing_email') ? '' : 'hidden' }}">{{ $errors->first('billing_email') }}</p>
                     </div>
 
                     <div>
-                        <label class="block text-sm mb-1">Phone</label>
-                        <input name="billing_phone" required value="{{ old('billing_phone', $address?->phone ?: $user->phone) }}"
+                        <label for="billing_phone" class="block text-sm mb-1 required">Phone</label>
+                        <input id="billing_phone" name="billing_phone" required value="{{ old('billing_phone', $address?->phone ?: $user->phone) }}"
                                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
-                        @error('billing_phone')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
+                        <p id="error-billing_phone" class="field-error text-xs mt-1 {{ $errors->has('billing_phone') ? '' : 'hidden' }}">{{ $errors->first('billing_phone') }}</p>
                     </div>
 
                     <div class="sm:col-span-2">
-                        <label class="block text-sm mb-1">Street Address</label>
-                        <input name="billing_address_line1" required placeholder="House number and street name"
+                        <label for="billing_address_line1" class="block text-sm mb-1 required">Street Address</label>
+                        <input id="billing_address_line1" name="billing_address_line1" required placeholder="House number and street name"
                                value="{{ old('billing_address_line1', $address?->address_line1) }}"
                                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm mb-2">
-                        <input name="billing_address_line2" placeholder="Apartment, suite, unit, etc. (optional)"
+                        <input id="billing_address_line2" name="billing_address_line2" placeholder="Apartment, suite, unit, etc. (optional)"
                                value="{{ old('billing_address_line2', $address?->address_line2) }}"
                                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
-                        @error('billing_address_line1')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
+                        <p id="error-billing_address_line1" class="field-error text-xs mt-1 {{ $errors->has('billing_address_line1') ? '' : 'hidden' }}">{{ $errors->first('billing_address_line1') }}</p>
                     </div>
 
 
                     <div>
-                        <label class="block text-sm mb-1">Country</label>
-                        <select name="billing_country" required class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                        <label for="billing_country" class="block text-sm mb-1 required">Country</label>
+                        <select id="billing_country" name="billing_country" required class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
                             @foreach(config('countries') as $code => $name)
                                 <option value="{{ $code }}" @selected(old('billing_country', 'IN') === $code)>{{ $name }}</option>
                             @endforeach
                         </select>
-                        @error('billing_country')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm mb-1">City</label>
-                        <input name="billing_city" required value="{{ old('billing_city', $address?->city) }}"
-                               class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
-                        @error('billing_city')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
+                        <p id="error-billing_country" class="field-error text-xs mt-1 {{ $errors->has('billing_country') ? '' : 'hidden' }}">{{ $errors->first('billing_country') }}</p>
                     </div>
 
                     <div>
-                        <label class="block text-sm mb-1">State</label>
-                        <input name="billing_state" required value="{{ old('billing_state', $address?->state) }}"
+                        <label for="billing_city" class="block text-sm mb-1 required">City</label>
+                        <input id="billing_city" name="billing_city" required value="{{ old('billing_city', $address?->city) }}"
                                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
-                        @error('billing_state')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
+                        <p id="error-billing_city" class="field-error text-xs mt-1 {{ $errors->has('billing_city') ? '' : 'hidden' }}">{{ $errors->first('billing_city') }}</p>
                     </div>
 
                     <div>
-                        <label class="block text-sm mb-1">Pin code</label>
+                        <label for="billing_state" class="block text-sm mb-1 required">State</label>
+                        <input id="billing_state" name="billing_state" required value="{{ old('billing_state', $address?->state) }}"
+                               class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                        <p id="error-billing_state" class="field-error text-xs mt-1 {{ $errors->has('billing_state') ? '' : 'hidden' }}">{{ $errors->first('billing_state') }}</p>
+                    </div>
+
+                    <div>
+                        <label for="billing_postal_code" class="block text-sm mb-1 required">Pin code</label>
                         <input name="billing_postal_code" id="billing_postal_code" required maxlength="6" inputmode="numeric"
                                value="{{ old('billing_postal_code', $address?->postal_code) }}"
                                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
-                        @error('billing_postal_code')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
+                        <p id="error-billing_postal_code" class="field-error text-xs mt-1 {{ $errors->has('billing_postal_code') ? '' : 'hidden' }}">{{ $errors->first('billing_postal_code') }}</p>
                     </div>
 
-                    
+
                 </div>
             </div>
 
@@ -93,53 +93,53 @@
                 <h2 class="font-medium text-lg">Shipping details</h2>
                 <div class="grid sm:grid-cols-2 gap-4">
                     <div class="sm:col-span-2">
-                        <label class="block text-sm mb-1">Full Name</label>
-                        <input name="shipping_name" value="{{ old('shipping_name') }}" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
-                        @error('shipping_name')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
+                        <label for="shipping_name" class="block text-sm mb-1">Full Name</label>
+                        <input id="shipping_name" name="shipping_name" value="{{ old('shipping_name') }}" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                        <p id="error-shipping_name" class="field-error text-xs mt-1 {{ $errors->has('shipping_name') ? '' : 'hidden' }}">{{ $errors->first('shipping_name') }}</p>
                     </div>
 
                     <div class="sm:col-span-2">
-                        <label class="block text-sm mb-1">Street Address</label>
-                        <input name="shipping_address_line1" placeholder="House number and street name"
+                        <label for="shipping_address_line1" class="block text-sm mb-1">Street Address</label>
+                        <input id="shipping_address_line1" name="shipping_address_line1" placeholder="House number and street name"
                                value="{{ old('shipping_address_line1') }}"
                                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm mb-2">
-                        <input name="shipping_address_line2" placeholder="Apartment, suite, unit, etc. (optional)"
+                        <input id="shipping_address_line2" name="shipping_address_line2" placeholder="Apartment, suite, unit, etc. (optional)"
                                value="{{ old('shipping_address_line2') }}"
                                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
-                        @error('shipping_address_line1')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
+                        <p id="error-shipping_address_line1" class="field-error text-xs mt-1 {{ $errors->has('shipping_address_line1') ? '' : 'hidden' }}">{{ $errors->first('shipping_address_line1') }}</p>
                     </div>
 
                     <div>
-                        <label class="block text-sm mb-1">Country</label>
-                        <select name="shipping_country" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                        <label for="shipping_country" class="block text-sm mb-1">Country</label>
+                        <select id="shipping_country" name="shipping_country" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
                             @foreach(config('countries') as $code => $name)
                                 <option value="{{ $code }}" @selected(old('shipping_country', 'IN') === $code)>{{ $name }}</option>
                             @endforeach
                         </select>
-                        @error('shipping_country')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
+                        <p id="error-shipping_country" class="field-error text-xs mt-1 {{ $errors->has('shipping_country') ? '' : 'hidden' }}">{{ $errors->first('shipping_country') }}</p>
                     </div>
 
                     <div>
-                        <label class="block text-sm mb-1">City</label>
-                        <input name="shipping_city" value="{{ old('shipping_city') }}" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
-                        @error('shipping_city')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
+                        <label for="shipping_city" class="block text-sm mb-1">City</label>
+                        <input id="shipping_city" name="shipping_city" value="{{ old('shipping_city') }}" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                        <p id="error-shipping_city" class="field-error text-xs mt-1 {{ $errors->has('shipping_city') ? '' : 'hidden' }}">{{ $errors->first('shipping_city') }}</p>
                     </div>
 
                     <div>
-                        <label class="block text-sm mb-1">State</label>
-                        <input name="shipping_state" value="{{ old('shipping_state') }}" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
-                        @error('shipping_state')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
+                        <label for="shipping_state" class="block text-sm mb-1">State</label>
+                        <input id="shipping_state" name="shipping_state" value="{{ old('shipping_state') }}" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                        <p id="error-shipping_state" class="field-error text-xs mt-1 {{ $errors->has('shipping_state') ? '' : 'hidden' }}">{{ $errors->first('shipping_state') }}</p>
                     </div>
 
                     <div>
-                        <label class="block text-sm mb-1">Pin code</label>
+                        <label for="shipping_postal_code" class="block text-sm mb-1">Pin code</label>
                         <input name="shipping_postal_code" id="shipping_postal_code" maxlength="6" inputmode="numeric"
                                value="{{ old('shipping_postal_code') }}"
                                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
-                        @error('shipping_postal_code')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
+                        <p id="error-shipping_postal_code" class="field-error text-xs mt-1 {{ $errors->has('shipping_postal_code') ? '' : 'hidden' }}">{{ $errors->first('shipping_postal_code') }}</p>
                     </div>
 
-                    
+
                 </div>
             </div>
 
@@ -210,8 +210,97 @@
 
 @push('scripts')
 <script>
-document.getElementById('ship-different')?.addEventListener('change', function () {
-    document.getElementById('shipping-box').classList.toggle('hidden', !this.checked);
-});
+(function () {
+    var form = document.getElementById('checkout-form');
+    var shipDifferent = document.getElementById('ship-different');
+    var shippingBox = document.getElementById('shipping-box');
+    var shippingRequiredFields = ['shipping_name', 'shipping_address_line1', 'shipping_city', 'shipping_state', 'shipping_postal_code'];
+
+    function fieldLabel(field) {
+        return document.querySelector('label[for="' + field.id + '"]');
+    }
+
+    function showError(name, message) {
+        var errorEl = document.getElementById('error-' + name);
+        var field = document.getElementById(name);
+        if (errorEl) {
+            errorEl.textContent = message;
+            errorEl.classList.toggle('hidden', !message);
+        }
+        if (field) field.classList.toggle('field-invalid', !!message);
+    }
+
+    function clearError(name) {
+        showError(name, '');
+    }
+
+    function validateField(field) {
+        if (!field.hasAttribute('required')) {
+            clearError(field.name);
+            return true;
+        }
+        if (!field.value.trim()) {
+            showError(field.name, 'This field is required.');
+            return false;
+        }
+        if (field.type === 'email' && typeof field.checkValidity === 'function' && !field.checkValidity()) {
+            showError(field.name, 'Enter a valid email address.');
+            return false;
+        }
+        clearError(field.name);
+        return true;
+    }
+
+    function toggleShippingRequired(isChecked) {
+        shippingRequiredFields.forEach(function (name) {
+            var field = document.getElementById(name);
+            var label = fieldLabel(field);
+            if (!field) return;
+            if (isChecked) {
+                field.setAttribute('required', 'required');
+                if (label) label.classList.add('required');
+            } else {
+                field.removeAttribute('required');
+                if (label) label.classList.remove('required');
+                clearError(name);
+            }
+        });
+    }
+
+    shipDifferent?.addEventListener('change', function () {
+        shippingBox.classList.toggle('hidden', !this.checked);
+        toggleShippingRequired(this.checked);
+    });
+    toggleShippingRequired(shipDifferent?.checked);
+
+    form?.querySelectorAll('input, select').forEach(function (field) {
+        if (!field.name) return;
+        field.addEventListener('blur', function () { validateField(field); });
+        field.addEventListener('input', function () { if (field.classList.contains('field-invalid')) validateField(field); });
+        field.addEventListener('change', function () { if (field.classList.contains('field-invalid')) validateField(field); });
+    });
+
+    form?.addEventListener('submit', function (e) {
+        var fields = form.querySelectorAll('[required]');
+        var firstInvalid = null;
+        fields.forEach(function (field) {
+            if (!validateField(field) && !firstInvalid) firstInvalid = field;
+        });
+        if (firstInvalid) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            firstInvalid.focus();
+        }
+    });
+
+    form?.addEventListener('ajax:done', function (e) {
+        var result = e.detail;
+        if (result.ok || !result.data || !result.data.errors) return;
+        Object.keys(result.data.errors).forEach(function (name) {
+            var messages = result.data.errors[name];
+            showError(name, Array.isArray(messages) ? messages[0] : messages);
+        });
+    });
+})();
 </script>
 @endpush
