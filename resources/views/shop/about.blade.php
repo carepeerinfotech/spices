@@ -102,7 +102,7 @@
         <div class="rounded-2xl bg-brand text-white text-center px-6 py-12 sm:py-16">
             <h2 class="font-display text-2xl sm:text-3xl mb-3">Taste the difference purity makes</h2>
             <p class="text-white/80 max-w-xl mx-auto mb-6">Explore our full range of pure powders, blended masalas, vrat atta and salt.</p>
-            <a href="{{ route('shop.catalog') }}" class="btn-gold">Shop our spices</a>
+            <a href="{{ route('shop.catalog') }}" class="btn-gold">Shop Now</a>
         </div>
     </div>
 </section>

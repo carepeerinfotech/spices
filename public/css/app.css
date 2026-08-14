@@ -23,8 +23,20 @@ body {
 }
 
 .font-display {
-  /* font-family: "Playfair Display", Georgia, "Times New Roman", serif; */
   font-family: "Montserrat", serif;
+}
+
+.required::after {
+  content: " *";
+  color: var(--danger);
+}
+
+.field-error {
+  color: var(--danger);
+}
+
+.field-invalid {
+  border-color: var(--danger) !important;
 }
 
 .toast-root {
