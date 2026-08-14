@@ -48,8 +48,6 @@ class ProductImageTest extends TestCase
             'price' => 500,
             'stock' => 5,
             'is_active' => 1,
-            'allow_cod' => 1,
-            'allow_online' => 1,
         ], $overrides);
     }
 

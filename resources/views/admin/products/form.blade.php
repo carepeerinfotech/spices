@@ -2,7 +2,7 @@
 
 @section('title', $product->exists ? 'Edit Product' : 'Add Product')
 @section('heading', $product->exists ? 'Edit product' : 'Add product')
-@section('subtitle', 'Manage details, variations, media, shipping and purchase modes')
+@section('subtitle', 'Manage details, variations, media, shipping and offers')
 
 @section('content')
 <form data-ajax="formdata" method="POST" enctype="multipart/form-data"
@@ -12,7 +12,7 @@
     @if($product->exists) @method('PUT') @endif
 
     <div class="border-b border-slate-200 px-4 pt-3 flex flex-wrap gap-2" role="tablist">
-        @foreach(['basic' => 'Basic Info', 'variants' => 'Variations & Pricing', 'media' => 'Media', 'shipping' => 'Shipping', 'purchase' => 'Purchase Modes', 'offers' => 'Offers', 'seo' => 'SEO / Status'] as $key => $label)
+        @foreach(['basic' => 'Basic Info', 'variants' => 'Variations & Pricing', 'media' => 'Media', 'shipping' => 'Shipping', 'offers' => 'Offers', 'seo' => 'SEO / Status'] as $key => $label)
             <button type="button" data-tab="{{ $key }}" role="tab"
                     class="tab-btn px-3 py-2 text-sm rounded-t-lg border border-b-0 {{ $key === 'basic' ? 'bg-slate-50 border-slate-200 text-teal-800 font-medium' : 'border-transparent text-slate-500' }}">
                 {{ $label }}
@@ -186,25 +186,6 @@
                     <label class="block text-sm font-medium mb-1.5">Height (cm)</label>
                     <input name="height" type="number" step="0.01" min="0" value="{{ old('height', $product->height) }}" class="w-full rounded-lg border border-slate-300 px-3 py-2">
                 </div>
-            </div>
-        </div>
-
-        <div data-tab-panel="purchase" class="hidden space-y-4">
-            <label class="inline-flex items-center gap-2 text-sm">
-                <input type="checkbox" name="allow_cod" value="1" data-bool @checked(old('allow_cod', $product->allow_cod ?? true))> Allow Cash on Delivery
-            </label>
-            <label class="inline-flex items-center gap-2 text-sm block">
-                <input type="checkbox" name="allow_online" value="1" data-bool @checked(old('allow_online', $product->allow_online ?? true))> Allow Online Payment (Paytm)
-            </label>
-            <div>
-                <label class="block text-sm font-medium mb-1.5">Tax class</label>
-                <select name="tax_class" class="w-full max-w-xs rounded-lg border border-slate-300 px-3 py-2">
-                    <option value="gst_0" @selected(old('tax_class', $product->tax_class) === 'gst_0')>GST 0%</option>
-                    <option value="gst_5" @selected(old('tax_class', $product->tax_class) === 'gst_5')>GST 5%</option>
-                    <option value="gst_12" @selected(old('tax_class', $product->tax_class) === 'gst_12')>GST 12%</option>
-                    <option value="gst_18" @selected(old('tax_class', $product->tax_class ?? 'gst_18') === 'gst_18')>GST 18%</option>
-                    <option value="gst_28" @selected(old('tax_class', $product->tax_class) === 'gst_28')>GST 28%</option>
-                </select>
             </div>
         </div>
 

@@ -25,11 +25,8 @@ class ProductFactory extends Factory
             'stock' => 20,
             'is_active' => true,
             'is_featured' => false,
-            'allow_cod' => true,
-            'allow_online' => true,
             'weight' => 0.5,
             'has_variants' => false,
-            'tax_class' => 'gst_18',
         ];
     }
 }

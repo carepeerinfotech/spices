@@ -35,9 +35,6 @@ class ProductController extends Controller
         return view('admin.products.form', [
             'product' => new Product([
                 'is_active' => true,
-                'allow_cod' => true,
-                'allow_online' => true,
-                'tax_class' => 'gst_18',
                 'stock' => 0,
                 'price' => 0,
             ]),
@@ -106,7 +103,6 @@ class ProductController extends Controller
             'slug' => $request->input('slug'),
             'sku' => $request->input('sku'),
             'hsn_code' => $request->input('hsn_code'),
-            'tax_class' => $request->input('tax_class', 'gst_18'),
             'short_description' => $request->input('short_description'),
             'description' => $request->input('description'),
             'price' => $request->input('price'),
@@ -114,8 +110,6 @@ class ProductController extends Controller
             'stock' => $request->input('stock', 0),
             'is_featured' => $request->boolean('is_featured'),
             'is_active' => $request->boolean('is_active', true),
-            'allow_cod' => $request->boolean('allow_cod', true),
-            'allow_online' => $request->boolean('allow_online', true),
             'weight' => $request->input('weight'),
             'length' => $request->input('length'),
             'breadth' => $request->input('breadth'),

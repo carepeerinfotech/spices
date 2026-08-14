@@ -186,7 +186,7 @@ class OfferCheckoutTest extends TestCase
             'is_default_shipping' => true,
             'is_default_billing' => true,
         ]);
-        $product = Product::factory()->create(['allow_cod' => true, 'price' => 1000]);
+        $product = Product::factory()->create(['price' => 1000]);
         $variant = ProductVariant::factory()->create([
             'product_id' => $product->id,
             'price' => 1000,

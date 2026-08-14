@@ -205,8 +205,6 @@ class CartService
             'total' => $total,
             'currency' => 'INR',
             'weight' => round($weight, 3),
-            'allow_cod' => $cart->items->every(fn (CartItem $i) => (bool) ($i->product?->allow_cod ?? true)),
-            'allow_online' => $cart->items->every(fn (CartItem $i) => (bool) ($i->product?->allow_online ?? true)),
             'items' => $cart->items->map(function (CartItem $item) {
                 $offer = $item->offer();
 

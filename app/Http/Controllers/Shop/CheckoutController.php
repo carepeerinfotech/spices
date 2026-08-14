@@ -57,8 +57,8 @@ class CheckoutController extends Controller
             'summary' => $summary,
             'user' => $user,
             'address' => $address,
-            'codEnabled' => $this->settings->bool('payments', 'cod_enabled', true) && $summary['allow_cod'],
-            'onlineEnabled' => $this->settings->bool('payments', 'online_enabled', true) && $summary['allow_online'],
+            'codEnabled' => $this->settings->bool('payments', 'cod_enabled', true),
+            'onlineEnabled' => $this->settings->bool('payments', 'online_enabled', true),
             'cartCount' => $summary['item_count'],
         ]);
     }
@@ -144,13 +144,6 @@ class CheckoutController extends Controller
 
         $shippingRate = (float) ($data['shipping_rate'] ?? data_get($quote, 'cheapest.rate', 0));
         $summary = $this->cartService->summary($cart, $shippingRate);
-
-        if ($data['payment_method'] === 'cod' && ! $summary['allow_cod']) {
-            return response()->json(['success' => false, 'message' => 'One or more items do not allow COD.'], 422);
-        }
-        if ($data['payment_method'] === 'paytm' && ! $summary['allow_online']) {
-            return response()->json(['success' => false, 'message' => 'One or more items do not allow online payment.'], 422);
-        }
 
         // Every order belongs to a customer record, but nobody has to log in to
         // get one: an unknown email gets a fresh account created below, and a

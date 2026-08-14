@@ -91,11 +91,6 @@
                 <p id="pincode-result" class="text-sm text-slate-600 mt-2"></p>
             </div> -->
 
-            <!-- <div class="mt-8 text-sm text-slate-500 space-y-1">
-                <p>COD: {{ $product->allow_cod ? 'Available' : 'Not available' }}</p>
-                <p>Online payment: {{ $product->allow_online ? 'Available' : 'Not available' }}</p>
-            </div> -->
-
             <div class="mt-10 border-t border-[var(--line)]">
                 <button type="button" class="accordion-trigger w-full flex items-center justify-between py-4 cursor-pointer" aria-expanded="true" aria-controls="description-content">
                     <span class="font-display text-lg text-stone-900">Description</span>

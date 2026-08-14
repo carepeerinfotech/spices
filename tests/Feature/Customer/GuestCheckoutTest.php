@@ -59,7 +59,7 @@ class GuestCheckoutTest extends TestCase
 
     private function fillCart(): ProductVariant
     {
-        $product = Product::factory()->create(['allow_cod' => true]);
+        $product = Product::factory()->create();
         $variant = ProductVariant::factory()->create([
             'product_id' => $product->id,
             'price' => 1000,

@@ -11,9 +11,9 @@ use App\Models\Concerns\HasImages;
 use Illuminate\Support\Str;
 
 #[Fillable([
-    'category_id', 'name', 'brand', 'slug', 'sku', 'hsn_code', 'tax_class',
+    'category_id', 'name', 'brand', 'slug', 'sku', 'hsn_code',
     'short_description', 'description', 'price', 'compare_price', 'stock',
-    'is_featured', 'is_active', 'allow_cod', 'allow_online',
+    'is_featured', 'is_active',
     'weight', 'length', 'breadth', 'height', 'meta_title', 'meta_description', 'has_variants',
 ])]
 class Product extends Model
@@ -29,8 +29,6 @@ class Product extends Model
             'stock' => 'integer',
             'is_featured' => 'boolean',
             'is_active' => 'boolean',
-            'allow_cod' => 'boolean',
-            'allow_online' => 'boolean',
             'has_variants' => 'boolean',
             'weight' => 'decimal:3',
             'length' => 'decimal:2',
