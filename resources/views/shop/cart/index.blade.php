@@ -56,7 +56,7 @@
             </div>
             <div class="flex justify-between"><span>Subtotal</span><span id="sum-subtotal">₹{{ number_format($summary['subtotal'], 2) }}</span></div>
             <div class="flex justify-between"><span>Shipping</span><span id="sum-shipping">₹{{ number_format($summary['shipping'], 2) }}</span></div>
-            <div class="flex justify-between"><span>GST</span><span id="sum-tax">₹{{ number_format($summary['tax'], 2) }}</span></div>
+            <div class="flex justify-between"><span>GST ({{ $summary['tax_percent'] }}%)</span><span id="sum-tax">₹{{ number_format($summary['tax'], 2) }}</span></div>
             <div class="flex justify-between font-semibold text-base pt-2 border-t border-slate-100">
                 <span>Total</span><span id="sum-total">₹{{ number_format($summary['total'], 2) }}</span>
             </div>
