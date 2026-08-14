@@ -17,21 +17,21 @@
                 <div class="grid sm:grid-cols-2 gap-4">
                     <div class="sm:col-span-2">
                         <label for="billing_name" class="block text-sm mb-1 required">Full Name</label>
-                        <input id="billing_name" name="billing_name" required value="{{ old('billing_name', $address?->name ?: $user->name) }}"
+                        <input id="billing_name" name="billing_name" required value="{{ old('billing_name', $address?->name ?: $user?->name) }}"
                                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
                         <p id="error-billing_name" class="field-error text-xs mt-1 {{ $errors->has('billing_name') ? '' : 'hidden' }}">{{ $errors->first('billing_name') }}</p>
                     </div>
 
                     <div>
                         <label for="billing_email" class="block text-sm mb-1 required">Email address</label>
-                        <input type="email" id="billing_email" name="billing_email" required value="{{ old('billing_email', $address?->email ?: $user->email) }}"
+                        <input type="email" id="billing_email" name="billing_email" required value="{{ old('billing_email', $address?->email ?: $user?->email) }}"
                                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
                         <p id="error-billing_email" class="field-error text-xs mt-1 {{ $errors->has('billing_email') ? '' : 'hidden' }}">{{ $errors->first('billing_email') }}</p>
                     </div>
 
                     <div>
                         <label for="billing_phone" class="block text-sm mb-1 required">Phone</label>
-                        <input id="billing_phone" name="billing_phone" required value="{{ old('billing_phone', $address?->phone ?: $user->phone) }}"
+                        <input id="billing_phone" name="billing_phone" required value="{{ old('billing_phone', $address?->phone ?: $user?->phone) }}"
                                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
                         <p id="error-billing_phone" class="field-error text-xs mt-1 {{ $errors->has('billing_phone') ? '' : 'hidden' }}">{{ $errors->first('billing_phone') }}</p>
                     </div>
