@@ -17,8 +17,7 @@ html {
   overflow-x: hidden;
 }
 body {
-  /* font-family: "DM Sans", sans-serif; */
-  font-family: 'Montserrat';
+  font-family: "Montserrat", ui-sans-serif, system-ui, sans-serif;
   color: var(--ink);
   background: #fff;
 }
@@ -49,10 +48,7 @@ button {
   padding: 78px 0;
 }
 .section-title {
-    font: 600 38px "Montserrat", serif;
-  /* font: 600 38px "Playfair Display", serif; */
-  /* text-align: center; */
-  /* font-family: "Montserrat", sans-serif !important; */
+  font: 600 38px "Montserrat", ui-sans-serif, system-ui, sans-serif;
 }
 .section-title.heading-center {
   text-align: center;
@@ -89,7 +85,7 @@ header {
 .nav a {
   font-size: 16px;
     font-weight: 600;
-    font-family: 'Montserrat';
+    font-family: "Montserrat", ui-sans-serif, system-ui, sans-serif;
     text-transform: uppercase;
 }
 .nav a:hover {
@@ -187,8 +183,8 @@ header {
 }
 .hero h1 {
   font:
-    800 45px/1.25 "Playfair Display",
-    serif;
+    800 45px/1.25 "Montserrat",
+    ui-sans-serif, system-ui, sans-serif;
   max-width: 370px;
 }
 .hero h1 span {
@@ -526,7 +522,7 @@ body.search-open {
 .cart-drawer__header h2 {
   font:
     700 18px "Montserrat",
-    serif;
+    ui-sans-serif, system-ui, sans-serif;
 }
 .cart-drawer__close {
   border: 0;
@@ -1058,7 +1054,7 @@ section.feature-collection {
 .newsletter h2 {
   font:
     700 32px "Montserrat",
-    serif;
+    ui-sans-serif, system-ui, sans-serif;
 }
 .newsletter p {
   font-size: 8px;

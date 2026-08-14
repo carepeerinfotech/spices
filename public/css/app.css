@@ -17,13 +17,19 @@
 }
 
 body {
-  font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  font-family: "Montserrat", ui-sans-serif, system-ui, sans-serif;
   color: var(--ink);
   /* background: var(--surface); */
 }
 
+/* Keep the whole storefront on one typeface (matches the home page). */
+h1, h2, h3, h4, h5, h6,
+input, select, textarea, button {
+  font-family: inherit;
+}
+
 .font-display {
-  font-family: "Montserrat", serif;
+  font-family: "Montserrat", ui-sans-serif, system-ui, sans-serif;
 }
 
 .required::after {
@@ -292,7 +298,7 @@ body {
 }
 
 .spice-hero__title {
-  font-family: "Libre Baskerville", Georgia, serif;
+  font-family: "Montserrat", ui-sans-serif, system-ui, sans-serif;
   font-size: clamp(1.85rem, 4.5vw, 3.25rem);
   line-height: 1.2;
   color: var(--ink);
@@ -423,7 +429,7 @@ body {
 }
 
 .section-title {
-  font-family: "Libre Baskerville", Georgia, serif;
+  font-family: "Montserrat", ui-sans-serif, system-ui, sans-serif;
   font-size: clamp(1.5rem, 3vw, 2rem);
   color: var(--ink);
   text-align: center;
@@ -737,7 +743,7 @@ body {
 }
 
 .newsletter-band__title {
-  font-family: "Libre Baskerville", Georgia, serif;
+  font-family: "Montserrat", ui-sans-serif, system-ui, sans-serif;
   font-size: clamp(1.35rem, 2.5vw, 1.85rem);
 }
 
@@ -778,7 +784,7 @@ body {
 
 .site-footer__brand {
   color: #fff;
-  font-family: "Libre Baskerville", Georgia, serif;
+  font-family: "Montserrat", ui-sans-serif, system-ui, sans-serif;
   font-size: 1.35rem;
 }
 
@@ -794,7 +800,7 @@ body {
 }
 
 .page-hero-band h1 {
-  font-family: "Libre Baskerville", Georgia, serif;
+  font-family: "Montserrat", ui-sans-serif, system-ui, sans-serif;
   font-size: clamp(1.5rem, 3vw, 2rem);
 }
 
