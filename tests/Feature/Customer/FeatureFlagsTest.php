@@ -43,20 +43,15 @@ class FeatureFlagsTest extends TestCase
         $this->actingAs($user)->postJson('/email/verification-notification')->assertNotFound();
     }
 
-    public function test_unverified_user_can_reach_checkout_when_verification_disabled(): void
+    public function test_checkout_ignores_the_verification_flag(): void
     {
-        $this->flag('email_verification', false);
+        // Checkout is open to guests, so email verification cannot gate it either
+        // way: both settings land on the empty-cart redirect, not /email/verify.
         $user = User::factory()->unverified()->create(['is_active' => true]);
-
-        // Passes the `verified` gate: it lands on the empty-cart redirect, not /email/verify.
         $this->actingAs($user)->get('/checkout')->assertRedirect(route('shop.cart'));
-    }
 
-    public function test_unverified_user_is_blocked_from_checkout_when_verification_enabled(): void
-    {
-        $user = User::factory()->unverified()->create(['is_active' => true]);
-
-        $this->actingAs($user)->get('/checkout')->assertRedirect('/email/verify');
+        $this->flag('email_verification', false);
+        $this->actingAs($user)->get('/checkout')->assertRedirect(route('shop.cart'));
     }
 
     public function test_registration_skips_verification_when_disabled(): void

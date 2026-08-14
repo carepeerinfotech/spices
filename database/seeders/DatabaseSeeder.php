@@ -180,6 +180,16 @@ class DatabaseSeeder extends Seeder
                 'placeholders' => ['email', 'subscribed_at', 'total_subscribers'],
             ],
             [
+                'slug' => 'account_created',
+                'name' => 'Account Created (Checkout)',
+                'subject' => 'Your account is ready',
+                'body' => '<p>Hi {{customer_name}},</p>'
+                    .'<p>We created an account for <strong>{{email}}</strong> while placing your order, so you can track it and check out faster next time.</p>'
+                    .'<p><a href="{{set_password_url}}">Set your password</a> to finish setting it up.</p>'
+                    .'<p>You can view your orders any time at <a href="{{account_url}}">{{account_url}}</a>.</p>',
+                'placeholders' => ['customer_name', 'email', 'set_password_url', 'account_url'],
+            ],
+            [
                 'slug' => 'payment_result',
                 'name' => 'Payment Result',
                 'subject' => 'Payment {{status}} for {{order_number}}',

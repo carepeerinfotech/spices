@@ -68,6 +68,17 @@ Route::delete('/cart/{item}', [CartController::class, 'destroy'])->name('shop.ca
 Route::post('/shipping/quote/product', [ShippingQuoteController::class, 'product'])->name('shipping.quote.product');
 Route::post('/shipping/quote/cart', [ShippingQuoteController::class, 'cart'])->name('shipping.quote.cart');
 
+// Checkout is deliberately open to guests: the account is created from the
+// checkout form itself, so a login wall here only costs orders.
+Route::get('/checkout', [CheckoutController::class, 'index'])->name('shop.checkout');
+Route::post('/checkout', [CheckoutController::class, 'store'])->middleware('throttle:20,1')->name('shop.checkout.store');
+Route::get('/checkout/success/{orderNumber}', [CheckoutController::class, 'success'])->name('shop.checkout.success');
+
+// The fake gateway stands in for Paytm's hosted page, which is likewise
+// reached without a session, so it cannot sit behind `auth` either.
+Route::get('/payments/paytm/fake/{transaction}', [PaymentController::class, 'fakePaytm'])->name('payments.paytm.fake');
+Route::post('/payments/paytm/fake/{transaction}', [PaymentController::class, 'fakePaytmComplete'])->name('payments.paytm.fake.complete');
+
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AccountAuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AccountAuthController::class, 'login'])->middleware('throttle:10,1')->name('login.submit');
@@ -108,15 +119,6 @@ Route::middleware('auth')->group(function () {
         Route::put('/addresses/{address}', [AddressController::class, 'update'])->name('addresses.update');
         Route::delete('/addresses/{address}', [AddressController::class, 'destroy'])->name('addresses.destroy');
     });
-
-    Route::middleware('verified')->group(function () {
-        Route::get('/checkout', [CheckoutController::class, 'index'])->name('shop.checkout');
-        Route::post('/checkout', [CheckoutController::class, 'store'])->middleware('throttle:20,1')->name('shop.checkout.store');
-        Route::get('/checkout/success/{orderNumber}', [CheckoutController::class, 'success'])->name('shop.checkout.success');
-    });
-
-    Route::get('/payments/paytm/fake/{transaction}', [PaymentController::class, 'fakePaytm'])->name('payments.paytm.fake');
-    Route::post('/payments/paytm/fake/{transaction}', [PaymentController::class, 'fakePaytmComplete'])->name('payments.paytm.fake.complete');
 });
 
 Route::post('/payments/paytm/callback', [PaymentController::class, 'paytmCallback'])->name('payments.paytm.callback');

@@ -17,21 +17,21 @@
                 <div class="grid sm:grid-cols-2 gap-4">
                     <div class="sm:col-span-2">
                         <label class="block text-sm mb-1">Full Name</label>
-                        <input name="billing_name" required value="{{ old('billing_name', $address?->name ?: $user->name) }}"
+                        <input name="billing_name" required value="{{ old('billing_name', $address?->name ?: $user?->name) }}"
                                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
                         @error('billing_name')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
                     </div>
 
                     <div>
                         <label class="block text-sm mb-1">Email address</label>
-                        <input type="email" name="billing_email" required value="{{ old('billing_email', $address?->email ?: $user->email) }}"
+                        <input type="email" name="billing_email" required value="{{ old('billing_email', $address?->email ?: $user?->email) }}"
                                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
                         @error('billing_email')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
                     </div>
 
                     <div>
                         <label class="block text-sm mb-1">Phone</label>
-                        <input name="billing_phone" required value="{{ old('billing_phone', $address?->phone ?: $user->phone) }}"
+                        <input name="billing_phone" required value="{{ old('billing_phone', $address?->phone ?: $user?->phone) }}"
                                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
                         @error('billing_phone')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
                     </div>
