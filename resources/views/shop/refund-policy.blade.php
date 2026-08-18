@@ -75,7 +75,7 @@
             <h2 class="font-display text-xl text-stone-900 mb-2">Contact Us</h2>
             <p class="mb-2">If you have any questions regarding cancellations, refunds, or product quality, please reach out to our customer support team.</p>
             <p><strong>Email:</strong> <a href="mailto:info@elephantspices.com" class="text-brand">info@elephantspices.com</a></p>
-            <p><strong>Phone:</strong> <a href="tel:9876543210" class="text-brand">9876543210</a></p>
+            <p><strong>Phone:</strong> <a href="tel:9915954385" class="text-brand">9915954385</a></p>
         </section>
     </div>
 </article>

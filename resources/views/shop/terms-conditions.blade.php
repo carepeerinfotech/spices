@@ -112,7 +112,7 @@
 
         <section>
             <h2 class="font-display text-xl text-stone-900 mb-2">18. Contact Us</h2>
-            <p>If you have any queries, grievances, feedback, or suggestions, please contact us at <a href="mailto:info@elephantspices.com" class="text-brand">info@elephantspices.com</a> or <a href="tel:9876543210" class="text-brand">9876543210</a>.</p>
+            <p>If you have any queries, grievances, feedback, or suggestions, please contact us at <a href="mailto:info@elephantspices.com" class="text-brand">info@elephantspices.com</a> or <a href="tel:9915954385" class="text-brand">9915954385</a>.</p>
         </section>
 
         <section>

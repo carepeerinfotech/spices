@@ -25,7 +25,7 @@
                     </span>
                     <div>
                         <p class="text-xs uppercase tracking-wide text-white/60 mb-0.5">Phone</p>
-                        <a href="tel:9876543210" class="font-medium hover:text-gold transition-colors">9876543210</a>
+                        <a href="tel:9915954385" class="font-medium hover:text-gold transition-colors">9915954385</a>
                     </div>
                 </div>
                 <div class="flex items-start gap-3">
@@ -43,7 +43,7 @@
                     </span>
                     <div>
                         <p class="text-xs uppercase tracking-wide text-white/60 mb-0.5">Address</p>
-                        <p class="font-medium">India</p>
+                        <p class="font-medium">Amritsar Haldi Sales Corporation, F 22/44, Public Sahara Gali, Opposite Pillar No. 67 , Batala Road, Amritsar - 143001 (Punjab).</p>
                     </div>
                 </div>
                 <!-- <div class="flex items-start gap-3">

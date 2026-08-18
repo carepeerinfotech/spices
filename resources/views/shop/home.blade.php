@@ -28,6 +28,7 @@
       <x-home.story />
       <x-home.process />
       <x-home.reviews />
+      <x-home.faq />
       <x-home.newsletter />
     </main>
     <x-home.footer />
