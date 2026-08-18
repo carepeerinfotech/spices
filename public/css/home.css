@@ -326,16 +326,12 @@ body.search-open {
   overflow: hidden;
 }
 .accordion-content {
-  display: grid;
-  grid-template-rows: 0fr;
+  max-height: 0;
   overflow: hidden;
-  transition: grid-template-rows 0.3s ease;
+  transition: max-height 0.3s ease;
 }
 .accordion-content.is-open {
-  grid-template-rows: 1fr;
-}
-.accordion-content > .accordion-inner {
-  overflow: hidden;
+  max-height: 1000px;
 }
 .accordion-chevron {
   transition: transform 0.25s ease;
@@ -917,6 +913,92 @@ body.cart-drawer-open {
   transition: all 0.3s ease;
   transform: translateY(-3px);
 }
+.faq-grid {
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+  gap: 64px;
+  align-items: center;
+}
+.faq-visual {
+  background: var(--cream);
+  border-radius: 28px;
+}
+.faq-visual img {
+  width: 100%;
+  margin: 0 auto;
+  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.12));
+    border-radius: 10px;
+}
+
+.faq-list {
+  margin-top: 26px;
+}
+.faq-item {
+  border-bottom: 1px solid var(--line);
+}
+.faq-item:first-child {
+  border-top: 1px solid var(--line);
+}
+.faq-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 0;
+  background: none;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  font-family: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+}
+.faq-trigger:hover {
+  color: var(--red);
+}
+.faq-icon {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+.faq-icon::before,
+.faq-icon::after {
+  content: "";
+  position: absolute;
+  background: var(--red);
+  transition: transform 0.25s ease;
+}
+.faq-icon::before {
+  left: 0;
+  top: 50%;
+  width: 100%;
+  height: 2px;
+  transform: translateY(-50%);
+}
+.faq-icon::after {
+  top: 0;
+  left: 50%;
+  width: 2px;
+  height: 100%;
+  transform: translateX(-50%);
+}
+.faq-trigger[aria-expanded="true"] .faq-icon::after {
+  transform: translateX(-50%) scaleY(0);
+}
+.faq-item .accordion-inner {
+  padding: 0 20px 20px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.65;
+}
+.faq-item .accordion-inner a {
+  color: var(--red);
+  font-weight: 600;
+  text-decoration: underline;
+}
 .process {
   display: flex;
   justify-content: center;
@@ -1279,6 +1361,11 @@ footer {
   .story-products img {
     height: 82px;
   }
+  .faq-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
   .process {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -1433,6 +1520,49 @@ footer {
 .nav-drawer-head {
   display: none;
 }
+
+  .whatsapp-float {
+    position: fixed;
+    width: 55px;
+    height: 55px;
+    right: 25px;
+    bottom: 100px;
+    background: #25D366;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    z-index: 9999;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .whatsapp-float:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+  }
+
+  .whatsapp-icon {
+    font-size: 32px;
+    line-height: 1;
+  }
+
+  @media (max-width: 600px) {
+    .whatsapp-float {
+      width: 52px;
+      height: 52px;
+      right: 18px;
+      bottom: 18px;
+    }
+
+    .whatsapp-icon {
+      font-size: 28px;
+    }
+  }
+
+
 @media (max-width: 960px) {
   header {
     position: sticky;

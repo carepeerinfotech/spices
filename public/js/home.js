@@ -45,3 +45,23 @@ nav
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") setMenu(false);
 });
+document.querySelectorAll(".faq-trigger").forEach((trigger) => {
+  trigger.addEventListener("click", () => {
+    const expanded = trigger.getAttribute("aria-expanded") === "true";
+    const content = document.getElementById(
+      trigger.getAttribute("aria-controls"),
+    );
+    trigger.setAttribute("aria-expanded", String(!expanded));
+    if (!content) return;
+    if (expanded) {
+      content.style.maxHeight = content.scrollHeight + "px";
+      requestAnimationFrame(() => {
+        content.style.maxHeight = "0px";
+      });
+      content.classList.remove("is-open");
+    } else {
+      content.classList.add("is-open");
+      content.style.maxHeight = content.scrollHeight + "px";
+    }
+  });
+});

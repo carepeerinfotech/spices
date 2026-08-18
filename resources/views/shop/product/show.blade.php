@@ -176,7 +176,17 @@
       var expanded = trigger.getAttribute('aria-expanded') === 'true';
       var content = document.getElementById(trigger.getAttribute('aria-controls'));
       trigger.setAttribute('aria-expanded', String(!expanded));
-      if (content) content.classList.toggle('is-open', !expanded);
+      if (!content) return;
+      if (expanded) {
+        content.style.maxHeight = content.scrollHeight + 'px';
+        requestAnimationFrame(function () {
+          content.style.maxHeight = '0px';
+        });
+        content.classList.remove('is-open');
+      } else {
+        content.classList.add('is-open');
+        content.style.maxHeight = content.scrollHeight + 'px';
+      }
     });
   });
 

@@ -34,19 +34,24 @@
       <div>
         <h3>Contact Us</h3>
         <ul>
-          <li><a href="tel:9876543210">9876543210</a></li>
+          <li><a href="tel:9915954385">9915954385</a></li>
           <li><a href="mailto:info@elephantspices.com">info@elephantspices.com</a></li>
-          <li>India</li>
+          <li>Amritsar Haldi Sales Corporation,
+            F 22/44, Public Sahara Gali, Opposite Pillar No. 67 ,
+            Batala Road,
+            Amritsar - 143001 (Punjab).</li>
         </ul>
       </div>
     </div>
     <div class="footer-base">
-      <span>© 2026 Elephant Spices. All rights reserved.</span
-      ><span class="socials"
-        ><a href="#"><i class="fa-brands fa-facebook-f"></i></a
-        ><a href="#"><i class="fa-brands fa-instagram"></i></a
-        ><a href="#"><i class="fa-brands fa-x-twitter"></i></a
-      ></span>
+      <span>© 2026 Elephant Spices. All rights reserved.</span><span class="socials"><a href="#"><i
+            class="fa-brands fa-facebook-f"></i></a><a href="#"><i class="fa-brands fa-instagram"></i></a><a href="#"><i
+            class="fa-brands fa-x-twitter"></i></a></span>
     </div>
   </div>
 </footer>
+
+<a href="https://wa.me/919915954385" class="whatsapp-float" target="_blank" rel="noopener noreferrer"
+  aria-label="Chat with us on WhatsApp">
+  <span class="whatsapp-icon"><i class="fa-brands fa-whatsapp"></i></span>
+</a>
