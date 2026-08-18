@@ -8,17 +8,25 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderOffer;
 use App\Models\ProductVariant;
+use App\Models\User;
 use App\Services\CartService;
+use App\Services\Mail\OrderMailData;
 use App\Services\Mail\TemplateMailer;
 use App\Services\Payments\PaymentGatewayManager;
 use App\Services\Settings\SettingsService;
 use App\Services\Shipping\ShippingManager;
+use App\Support\Features;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 
 class CheckoutController extends Controller
 {
+    /** Order numbers placed in this session, viewable without signing in. */
+    private const PLACED_ORDERS_KEY = 'checkout.placed_orders';
+
     public function __construct(
         private CartService $cartService,
         private SettingsService $settings,
@@ -27,9 +35,9 @@ class CheckoutController extends Controller
         private TemplateMailer $mailer,
     ) {}
 
-    public function index()
+    public function index(Request $request)
     {
-        $user = auth()->user();
+        $user = $request->user();
         $cart = $this->cartService->getCart();
         $summary = $this->cartService->summary($cart);
 
@@ -37,14 +45,20 @@ class CheckoutController extends Controller
             return redirect()->route('shop.cart')->with('error', 'Your cart is empty.');
         }
 
-        $address = $user->defaultShippingAddress() ?: $user->defaultBillingAddress();
+        // A returning customer who uses the sign-in link on this page should land
+        // back here, cart intact, rather than on the account dashboard.
+        if (! $user) {
+            $request->session()->put('url.intended', route('shop.checkout'));
+        }
+
+        $address = $user?->defaultShippingAddress() ?: $user?->defaultBillingAddress();
 
         return view('shop.checkout.index', [
             'summary' => $summary,
             'user' => $user,
             'address' => $address,
-            'codEnabled' => $this->settings->bool('payments', 'cod_enabled', true) && $summary['allow_cod'],
-            'onlineEnabled' => $this->settings->bool('payments', 'online_enabled', true) && $summary['allow_online'],
+            'codEnabled' => $this->settings->bool('payments', 'cod_enabled', true),
+            'onlineEnabled' => $this->settings->bool('payments', 'online_enabled', true),
             'cartCount' => $summary['item_count'],
         ]);
     }
@@ -131,16 +145,15 @@ class CheckoutController extends Controller
         $shippingRate = (float) ($data['shipping_rate'] ?? data_get($quote, 'cheapest.rate', 0));
         $summary = $this->cartService->summary($cart, $shippingRate);
 
-        if ($data['payment_method'] === 'cod' && ! $summary['allow_cod']) {
-            return response()->json(['success' => false, 'message' => 'One or more items do not allow COD.'], 422);
-        }
-        if ($data['payment_method'] === 'paytm' && ! $summary['allow_online']) {
-            return response()->json(['success' => false, 'message' => 'One or more items do not allow online payment.'], 422);
-        }
+        // Every order belongs to a customer record, but nobody has to log in to
+        // get one: an unknown email gets a fresh account created below, and a
+        // known one files the order under its owner without signing anyone in.
+        $account = $user ?: User::where('email', $data['billing_email'])->first();
+        $createsAccount = $account === null;
 
         try {
             $order = DB::transaction(function () use (
-                $data, $user, $cart, $summary, $quote, $shipToDifferent,
+                $data, $user, &$account, $createsAccount, $cart, $summary, $quote, $shipToDifferent,
                 $billingAddressLine, $shippingName, $shippingAddressLine, $shippingCity, $shippingState, $shippingPostal, $shippingCountry
             ) {
                 foreach ($cart->items as $item) {
@@ -150,27 +163,46 @@ class CheckoutController extends Controller
                     }
                 }
 
-                Address::updateOrCreate(
-                    ['user_id' => $user->id, 'is_default_shipping' => true],
-                    [
-                        'label' => 'Home',
+                // Rolled back with the order, so a failed checkout leaves no
+                // half-registered customer behind. The password is a throwaway;
+                // the welcome mail carries a link to set a real one.
+                if ($createsAccount) {
+                    $account = User::create([
                         'name' => $data['billing_name'],
-                        'phone' => $data['billing_phone'],
                         'email' => $data['billing_email'],
-                        'address_line1' => $data['billing_address_line1'],
-                        'address_line2' => $data['billing_address_line2'] ?? null,
-                        'city' => $data['billing_city'],
-                        'state' => $data['billing_state'],
-                        'postal_code' => $data['billing_postal_code'],
-                        'country' => $data['billing_country'],
-                        'is_default_shipping' => true,
-                        'is_default_billing' => true,
-                    ]
-                );
+                        'phone' => $data['billing_phone'],
+                        'password' => Str::password(32),
+                        'is_active' => true,
+                        'is_customer' => true,
+                    ]);
+                }
+
+                // Only touch the address book when the session owns the account.
+                // A guest typing a registered customer's email must not be able
+                // to overwrite that customer's saved address.
+                if ($user || $createsAccount) {
+                    Address::updateOrCreate(
+                        ['user_id' => $account->id, 'is_default_shipping' => true],
+                        [
+                            'label' => 'Home',
+                            'name' => $data['billing_name'],
+                            'phone' => $data['billing_phone'],
+                            'email' => $data['billing_email'],
+                            'address_line1' => $data['billing_address_line1'],
+                            'address_line2' => $data['billing_address_line2'] ?? null,
+                            'city' => $data['billing_city'],
+                            'state' => $data['billing_state'],
+                            'postal_code' => $data['billing_postal_code'],
+                            'country' => $data['billing_country'],
+                            'is_default_shipping' => true,
+                            'is_default_billing' => true,
+                        ]
+                    );
+                }
 
                 $order = Order::create([
                     'order_number' => 'ELP-'.strtoupper(Str::random(8)),
-                    'user_id' => $user->id,
+                    'user_id' => $account->id,
                     'customer_name' => $data['billing_name'],
                     'customer_email' => $data['billing_email'],
                     'customer_phone' => $data['billing_phone'],
@@ -239,11 +271,21 @@ class CheckoutController extends Controller
                 return $order->load('items', 'offers');
             });
 
-            $this->mailer->send('order_placed', $order->customer_email, [
-                'customer_name' => $order->customer_name,
-                'order_number' => $order->order_number,
-                'total' => '₹'.number_format((float) $order->total, 2),
-            ]);
+            $this->rememberPlacedOrder($request, $order);
+
+            // Sign in only an account this checkout just created. An order placed
+            // against an existing customer's email says nothing about who is at
+            // the keyboard, so that case stays a guest session.
+            if ($createsAccount) {
+                Auth::login($account);
+                $request->session()->regenerate();
+            }
+
+            $this->sendOrderNotifications($order);
+
+            if ($createsAccount) {
+                $this->sendAccountCreatedMail($account);
+            }
 
             if ($data['payment_method'] === 'paytm') {
                 $payment = $this->payments->paytm()->initiate($order);
@@ -273,14 +315,104 @@ class CheckoutController extends Controller
 
     public function success(Request $request, string $orderNumber)
     {
-        $order = Order::where('order_number', $orderNumber)
-            ->where('user_id', $request->user()->id)
-            ->with('items')
-            ->firstOrFail();
+        $order = Order::where('order_number', $orderNumber)->with('items')->firstOrFail();
+
+        // 404 rather than 403: an order number should not be confirmable by
+        // anyone who merely guesses it.
+        abort_unless($this->canViewOrder($request, $order), 404);
 
         return view('shop.checkout.success', [
             'order' => $order,
             'cartCount' => 0,
+            'showDeliveryDetails' => $this->settings->bool('shipping', 'show_delivery_details', false),
         ]);
+    }
+
+    /**
+     * Its owner may always see an order; so may whoever placed it in this
+     * session, which is what keeps the confirmation page reachable for a guest
+     * whose order went to an account they were not signed into.
+     */
+    private function canViewOrder(Request $request, Order $order): bool
+    {
+        $user = $request->user();
+
+        if ($user && $order->user_id === $user->id) {
+            return true;
+        }
+
+        return in_array($order->order_number, $this->placedOrders($request), true);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function placedOrders(Request $request): array
+    {
+        return array_values((array) $request->session()->get(self::PLACED_ORDERS_KEY, []));
+    }
+
+    private function rememberPlacedOrder(Request $request, Order $order): void
+    {
+        // The order is placed, so the "come back to checkout after signing in"
+        // intent recorded by index() has been served.
+        $request->session()->forget('url.intended');
+
+        $placed = array_unique([...$this->placedOrders($request), $order->order_number]);
+
+        // Bounded so a long-lived session cannot grow the cookie payload forever.
+        $request->session()->put(self::PLACED_ORDERS_KEY, array_slice(array_values($placed), -20));
+    }
+
+    /**
+     * Welcome a customer whose account the checkout form just created. The
+     * generated password is throwaway, so the mail carries a reset link for
+     * choosing a real one; with password reset switched off there is no link to
+     * send and the mail is skipped.
+     */
+    private function sendAccountCreatedMail(User $user): void
+    {
+        if (! Features::passwordReset()) {
+            return;
+        }
+
+        try {
+            /** @var \Illuminate\Auth\Passwords\PasswordBroker $broker */
+            $broker = Password::broker();
+            $token = $broker->createToken($user);
+
+            $this->mailer->send('account_created', $user->email, [
+                'customer_name' => $user->name,
+                'email' => $user->email,
+                'set_password_url' => route('password.reset', ['token' => $token, 'email' => $user->email]),
+                'account_url' => route('account.dashboard'),
+            ]);
+        } catch (\Throwable $e) {
+            report($e);
+        }
+    }
+
+    /**
+     * Notify the customer, then send the store owners their own copy.
+     * Mail failures must never roll back a paid-for order.
+     */
+    private function sendOrderNotifications(Order $order): void
+    {
+        try {
+            $this->mailer->send('order_placed', $order->customer_email, OrderMailData::customer($order));
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
+        $admins = $this->mailer->adminRecipients();
+        if ($admins === []) {
+            return;
+        }
+
+        try {
+            $this->mailer->send('order_placed_admin', $admins, OrderMailData::admin($order));
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 }

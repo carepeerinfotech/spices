@@ -145,7 +145,7 @@ class OfferCheckoutTest extends TestCase
         app(\App\Services\Catalog\ProductCatalogService::class)->save(
             $product,
             $product->only(['category_id', 'name', 'slug', 'sku', 'price', 'stock']),
-            [], [], [], [],
+            [], [],
             [['discount_type' => 'flat', 'value' => 50, 'starts_at' => '2026-08-11T15:50', 'ends_at' => '2026-08-16T15:50']],
             null
         );
@@ -186,7 +186,7 @@ class OfferCheckoutTest extends TestCase
             'is_default_shipping' => true,
             'is_default_billing' => true,
         ]);
-        $product = Product::factory()->create(['allow_cod' => true, 'price' => 1000]);
+        $product = Product::factory()->create(['price' => 1000]);
         $variant = ProductVariant::factory()->create([
             'product_id' => $product->id,
             'price' => 1000,

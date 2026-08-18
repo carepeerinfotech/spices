@@ -23,7 +23,7 @@
             }
         }
     </script>
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <link rel="stylesheet" href="@asset('css/app.css')">
 </head>
 <body class="min-h-screen bg-gradient-to-br from-teal-900 via-slate-900 to-slate-950 text-white antialiased">
 <div class="min-h-screen flex items-center justify-center p-6 sm:p-10">
@@ -64,6 +64,6 @@
         <p class="text-slate-500 text-sm text-center mt-8">© {{ date('Y') }} Elephant Shop</p>
     </div>
 </div>
-<script src="{{ asset('js/app-ajax.js') }}" defer></script>
+<script src="@asset('js/app-ajax.js')" defer></script>
 </body>
 </html>

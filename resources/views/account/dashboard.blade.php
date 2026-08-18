@@ -24,14 +24,28 @@
             <button class="rounded-lg bg-brand text-white px-3 py-2 text-sm">Save profile</button>
         </form>
 
-        <form data-ajax method="POST" action="{{ route('account.password') }}" class="rounded-xl border bg-white p-5 space-y-3">
-            @csrf @method('PUT')
-            <h2 class="font-medium">Change password</h2>
-            <input type="password" name="current_password" placeholder="Current password" required class="w-full rounded-lg border px-3 py-2 text-sm">
-            <input type="password" name="password" placeholder="New password" required class="w-full rounded-lg border px-3 py-2 text-sm">
-            <input type="password" name="password_confirmation" placeholder="Confirm password" required class="w-full rounded-lg border px-3 py-2 text-sm">
-            <button class="rounded-lg bg-brand text-white px-3 py-2 text-sm">Update password</button>
-        </form>
+        @if(\App\Support\Features::passwordReset())
+            <form data-ajax method="POST" action="{{ route('account.password.link') }}" class="rounded-xl border bg-white p-5 space-y-3">
+                @csrf
+                <h2 class="font-medium">Password</h2>
+                <p class="text-sm text-slate-500">
+                    We'll email a secure link to <span class="font-medium text-slate-700">{{ $user->email }}</span>
+                    so you can set a new password.
+                </p>
+                <button type="submit" data-loading="Sending..." class="rounded-lg bg-brand text-white px-3 py-2 text-sm">Email me a reset link</button>
+            </form>
+        @else
+            {{-- No reset link would resolve with the feature off, so fall back to
+                 changing the password in place. --}}
+            <form data-ajax method="POST" action="{{ route('account.password') }}" class="rounded-xl border bg-white p-5 space-y-3">
+                @csrf @method('PUT')
+                <h2 class="font-medium">Change password</h2>
+                <input type="password" name="current_password" placeholder="Current password" required class="w-full rounded-lg border px-3 py-2 text-sm">
+                <input type="password" name="password" placeholder="New password" required class="w-full rounded-lg border px-3 py-2 text-sm">
+                <input type="password" name="password_confirmation" placeholder="Confirm password" required class="w-full rounded-lg border px-3 py-2 text-sm">
+                <button class="rounded-lg bg-brand text-white px-3 py-2 text-sm">Update password</button>
+            </form>
+        @endif
     </div>
 
     <div class="rounded-xl border bg-white p-5">
@@ -52,9 +66,15 @@
         <h2 class="font-medium mb-3">Recent orders</h2>
         <div class="space-y-2 text-sm">
             @forelse($user->orders as $order)
-                <div class="flex justify-between border-b pb-2">
-                    <span>{{ $order->order_number }}</span>
-                    <span>₹{{ number_format($order->total, 2) }} · {{ $order->status }}</span>
+                <div class="flex items-center justify-between gap-3 border-b pb-2">
+                    <div class="min-w-0">
+                        <p class="font-medium truncate">{{ $order->order_number }}</p>
+                        <p class="text-xs text-slate-500">{{ $order->created_at->format('M j, Y') }} · {{ ucfirst($order->status) }}</p>
+                    </div>
+                    <div class="flex items-center gap-4 shrink-0">
+                        <span>₹{{ number_format($order->total, 2) }}</span>
+                        <a href="{{ route('shop.checkout.success', $order->order_number) }}" class="text-brand whitespace-nowrap">View details</a>
+                    </div>
                 </div>
             @empty
                 <p class="text-slate-500">No orders yet.</p>

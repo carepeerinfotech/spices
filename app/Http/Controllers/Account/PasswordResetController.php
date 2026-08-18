@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Account;
 
 use App\Http\Controllers\Controller;
+use App\Services\Mail\TemplateMailer;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
@@ -16,9 +17,13 @@ class PasswordResetController extends Controller
         return view('account.auth.forgot-password');
     }
 
-    public function sendResetLink(Request $request)
+    public function sendResetLink(Request $request, TemplateMailer $mailer)
     {
         $request->validate(['email' => ['required', 'email']]);
+
+        // The reset link rides Laravel's own notification, which does not know
+        // about the SMTP credentials held in admin settings.
+        $mailer->applyMailConfig();
 
         $status = Password::sendResetLink($request->only('email'));
 
@@ -35,12 +40,35 @@ class PasswordResetController extends Controller
         ]);
     }
 
-    public function showReset(string $token)
+    public function showReset(Request $request, string $token)
     {
+        $email = (string) $request->query('email', '');
+
+        // Check the token before rendering, so a used or expired link says so
+        // straight away instead of failing after the customer fills the form in.
+        if (! $this->tokenIsValid($email, $token)) {
+            $back = $request->user() ? route('account.dashboard') : route('password.request');
+
+            return redirect($back)->with('error', 'That password reset link has expired or has already been used. Please request a new one.');
+        }
+
         return view('account.auth.reset-password', [
             'token' => $token,
-            'email' => request('email'),
+            'email' => $email,
         ]);
+    }
+
+    private function tokenIsValid(string $email, string $token): bool
+    {
+        if ($email === '' || $token === '') {
+            return false;
+        }
+
+        /** @var \Illuminate\Auth\Passwords\PasswordBroker $broker */
+        $broker = Password::broker();
+        $user = $broker->getUser(['email' => $email]);
+
+        return $user !== null && $broker->tokenExists($user, $token);
     }
 
     public function reset(Request $request)
@@ -73,7 +101,9 @@ class PasswordResetController extends Controller
         return response()->json([
             'success' => true,
             'message' => __($status),
-            'redirect' => route('login'),
+            // Someone who reset from inside their account is still signed in;
+            // sending them to the login page would only bounce them home.
+            'redirect' => $request->user() ? route('account.dashboard') : route('login'),
         ]);
     }
 }

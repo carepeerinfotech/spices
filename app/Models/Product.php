@@ -7,18 +7,19 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Support\MediaUrl;
+use App\Models\Concerns\HasImages;
 use Illuminate\Support\Str;
 
 #[Fillable([
-    'category_id', 'name', 'brand', 'slug', 'sku', 'hsn_code', 'tax_class',
-    'short_description', 'description', 'price', 'compare_price', 'stock', 'image',
-    'is_featured', 'is_active', 'allow_cod', 'allow_online',
+    'category_id', 'name', 'brand', 'slug', 'sku', 'hsn_code',
+    'short_description', 'description', 'price', 'compare_price', 'stock',
+    'is_featured', 'is_active',
     'weight', 'length', 'breadth', 'height', 'meta_title', 'meta_description', 'has_variants',
 ])]
 class Product extends Model
 {
     use HasFactory;
+    use HasImages;
 
     protected function casts(): array
     {
@@ -28,8 +29,6 @@ class Product extends Model
             'stock' => 'integer',
             'is_featured' => 'boolean',
             'is_active' => 'boolean',
-            'allow_cod' => 'boolean',
-            'allow_online' => 'boolean',
             'has_variants' => 'boolean',
             'weight' => 'decimal:3',
             'length' => 'decimal:2',
@@ -60,11 +59,6 @@ class Product extends Model
     public function variants(): HasMany
     {
         return $this->hasMany(ProductVariant::class);
-    }
-
-    public function images(): HasMany
-    {
-        return $this->hasMany(ProductImage::class)->orderBy('sort_order');
     }
 
     public function offers(): HasMany
@@ -133,19 +127,6 @@ class Product extends Model
 
     public function primaryImageUrl(): ?string
     {
-        $image = $this->images->firstWhere('is_primary', true) ?? $this->images->first();
-
-        if ($image) {
-            return $image->url();
-        }
-
-        if (! $this->image) {
-            return null;
-        }
-
-        if (str_starts_with($this->image, 'http')) {
-            return $this->image;
-        }
-        return MediaUrl::public($this->image);
+        return $this->imageUrlFor('gallery');
     }
 }

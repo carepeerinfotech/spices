@@ -22,20 +22,8 @@
         <textarea name="description" rows="3" class="w-full rounded-lg border border-slate-300 px-3 py-2">{{ old('description', $category->description) }}</textarea>
     </div>
     <div class="grid sm:grid-cols-2 gap-4">
-        <div>
-            <label class="block text-sm font-medium mb-1.5">Category picture</label>
-            <input type="file" name="image_file" accept="image/*" class="block w-full text-sm">
-            @if($category->imageUrl())
-                <img src="{{ $category->imageUrl() }}" alt="" class="mt-2 h-24 rounded object-cover">
-            @endif
-        </div>
-        <div>
-            <label class="block text-sm font-medium mb-1.5">Category page banner</label>
-            <input type="file" name="banner_file" accept="image/*" class="block w-full text-sm">
-            @if($category->bannerUrl())
-                <img src="{{ $category->bannerUrl() }}" alt="" class="mt-2 h-24 w-full rounded object-cover">
-            @endif
-        </div>
+        <x-image-upload :owner="$category" collection="image" />
+        <x-image-upload :owner="$category" collection="banner" />
     </div>
     <div>
         <label class="block text-sm font-medium mb-1.5">Meta title</label>

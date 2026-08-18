@@ -2,7 +2,7 @@
 
 @section('title', $product->exists ? 'Edit Product' : 'Add Product')
 @section('heading', $product->exists ? 'Edit product' : 'Add product')
-@section('subtitle', 'Manage details, variations, media, shipping and purchase modes')
+@section('subtitle', 'Manage details, variations, media, shipping and offers')
 
 @section('content')
 <form data-ajax="formdata" method="POST" enctype="multipart/form-data"
@@ -12,7 +12,7 @@
     @if($product->exists) @method('PUT') @endif
 
     <div class="border-b border-slate-200 px-4 pt-3 flex flex-wrap gap-2" role="tablist">
-        @foreach(['basic' => 'Basic Info', 'variants' => 'Variations & Pricing', 'media' => 'Media', 'shipping' => 'Shipping', 'purchase' => 'Purchase Modes', 'offers' => 'Offers', 'seo' => 'SEO / Status'] as $key => $label)
+        @foreach(['basic' => 'Basic Info', 'variants' => 'Variations & Pricing', 'media' => 'Media', 'shipping' => 'Shipping', 'offers' => 'Offers', 'seo' => 'SEO / Status'] as $key => $label)
             <button type="button" data-tab="{{ $key }}" role="tab"
                     class="tab-btn px-3 py-2 text-sm rounded-t-lg border border-b-0 {{ $key === 'basic' ? 'bg-slate-50 border-slate-200 text-teal-800 font-medium' : 'border-transparent text-slate-500' }}">
                 {{ $label }}
@@ -108,6 +108,7 @@
                             <th class="px-3 py-2">Label</th>
                             <th class="px-3 py-2">SKU</th>
                             <th class="px-3 py-2">Price</th>
+                            <th class="px-3 py-2">Compare price</th>
                             <th class="px-3 py-2">Stock</th>
                             <th class="px-3 py-2">Default</th>
                             <th class="px-3 py-2">Active</th>
@@ -122,6 +123,7 @@
                                 </td>
                                 <td class="px-3 py-2"><input name="variants[{{ $vIndex }}][sku]" value="{{ $variant->sku }}" class="w-36 rounded border border-slate-300 px-2 py-1"></td>
                                 <td class="px-3 py-2"><input name="variants[{{ $vIndex }}][price]" type="number" step="0.01" value="{{ $variant->price }}" class="w-24 rounded border border-slate-300 px-2 py-1"></td>
+                                <td class="px-3 py-2"><input name="variants[{{ $vIndex }}][compare_price]" type="number" step="0.01" min="0" value="{{ $variant->compare_price }}" class="w-24 rounded border border-slate-300 px-2 py-1"></td>
                                 <td class="px-3 py-2"><input name="variants[{{ $vIndex }}][stock]" type="number" value="{{ $variant->stock }}" class="w-20 rounded border border-slate-300 px-2 py-1"></td>
                                 <td class="px-3 py-2"><input type="checkbox" name="variants[{{ $vIndex }}][is_default]" value="1" @checked($variant->is_default)></td>
                                 <td class="px-3 py-2"><input type="checkbox" name="variants[{{ $vIndex }}][is_active]" value="1" data-bool @checked($variant->is_active)></td>
@@ -135,22 +137,37 @@
             </div>
         </div>
 
-        <div data-tab-panel="media" class="hidden space-y-4">
-            <div>
-                <label class="block text-sm font-medium mb-1.5">Upload images</label>
-                <input type="file" name="images[]" accept="image/*" multiple class="block w-full text-sm">
-            </div>
-            <div class="grid sm:grid-cols-4 gap-3">
-                @foreach(($product->images ?? collect()) as $image)
-                    <label class="border rounded-lg p-2 block">
-                        <img src="{{ $image->url() }}" alt="" class="w-full h-28 object-cover rounded mb-2">
-                        <input type="hidden" name="existing_images[]" value="{{ $image->id }}">
-                        <span class="text-xs flex items-center gap-1">
-                            <input type="radio" name="primary_image_id" value="{{ $image->id }}" @checked($image->is_primary)> Primary
-                        </span>
-                    </label>
-                @endforeach
-            </div>
+        <div data-tab-panel="media" class="hidden space-y-6">
+            <x-image-upload :owner="$product" collection="gallery"
+                            help="Drag thumbnails to reorder. The starred image is used on listings." />
+
+            @if($product->exists && $product->variants->isNotEmpty())
+                <div class="border-t border-slate-200 pt-5">
+                    <h3 class="font-medium">Variant images</h3>
+                    <p class="text-xs text-slate-500 mt-0.5 mb-3">
+                        Shown when a shopper picks that variant. Without one, the product's starred image is used.
+                    </p>
+
+                    <div class="grid sm:grid-cols-2 gap-5">
+                        @foreach($product->variants as $variant)
+                            <div class="rounded-lg border border-slate-200 p-3">
+                                <p class="text-sm font-medium">{{ $variant->option_label ?: $variant->name }}</p>
+                                <p class="text-xs text-slate-400 mb-2">{{ $variant->sku }}</p>
+                                <x-image-upload :owner="$variant" collection="image" label="Image"
+                                                help="Replaces this variant's current image." />
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @elseif($product->exists)
+                <p class="border-t border-slate-200 pt-5 text-xs text-slate-400">
+                    This product has no variants yet.
+                </p>
+            @else
+                <p class="border-t border-slate-200 pt-5 text-xs text-slate-400">
+                    Save the product first to add images to its variants.
+                </p>
+            @endif
         </div>
 
         <div data-tab-panel="shipping" class="hidden space-y-4">
@@ -171,25 +188,6 @@
                     <label class="block text-sm font-medium mb-1.5">Height (cm)</label>
                     <input name="height" type="number" step="0.01" min="0" value="{{ old('height', $product->height) }}" class="w-full rounded-lg border border-slate-300 px-3 py-2">
                 </div>
-            </div>
-        </div>
-
-        <div data-tab-panel="purchase" class="hidden space-y-4">
-            <label class="inline-flex items-center gap-2 text-sm">
-                <input type="checkbox" name="allow_cod" value="1" data-bool @checked(old('allow_cod', $product->allow_cod ?? true))> Allow Cash on Delivery
-            </label>
-            <label class="inline-flex items-center gap-2 text-sm block">
-                <input type="checkbox" name="allow_online" value="1" data-bool @checked(old('allow_online', $product->allow_online ?? true))> Allow Online Payment (Paytm)
-            </label>
-            <div>
-                <label class="block text-sm font-medium mb-1.5">Tax class</label>
-                <select name="tax_class" class="w-full max-w-xs rounded-lg border border-slate-300 px-3 py-2">
-                    <option value="gst_0" @selected(old('tax_class', $product->tax_class) === 'gst_0')>GST 0%</option>
-                    <option value="gst_5" @selected(old('tax_class', $product->tax_class) === 'gst_5')>GST 5%</option>
-                    <option value="gst_12" @selected(old('tax_class', $product->tax_class) === 'gst_12')>GST 12%</option>
-                    <option value="gst_18" @selected(old('tax_class', $product->tax_class ?? 'gst_18') === 'gst_18')>GST 18%</option>
-                    <option value="gst_28" @selected(old('tax_class', $product->tax_class) === 'gst_28')>GST 28%</option>
-                </select>
             </div>
         </div>
 
@@ -407,6 +405,7 @@
     var combos = cartesian(groups);
     var baseSku = document.querySelector('input[name="sku"]').value || 'SKU';
     var basePrice = document.querySelector('input[name="price"]').value || '0';
+    var baseCompare = document.querySelector('input[name="compare_price"]').value || '';
     var baseStock = document.querySelector('input[name="stock"]').value || '0';
     var body = document.getElementById('variants-body');
     body.innerHTML = '';
@@ -417,6 +416,7 @@
       tr.innerHTML = '<td class="px-3 py-2"><input name="variants[' + i + '][option_label]" value="' + label + '" class="w-36 rounded border border-slate-300 px-2 py-1"></td>' +
         '<td class="px-3 py-2"><input name="variants[' + i + '][sku]" value="' + sku + '" class="w-36 rounded border border-slate-300 px-2 py-1"></td>' +
         '<td class="px-3 py-2"><input name="variants[' + i + '][price]" type="number" step="0.01" value="' + basePrice + '" class="w-24 rounded border border-slate-300 px-2 py-1"></td>' +
+        '<td class="px-3 py-2"><input name="variants[' + i + '][compare_price]" type="number" step="0.01" min="0" value="' + baseCompare + '" class="w-24 rounded border border-slate-300 px-2 py-1"></td>' +
         '<td class="px-3 py-2"><input name="variants[' + i + '][stock]" type="number" value="' + baseStock + '" class="w-20 rounded border border-slate-300 px-2 py-1"></td>' +
         '<td class="px-3 py-2"><input type="checkbox" name="variants[' + i + '][is_default]" value="1"' + (i === 0 ? ' checked' : '') + '></td>' +
         '<td class="px-3 py-2"><input type="checkbox" name="variants[' + i + '][is_active]" value="1" data-bool checked></td>';

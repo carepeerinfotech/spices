@@ -12,6 +12,8 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EmailTemplateController;
 use App\Http\Controllers\Admin\HomepageController;
 use App\Http\Controllers\Admin\HomepageSlideController;
+use App\Http\Controllers\Admin\ImageController as AdminImageController;
+use App\Http\Controllers\Admin\NewsletterSubscriberController as AdminNewsletterSubscriberController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\RoleController;
@@ -19,12 +21,12 @@ use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\ShipmentController;
 use App\Http\Controllers\Admin\StorageLinkController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Shop\AboutController;
 use App\Http\Controllers\Shop\CartController;
 use App\Http\Controllers\Shop\CheckoutController;
-use App\Http\Controllers\Shop\AboutController;
 use App\Http\Controllers\Shop\ContactController;
-use App\Http\Controllers\Shop\NewsletterController;
 use App\Http\Controllers\Shop\HomeController;
+use App\Http\Controllers\Shop\NewsletterController;
 use App\Http\Controllers\Shop\PageController;
 use App\Http\Controllers\Shop\PaymentController;
 use App\Http\Controllers\Shop\PrivacyPolicyController;
@@ -66,18 +68,31 @@ Route::delete('/cart/{item}', [CartController::class, 'destroy'])->name('shop.ca
 Route::post('/shipping/quote/product', [ShippingQuoteController::class, 'product'])->name('shipping.quote.product');
 Route::post('/shipping/quote/cart', [ShippingQuoteController::class, 'cart'])->name('shipping.quote.cart');
 
+// Checkout is deliberately open to guests: the account is created from the
+// checkout form itself, so a login wall here only costs orders.
+Route::get('/checkout', [CheckoutController::class, 'index'])->name('shop.checkout');
+Route::post('/checkout', [CheckoutController::class, 'store'])->middleware('throttle:20,1')->name('shop.checkout.store');
+Route::get('/checkout/success/{orderNumber}', [CheckoutController::class, 'success'])->name('shop.checkout.success');
+
+// The fake gateway stands in for Paytm's hosted page, which is likewise
+// reached without a session, so it cannot sit behind `auth` either.
+Route::get('/payments/paytm/fake/{transaction}', [PaymentController::class, 'fakePaytm'])->name('payments.paytm.fake');
+Route::post('/payments/paytm/fake/{transaction}', [PaymentController::class, 'fakePaytmComplete'])->name('payments.paytm.fake.complete');
+
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AccountAuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AccountAuthController::class, 'login'])->middleware('throttle:10,1')->name('login.submit');
     Route::get('/register', [AccountAuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AccountAuthController::class, 'register'])->middleware('throttle:10,1')->name('register.submit');
+});
 
-    Route::middleware('feature:password_reset')->group(function () {
-        Route::get('/forgot-password', [PasswordResetController::class, 'showLinkRequest'])->name('password.request');
-        Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink'])->middleware('throttle:6,1')->name('password.email');
-        Route::get('/reset-password/{token}', [PasswordResetController::class, 'showReset'])->name('password.reset');
-        Route::post('/reset-password', [PasswordResetController::class, 'reset'])->middleware('throttle:6,1')->name('password.update');
-    });
+// Not guest-only: a signed-in customer requests a reset link from their account
+// page, and `guest` would bounce them off their own link when they open it.
+Route::middleware('feature:password_reset')->group(function () {
+    Route::get('/forgot-password', [PasswordResetController::class, 'showLinkRequest'])->name('password.request');
+    Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink'])->middleware('throttle:6,1')->name('password.email');
+    Route::get('/reset-password/{token}', [PasswordResetController::class, 'showReset'])->name('password.reset');
+    Route::post('/reset-password', [PasswordResetController::class, 'reset'])->middleware('throttle:6,1')->name('password.update');
 });
 
 Route::post('/logout', [AccountAuthController::class, 'logout'])->middleware('auth')->name('logout');
@@ -101,20 +116,14 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [AccountDashboardController::class, 'index'])->name('dashboard');
         Route::put('/profile', [AccountDashboardController::class, 'updateProfile'])->name('profile');
         Route::put('/password', [AccountDashboardController::class, 'updatePassword'])->name('password');
+        Route::post('/password/reset-link', [AccountDashboardController::class, 'sendPasswordResetLink'])
+            ->middleware(['feature:password_reset', 'throttle:6,1'])
+            ->name('password.link');
         Route::get('/addresses', [AddressController::class, 'index'])->name('addresses.index');
         Route::post('/addresses', [AddressController::class, 'store'])->name('addresses.store');
         Route::put('/addresses/{address}', [AddressController::class, 'update'])->name('addresses.update');
         Route::delete('/addresses/{address}', [AddressController::class, 'destroy'])->name('addresses.destroy');
     });
-
-    Route::middleware('verified')->group(function () {
-        Route::get('/checkout', [CheckoutController::class, 'index'])->name('shop.checkout');
-        Route::post('/checkout', [CheckoutController::class, 'store'])->middleware('throttle:20,1')->name('shop.checkout.store');
-        Route::get('/checkout/success/{orderNumber}', [CheckoutController::class, 'success'])->name('shop.checkout.success');
-    });
-
-    Route::get('/payments/paytm/fake/{transaction}', [PaymentController::class, 'fakePaytm'])->name('payments.paytm.fake');
-    Route::post('/payments/paytm/fake/{transaction}', [PaymentController::class, 'fakePaytmComplete'])->name('payments.paytm.fake.complete');
 });
 
 Route::post('/payments/paytm/callback', [PaymentController::class, 'paytmCallback'])->name('payments.paytm.callback');
@@ -127,6 +136,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('logout', [AdminAuthController::class, 'logout'])->name('logout');
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
         Route::post('storage-link', [StorageLinkController::class, 'store'])->name('storage-link');
+
+        // Shared by every module using HasImages; each image is guarded by the
+        // permission its owner declares in config/media.php.
+        Route::get('images/{image}/download', [AdminImageController::class, 'download'])->name('images.download');
+        Route::post('images/reorder', [AdminImageController::class, 'reorder'])->name('images.reorder');
+        Route::delete('images/{image}', [AdminImageController::class, 'destroy'])->name('images.destroy');
+        Route::post('images/{image}/primary', [AdminImageController::class, 'primary'])->name('images.primary');
 
         Route::middleware('permission:users.manage')->group(function () {
             Route::resource('users', UserController::class)->except(['show']);
@@ -151,6 +167,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('contact-messages', [AdminContactMessageController::class, 'index'])->name('contact-messages.index');
             Route::get('contact-messages/{contact_message}', [AdminContactMessageController::class, 'show'])->name('contact-messages.show');
             Route::delete('contact-messages/{contact_message}', [AdminContactMessageController::class, 'destroy'])->name('contact-messages.destroy');
+
+            // Newsletter signups come from the same storefront forms, so they sit
+            // behind the permission that already covers storefront enquiries.
+            Route::get('newsletter-subscribers', [AdminNewsletterSubscriberController::class, 'index'])->name('newsletter-subscribers.index');
+            Route::get('newsletter-subscribers/export', [AdminNewsletterSubscriberController::class, 'export'])->name('newsletter-subscribers.export');
+            Route::delete('newsletter-subscribers/{newsletter_subscriber}', [AdminNewsletterSubscriberController::class, 'destroy'])->name('newsletter-subscribers.destroy');
         });
         Route::middleware('permission:products.manage')->group(function () {
             Route::resource('products', AdminProductController::class)->except(['show']);

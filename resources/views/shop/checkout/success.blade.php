@@ -80,7 +80,7 @@ $statusClass = $statusColors[$order->status] ?? 'bg-stone-100 text-stone-700';
                     {{ $order->shipping_city }}, {{ $order->shipping_state }} {{ $order->shipping_postal_code }}<br>
                     India
                 </p>
-                @if($order->courier_name || $order->estimated_delivery_days)
+                @if($showDeliveryDetails && ($order->courier_name || $order->estimated_delivery_days))
                     <div class="mt-4 pt-4 border-t border-[var(--line)] text-sm text-stone-600 space-y-1">
                         @if($order->courier_name)
                             <p>Courier: <span class="font-medium text-stone-800">{{ $order->courier_name }}</span></p>
@@ -103,7 +103,11 @@ $statusClass = $statusColors[$order->status] ?? 'bg-stone-100 text-stone-700';
 
     <div class="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
         <a href="{{ route('shop.catalog') }}" class="inline-flex justify-center items-center rounded-full bg-brand hover:bg-brand-dark text-white px-6 py-3 text-sm font-semibold transition-colors">Continue Shopping</a>
-        <a href="{{ route('account.dashboard') }}" class="inline-flex justify-center items-center rounded-full border border-[var(--line)] hover:border-brand hover:text-brand px-6 py-3 text-sm font-semibold transition-colors">View My Orders</a>
+        {{-- A guest here ordered against an account they are not signed into, so
+             send them to the sign-in page rather than a dashboard they can't load. --}}
+        <a href="{{ auth()->check() ? route('account.dashboard') : route('login') }}" class="inline-flex justify-center items-center rounded-full border border-[var(--line)] hover:border-brand hover:text-brand px-6 py-3 text-sm font-semibold transition-colors">
+            {{ auth()->check() ? 'View My Orders' : 'Log In to View Orders' }}
+        </a>
     </div>
 </div>
 @endsection

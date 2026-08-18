@@ -65,15 +65,20 @@
                     <div><label class="text-sm">Password {{ $masked['email_password'] ? '('.$masked['email_password'].')' : '' }}</label><input name="password" placeholder="Leave blank to keep" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></div>
                     <div><label class="text-sm">From address</label><input name="from_address" value="{{ $email['from_address'] ?? '' }}" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></div>
                     <div><label class="text-sm">From name</label><input name="from_name" value="{{ $email['from_name'] ?? '' }}" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></div>
+                    <div class="sm:col-span-2"><label class="text-sm">Admin notification email</label><input name="admin_email" value="{{ $email['admin_email'] ?? '' }}" placeholder="Comma separated; falls back to support email" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></div>
                 </div>
             @elseif($group === 'notifications')
                 <label class="inline-flex items-center gap-2 text-sm"><input type="checkbox" name="enabled" value="1" data-bool @checked($notifications['enabled'] ?? true)> Notifications active</label>
                 <label class="inline-flex items-center gap-2 text-sm block"><input type="checkbox" name="notify_order_placed" value="1" data-bool @checked($notifications['notify_order_placed'] ?? true)> Order placed</label>
+                <label class="inline-flex items-center gap-2 text-sm block"><input type="checkbox" name="notify_order_placed_admin" value="1" data-bool @checked($notifications['notify_order_placed_admin'] ?? true)> Order placed (admin copy)</label>
+                <label class="inline-flex items-center gap-2 text-sm block"><input type="checkbox" name="notify_contact_message_admin" value="1" data-bool @checked($notifications['notify_contact_message_admin'] ?? true)> Contact enquiry (admin)</label>
+                <label class="inline-flex items-center gap-2 text-sm block"><input type="checkbox" name="notify_newsletter_signup_admin" value="1" data-bool @checked($notifications['notify_newsletter_signup_admin'] ?? true)> Newsletter signup (admin)</label>
                 <label class="inline-flex items-center gap-2 text-sm block"><input type="checkbox" name="notify_payment_result" value="1" data-bool @checked($notifications['notify_payment_result'] ?? true)> Payment result</label>
                 <label class="inline-flex items-center gap-2 text-sm block"><input type="checkbox" name="notify_shipment_update" value="1" data-bool @checked($notifications['notify_shipment_update'] ?? true)> Shipment updates</label>
                 <label class="inline-flex items-center gap-2 text-sm block"><input type="checkbox" name="notify_verify_email" value="1" data-bool @checked($notifications['notify_verify_email'] ?? true)> Verify email</label>
             @elseif($group === 'shipping')
                 <label class="inline-flex items-center gap-2 text-sm"><input type="checkbox" name="charges_enabled" value="1" data-bool @checked($shipping['charges_enabled'] ?? true)> Shipping charges active</label>
+                <label class="inline-flex items-center gap-2 text-sm block"><input type="checkbox" name="show_delivery_details" value="1" data-bool @checked($shipping['show_delivery_details'] ?? false)> Show courier &amp; delivery estimate to customers</label>
                 <div class="grid sm:grid-cols-2 gap-4">
                     <div><label class="text-sm">Fallback flat rate (INR)</label><input name="flat_rate" type="number" step="0.01" value="{{ $shipping['flat_rate'] ?? 49 }}" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></div>
                     <div><label class="text-sm">Free shipping above (INR)</label><input name="free_above" type="number" step="0.01" value="{{ $shipping['free_above'] ?? 999 }}" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></div>

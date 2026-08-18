@@ -6,17 +6,17 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Support\MediaUrl;
+use App\Models\Concerns\HasImages;
 
 #[Fillable([
     'product_id', 'sku', 'name', 'option_label', 'option_values',
-    'price', 'compare_price', 'stock', 'image',
+    'price', 'compare_price', 'stock',
     'weight', 'length', 'breadth', 'height', 'is_default', 'is_active',
 ])]
 class ProductVariant extends Model
 {
     use HasFactory;
+    use HasImages;
 
     protected function casts(): array
     {
@@ -39,11 +39,6 @@ class ProductVariant extends Model
         return $this->belongsTo(Product::class);
     }
 
-    public function images(): HasMany
-    {
-        return $this->hasMany(ProductImage::class);
-    }
-
     public function inStock(): bool
     {
         return $this->is_active && $this->stock > 0;
@@ -54,17 +49,10 @@ class ProductVariant extends Model
         return '₹'.number_format((float) $this->price, 2);
     }
 
+    /** Falls back to the parent product's primary image. */
     public function imageUrl(): ?string
     {
-        if (! $this->image) {
-            return $this->product?->primaryImageUrl();
-        }
-
-        if (str_starts_with($this->image, 'http')) {
-            return $this->image;
-        }
-
-        return MediaUrl::public($this->image);
+        return $this->imageUrlFor('image') ?? $this->product?->primaryImageUrl();
     }
 
     public function shippingWeight(): float

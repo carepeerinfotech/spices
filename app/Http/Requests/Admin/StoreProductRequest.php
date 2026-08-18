@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Models\Product;
+use App\Services\Media\ImageService;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -24,7 +26,6 @@ class StoreProductRequest extends FormRequest
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('products', 'slug')->ignore($productId)],
             'sku' => ['required', 'string', 'max:100', Rule::unique('products', 'sku')->ignore($productId)],
             'hsn_code' => ['nullable', 'string', 'max:20'],
-            'tax_class' => ['nullable', 'string', 'max:50'],
             'short_description' => ['nullable', 'string', 'max:500'],
             'description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
@@ -32,8 +33,6 @@ class StoreProductRequest extends FormRequest
             'stock' => ['nullable', 'integer', 'min:0'],
             'is_featured' => ['sometimes', 'boolean'],
             'is_active' => ['sometimes', 'boolean'],
-            'allow_cod' => ['sometimes', 'boolean'],
-            'allow_online' => ['sometimes', 'boolean'],
             'weight' => ['nullable', 'numeric', 'min:0'],
             'length' => ['nullable', 'numeric', 'min:0'],
             'breadth' => ['nullable', 'numeric', 'min:0'],
@@ -47,6 +46,7 @@ class StoreProductRequest extends FormRequest
             'variants.*.id' => ['nullable', 'integer'],
             'variants.*.sku' => ['required_with:variants', 'string', 'max:100'],
             'variants.*.price' => ['required_with:variants', 'numeric', 'min:0'],
+            'variants.*.compare_price' => ['nullable', 'numeric', 'min:0'],
             'variants.*.stock' => ['required_with:variants', 'integer', 'min:0'],
             'variants.*.option_label' => ['nullable', 'string', 'max:255'],
             'variants.*.is_default' => ['sometimes', 'boolean'],
@@ -59,12 +59,9 @@ class StoreProductRequest extends FormRequest
             'offers.*.apply_to_category' => ['sometimes', 'boolean'],
             'offers.*.starts_at' => ['required_with:offers', 'date'],
             'offers.*.ends_at' => ['required_with:offers', 'date', 'after_or_equal:offers.*.starts_at'],
-            'images' => ['nullable', 'array'],
-            'images.*' => ['image', 'max:4096'],
-            'existing_images' => ['nullable', 'array'],
-            'existing_images.*' => ['integer'],
-            'primary_image_id' => ['nullable', 'integer'],
-        ];
+            // Upload rules come from config/media.php; removal and ordering are
+            // applied instantly through the images endpoints, not on save.
+        ] + app(ImageService::class)->rules(Product::class);
     }
 
     public function attributes(): array

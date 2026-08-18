@@ -37,7 +37,7 @@ class CartController extends Controller
         $data = $request->validate([
             'product_id' => ['required', 'exists:products,id'],
             'variant_id' => ['nullable', 'exists:product_variants,id'],
-            'quantity' => ['nullable', 'integer', 'min:1', 'max:99'],
+            'quantity' => ['nullable', 'integer', 'min:1'],
         ]);
 
         try {
@@ -50,7 +50,7 @@ class CartController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Added to cart.',
+                'message' => $this->cartService->notice() ?? 'Added to cart.',
                 'data' => $this->cartService->summary($cart),
             ]);
         } catch (\Throwable $e) {
@@ -64,7 +64,7 @@ class CartController extends Controller
     public function update(Request $request, int $item)
     {
         $data = $request->validate([
-            'quantity' => ['required', 'integer', 'min:0', 'max:99'],
+            'quantity' => ['required', 'integer', 'min:0'],
         ]);
 
         try {
@@ -72,7 +72,7 @@ class CartController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Cart updated.',
+                'message' => $this->cartService->notice() ?? 'Cart updated.',
                 'data' => $this->cartService->summary($cart),
             ]);
         } catch (\Throwable $e) {

@@ -6,12 +6,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}" />
     <title>Elephant Spices — Authentic Indian Flavours</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://images.unsplash.com" />
-    <!-- <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap"
-      rel="stylesheet"
-    /> -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <link
       rel="stylesheet"
@@ -20,7 +16,7 @@
       referrerpolicy="no-referrer"
     />
      <link rel="icon" type="image/x-icon" href="assets/images/elephant-fav.png">
-    <link rel="stylesheet" href="{{ asset('css/home.css') }}" />
+    <link rel="stylesheet" href="@asset('css/home.css')" />
   </head>
   <body>
     <x-home.header :cart-count="$cartCount" />
@@ -35,10 +31,10 @@
       <x-home.newsletter />
     </main>
     <x-home.footer />
-    <script src="{{ asset('js/app-ajax.js') }}"></script>
-    <script src="{{ asset('js/home.js') }}"></script>
-    <script src="{{ asset('js/search.js') }}"></script>
-    <script src="{{ asset('js/cart-drawer.js') }}"></script>
-    <script src="{{ asset('js/product-variants.js') }}"></script>
+    <script src="@asset('js/app-ajax.js')"></script>
+    <script src="@asset('js/home.js')"></script>
+    <script src="@asset('js/search.js')"></script>
+    <script src="@asset('js/cart-drawer.js')"></script>
+    <script src="@asset('js/product-variants.js')"></script>
   </body>
 </html>
