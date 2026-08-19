@@ -14,7 +14,7 @@
             <p class="text-stone-600 leading-relaxed">Since 1974, Elephant Spices has been bringing authentic Indian flavours to kitchens across the country — one lab-tested batch at a time.</p>
         </div>
         <div class="rounded-2xl overflow-hidden shadow-md shadow-stone-900/5">
-            <img src="{{ asset('assets/images/banner1.jpg') }}" alt="Elephant Spices product range — turmeric, mirch and garam masala" class="w-full h-auto" loading="lazy">
+            <img src="{{ asset('assets/images/banner1-2.jpeg') }}" alt="Elephant Spices product range — turmeric, mirch and garam masala" class="w-full h-auto" loading="lazy">
         </div>
     </div>
 </section>
@@ -23,7 +23,7 @@
     <div class="max-w-6xl mx-auto px-4 sm:px-6">
         <div class="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
             <div class="rounded-2xl overflow-hidden shadow-md shadow-stone-900/5 order-2 lg:order-1 aspect-[4/3]">
-                <img src="{{ asset('assets/images/products.jpg') }}" alt="Elephant Spices products displayed in a kitchen setting" class="w-full h-full object-cover" loading="lazy">
+                <img src="{{ asset('assets/images/products1-2.jpeg') }}" alt="Elephant Spices products displayed in a kitchen setting" class="w-full h-full object-cover" loading="lazy">
             </div>
             <div class="order-1 lg:order-2">
                 <p class="text-brand text-xs font-semibold tracking-widest uppercase mb-2">Since 1974</p>

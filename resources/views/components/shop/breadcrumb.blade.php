@@ -2,13 +2,13 @@
 
 @if($title)
 <section
-    @class(['relative overflow-hidden', 'h-20 sm:h-96' => $slider, 'bg-cover bg-center bg-no-repeat' => !$slider])
+    @class(['relative overflow-hidden', 'h-20 sm:h-80' => $slider, 'bg-cover bg-center bg-no-repeat' => !$slider])
     @if(!$slider) style="background-image:url('{{ asset('assets/images/banner-breadcrumb.jpg') }}')" @endif
 >
     @if($slider)
         <div class="slides absolute inset-0">
             <article class="slide active">
-                <img src="{{ asset('assets/images/banner-3-bread.jpg') }}" alt="Bowls of colourful Indian spices" class="w-full h-full object-cover">
+                <img src="{{ asset('assets/images/banner-breadcrumb1.jpeg') }}" alt="Bowls of colourful Indian spices" class="w-full h-full object-cover">
             </article>
             <!-- <article class="slide">
                 <img src="{{ asset('assets/images/banner2-bread.jpg') }}" alt="Vrat Atta" class="w-full h-full object-cover">
