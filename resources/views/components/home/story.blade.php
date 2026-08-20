@@ -2,7 +2,7 @@
   <div class="container story">
     <div class="story-productss">
       <img
-        src="{{ asset('assets/images/productss.jpg') }}"
+        src="{{ asset('assets/images/products1-2.jpeg') }}"
         alt="Elephant spice product placeholder"
       />
     </div>

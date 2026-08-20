@@ -3,23 +3,24 @@
     <!-- Replace the src values below with your own banner images anytime. -->
     <article class="slide active">
       <img
-        src="{{ asset('assets/images/banner1.jpg') }}"
+        src="{{ asset('assets/images/banner-new1.jpg') }}"
         alt="Bowls of colourful Indian spices"
       />
     </article>
     <article class="slide">
-      <img src="{{ asset('assets/images/banner2.jpg') }}" alt="Vrat Atta" />
+      <img src="{{ asset('assets/images/banner-new2.jpg') }}" alt="Vrat Atta" />
     </article>
-    <article class="slide">
+    <!-- <article class="slide">
       <img
         src="{{ asset('assets/images/banner3.jpg') }}"
         alt="Whole spices in wooden bowls"
       />
-    </article>
+    </article> -->
   </div>
   <div class="slider-dots" aria-label="Hero slider">
     <button class="active" aria-label="Slide 1"></button
     ><button aria-label="Slide 2"></button
-    ><button aria-label="Slide 3"></button>
+    >
+    <!-- <button aria-label="Slide 3"></button> -->
   </div>
 </section>
