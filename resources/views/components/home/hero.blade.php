@@ -3,13 +3,13 @@
     <!-- Replace the src values below with your own banner images anytime. -->
     <article class="slide active">
       <img
-        src="{{ asset('assets/images/banner-new1.jpg') }}"
+        src="{{ asset('assets/images/banner-neww1.jpg') }}"
         alt="Bowls of colourful Indian spices"
       />
     </article>
     <article class="slide">
-      <img src="{{ asset('assets/images/banner-new2.jpg') }}" alt="Vrat Atta" />
-    </article>
+      <img src="{{ asset('assets/images/banner-neww2.jpg') }}" alt="Vrat Atta" />
+    </article> 
     <!-- <article class="slide">
       <img
         src="{{ asset('assets/images/banner3.jpg') }}"
