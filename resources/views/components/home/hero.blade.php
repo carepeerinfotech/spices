@@ -9,11 +9,11 @@
     </article> 
     <article class="slide">
       <img src="{{ asset('assets/images/banner-neww2.jpg') }}" alt="Vrat Atta" />
-    </article> 
+    </article>  
     <article class="slide">
       <img
         src="{{ asset('assets/images/banner-neww1.jpg') }}"
-        alt="Salt"
+        alt="Rock Salt"
       />
     </article>
     
