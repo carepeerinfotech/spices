@@ -1,21 +1,23 @@
 <section class="hero" aria-label="Featured products">
   <div class="slides">
     <!-- Replace the src values below with your own banner images anytime. -->
-    <article class="slide active">
-      <img
-        src="{{ asset('assets/images/banner-neww1.jpg') }}"
-        alt="Salt"
-      />
-    </article>
-    <article class="slide">
-      <img src="{{ asset('assets/images/banner-neww2.jpg') }}" alt="Vrat Atta" />
-    </article> 
-    <article class="slide">
+     <article class="slide active">
       <img src="{{ asset('assets/images/banner-neww3.jpg') }}" alt="Pure Powder Spices" />
     </article> 
     <article class="slide">
       <img src="{{ asset('assets/images/banner-neww4.jpg') }}" alt="Blended Masala" />
     </article> 
+    <article class="slide">
+      <img src="{{ asset('assets/images/banner-neww2.jpg') }}" alt="Vrat Atta" />
+    </article>  
+    <article class="slide">
+      <img
+        src="{{ asset('assets/images/banner-neww1.jpg') }}"
+        alt="Rock Salt"
+      />
+    </article>
+    
+    
     <!-- <article class="slide">
       <img
         src="{{ asset('assets/images/banner3.jpg') }}"
