@@ -63,7 +63,7 @@ button {
   background: var(--cream);
 }
 header {
-  height: 72px;
+  height: 84px;
   background: #fff;
   display: flex;
   align-items: center;
@@ -135,7 +135,7 @@ header {
   display: none;
 }
 .hero {
-  height: 88vh;
+  height: 86vh;
   position: relative;
   overflow: hidden;
   background: #f7f0e6;
