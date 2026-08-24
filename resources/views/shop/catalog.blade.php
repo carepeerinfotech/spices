@@ -3,7 +3,7 @@
 @section('title', ($activeCategory->name ?? 'Shop') . ' — Elephant Spices')
 
 @section('content')
-    <x-shop.breadcrumb :title="$activeCategory->name ?? 'Our Spices'" :slider="true" />
+    <x-shop.breadcrumb :title="$activeCategory->name ?? 'Our Spices'" />
 
     <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
         <div class="lg:grid lg:grid-cols-10 lg:gap-8 lg:items-start">
