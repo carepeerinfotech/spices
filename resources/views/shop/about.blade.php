@@ -28,7 +28,7 @@
             <div class="order-1 lg:order-2">
                 <p class="text-brand text-xs font-semibold tracking-widest uppercase mb-2">Since 1974</p>
                 <h2 class="section-title mb-4">Three generations of flavour</h2>
-                <p class="text-stone-600 leading-relaxed mb-4">What began as a single family stall trading pepper and turmeric has grown into a trusted, ISO 9001:2008 certified name across India — without ever losing sight of what made us different in the first place: real spices, honestly sourced.</p>
+                <p class="text-stone-600 leading-relaxed mb-4">What began as a single family stall trading pepper and turmeric has grown into a trusted, ISO 22000:2018 Certified name across India — without ever losing sight of what made us different in the first place: real spices, honestly sourced.</p>
                 <p class="text-stone-600 leading-relaxed mb-6">We work directly with farmers across India's renowned spice-growing belts, so every batch that carries the Elephant name can be traced back to where it was grown, cleaned and packed under strict hygiene standards.</p>
                 <div class="grid grid-cols-3 gap-4 text-center">
                     <div>
@@ -41,7 +41,7 @@
                     </div>
                     <div>
                         <p class="font-display text-2xl sm:text-3xl text-brand">ISO</p>
-                        <p class="text-xs text-stone-500 mt-1">9001:2008 certified</p>
+                        <p class="text-xs text-stone-500 mt-1">22000:2018 Certified</p>
                     </div>
                 </div>
             </div>
