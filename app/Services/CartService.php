@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Cart;
 use App\Models\CartItem;
+use App\Models\Coupon;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Services\Settings\SettingsService;
@@ -34,7 +35,7 @@ class CartService
             ]);
         }
 
-        return $cart->load(['items.product.images', 'items.product.offers', 'items.variant.images']);
+        return $cart->load(['items.product.images', 'items.product.offers', 'items.variant.images', 'coupon']);
     }
 
     public function mergeSessionCartIntoUser(int $userId, ?string $guestSessionId = null): Cart
@@ -199,6 +200,31 @@ class CartService
     {
         $cart = $this->getCart();
         $cart->items()->delete();
+        $cart->update(['coupon_id' => null]);
+    }
+
+    public function applyCoupon(Cart $cart, string $code): Cart
+    {
+        $coupon = Coupon::where('code', strtoupper(trim($code)))->first();
+
+        if (! $coupon) {
+            throw new \RuntimeException('This coupon code does not exist.');
+        }
+
+        if (! $coupon->isRunning()) {
+            throw new \RuntimeException('This coupon is not active or has expired.');
+        }
+
+        $cart->update(['coupon_id' => $coupon->id]);
+
+        return $this->getCart();
+    }
+
+    public function removeCoupon(Cart $cart): Cart
+    {
+        $cart->update(['coupon_id' => null]);
+
+        return $this->getCart();
     }
 
     public function summary(Cart $cart, ?float $shippingOverride = null): array
@@ -221,8 +247,14 @@ class CartService
             }
         }
 
-        $tax = round($subtotal * ($taxPercent / 100), 2);
-        $total = round($subtotal + $shipping + $tax, 2);
+        // A coupon is an order-level discount, applied after product offers but
+        // before tax, so it reduces what GST is actually charged on.
+        $coupon = $cart->coupon && $cart->coupon->isRunning() ? $cart->coupon : null;
+        $couponDiscount = $coupon ? $coupon->discountFor($subtotal) : 0.0;
+        $taxableAmount = round($subtotal - $couponDiscount, 2);
+
+        $tax = round($taxableAmount * ($taxPercent / 100), 2);
+        $total = round($taxableAmount + $shipping + $tax, 2);
         $weight = (float) $cart->items->sum(fn (CartItem $item) => ($item->variant?->shippingWeight() ?? 0.5) * $item->quantity);
 
         return [
@@ -230,6 +262,13 @@ class CartService
             'gross_subtotal' => round($grossSubtotal, 2),
             'discount' => round($discount, 2),
             'subtotal' => round($subtotal, 2),
+            'coupon' => $coupon ? [
+                'code' => $coupon->code,
+                'discount_type' => $coupon->discount_type,
+                'value' => (float) $coupon->value,
+                'label' => $coupon->label(),
+            ] : null,
+            'coupon_discount' => round($couponDiscount, 2),
             'shipping' => round($shipping, 2),
             'tax' => $tax,
             'tax_percent' => $taxPercent,

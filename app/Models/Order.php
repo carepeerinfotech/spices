@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
     'shipping_country', 'subtotal', 'shipping_amount', 'tax_amount', 'tax_percent',
     'total', 'currency', 'payment_method', 'payment_status', 'status', 'notes',
     'estimated_delivery_days', 'courier_name', 'shipping_weight',
+    'coupon_id', 'coupon_code', 'coupon_discount',
 ])]
 class Order extends Model
 {
@@ -34,6 +35,7 @@ class Order extends Model
             'shipping_weight' => 'decimal:3',
             'billing_same_as_shipping' => 'boolean',
             'estimated_delivery_days' => 'integer',
+            'coupon_discount' => 'decimal:2',
         ];
     }
 
@@ -45,6 +47,11 @@ class Order extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function coupon(): BelongsTo
+    {
+        return $this->belongsTo(Coupon::class);
     }
 
     public function offers(): HasMany

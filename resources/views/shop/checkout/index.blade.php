@@ -192,12 +192,26 @@
                         </div>
                     @endforeach
                 </div>
+                <div class="mb-4">
+                    <div id="coupon-applied" class="{{ ($summary['coupon'] ?? null) ? '' : 'hidden' }} flex items-center justify-between rounded-lg bg-emerald-50 border border-emerald-200 px-3 py-2 text-sm mb-2">
+                        <span>Coupon <strong id="coupon-code-label">{{ $summary['coupon']['code'] ?? '' }}</strong>{{ isset($summary['coupon']) ? ' — '.($summary['coupon']['label'] ?? '') : '' }} applied</span>
+                        <button type="button" id="coupon-remove" class="text-rose-600 hover:underline shrink-0 ml-2">Remove</button>
+                    </div>
+                    <div id="coupon-form-row" class="{{ ($summary['coupon'] ?? null) ? 'hidden' : '' }} flex gap-2">
+                        <input id="coupon-input" type="text" placeholder="Coupon code" maxlength="50" class="flex-1 min-w-0 rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                        <button type="button" id="coupon-apply" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-slate-50 shrink-0">Apply</button>
+                    </div>
+                    <p id="coupon-error" class="text-xs text-rose-600 mt-1 hidden"></p>
+                </div>
                 <div class="space-y-2 text-sm border-t border-slate-100 pt-4">
                     @if($summary['discount'] > 0)
                         <div class="flex justify-between text-slate-500"><span>Items</span><span>₹{{ number_format($summary['gross_subtotal'], 2) }}</span></div>
                         <div class="flex justify-between text-emerald-700"><span>Offer savings</span><span id="sum-discount">−₹{{ number_format($summary['discount'], 2) }}</span></div>
                     @endif
                     <div class="flex justify-between"><span>Subtotal</span><span id="sum-subtotal">₹{{ number_format($summary['subtotal'], 2) }}</span></div>
+                    <div id="row-coupon" class="flex justify-between text-emerald-700 {{ ($summary['coupon_discount'] ?? 0) > 0 ? '' : 'hidden' }}">
+                        <span>Coupon discount</span><span id="sum-coupon-discount">−₹{{ number_format($summary['coupon_discount'] ?? 0, 2) }}</span>
+                    </div>
                     <div class="flex justify-between"><span>Shipping</span><span id="sum-shipping">₹{{ number_format($summary['shipping'], 2) }}</span></div>
                     <div class="flex justify-between"><span>GST ({{ $summary['tax_percent'] }}%)</span><span id="sum-tax">₹{{ number_format($summary['tax'], 2) }}</span></div>
                     <div class="flex justify-between font-semibold text-base pt-2"><span>Total</span><span id="sum-total">₹{{ number_format($summary['total'], 2) }}</span></div>
@@ -301,6 +315,77 @@
             showError(name, Array.isArray(messages) ? messages[0] : messages);
         });
     });
+
+    (function () {
+        var applyBtn = document.getElementById('coupon-apply');
+        var removeBtn = document.getElementById('coupon-remove');
+        var input = document.getElementById('coupon-input');
+        var errorEl = document.getElementById('coupon-error');
+        var appliedBox = document.getElementById('coupon-applied');
+        var formRow = document.getElementById('coupon-form-row');
+        var codeLabel = document.getElementById('coupon-code-label');
+
+        function money(n) { return '₹' + Number(n).toFixed(2); }
+
+        function clearCouponError() {
+            errorEl.classList.add('hidden');
+            errorEl.textContent = '';
+        }
+
+        function renderSummary(summary) {
+            document.getElementById('sum-subtotal').textContent = money(summary.subtotal);
+            document.getElementById('sum-shipping').textContent = money(summary.shipping);
+            document.getElementById('sum-tax').textContent = money(summary.tax);
+            document.getElementById('sum-total').textContent = money(summary.total);
+
+            var couponRow = document.getElementById('row-coupon');
+            if (summary.coupon_discount > 0) {
+                document.getElementById('sum-coupon-discount').textContent = '−' + money(summary.coupon_discount);
+                couponRow.classList.remove('hidden');
+            } else {
+                couponRow.classList.add('hidden');
+            }
+
+            if (summary.coupon) {
+                codeLabel.textContent = summary.coupon.code;
+                appliedBox.classList.remove('hidden');
+                formRow.classList.add('hidden');
+            } else {
+                appliedBox.classList.add('hidden');
+                formRow.classList.remove('hidden');
+            }
+        }
+
+        function applyCoupon() {
+            var code = (input.value || '').trim();
+            if (!code) return;
+            clearCouponError();
+            AppAjax.request('{{ route('shop.cart.coupon.apply') }}', { method: 'POST', body: { code: code }, toast: false }).then(function (r) {
+                if (r.ok) {
+                    input.value = '';
+                    renderSummary(r.data.data);
+                } else {
+                    errorEl.textContent = r.data.message || 'Could not apply coupon.';
+                    errorEl.classList.remove('hidden');
+                }
+            });
+        }
+
+        applyBtn?.addEventListener('click', applyCoupon);
+        input?.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                applyCoupon();
+            }
+        });
+
+        removeBtn?.addEventListener('click', function () {
+            clearCouponError();
+            AppAjax.request('{{ route('shop.cart.coupon.remove') }}', { method: 'DELETE', toast: false }).then(function (r) {
+                if (r.ok) renderSummary(r.data.data);
+            });
+        });
+    })();
 })();
 </script>
 @endpush

@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\CmsPageController;
 use App\Http\Controllers\Admin\ContactMessageController as AdminContactMessageController;
+use App\Http\Controllers\Admin\CouponController as AdminCouponController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EmailTemplateController;
 use App\Http\Controllers\Admin\HomepageController;
@@ -62,6 +63,10 @@ Route::post('/newsletter/subscribe', [NewsletterController::class, 'store'])->mi
 Route::get('/cart', [CartController::class, 'index'])->name('shop.cart');
 Route::get('/cart/summary', [CartController::class, 'summary'])->name('shop.cart.summary');
 Route::post('/cart', [CartController::class, 'store'])->name('shop.cart.store');
+// Registered before the /cart/{item} wildcard routes below, otherwise "coupon"
+// would match {item} and never reach these.
+Route::post('/cart/coupon', [CartController::class, 'applyCoupon'])->name('shop.cart.coupon.apply');
+Route::delete('/cart/coupon', [CartController::class, 'removeCoupon'])->name('shop.cart.coupon.remove');
 Route::put('/cart/{item}', [CartController::class, 'update'])->name('shop.cart.update');
 Route::delete('/cart/{item}', [CartController::class, 'destroy'])->name('shop.cart.destroy');
 
@@ -176,6 +181,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         Route::middleware('permission:products.manage')->group(function () {
             Route::resource('products', AdminProductController::class)->except(['show']);
+        });
+        Route::middleware('permission:coupons.manage')->group(function () {
+            Route::resource('coupons', AdminCouponController::class)->except(['show']);
         });
         Route::middleware('permission:orders.manage')->group(function () {
             Route::get('orders', [AdminOrderController::class, 'index'])->name('orders.index');

@@ -65,6 +65,9 @@ $statusClass = $statusColors[$order->status] ?? 'bg-stone-100 text-stone-700';
             </div>
             <div class="px-5 sm:px-6 py-4 border-t border-[var(--line)] space-y-2 text-sm bg-cream/40">
                 <div class="flex justify-between"><span class="text-stone-500">Subtotal</span><span>₹{{ number_format($order->subtotal, 2) }}</span></div>
+                @if($order->coupon_discount > 0)
+                    <div class="flex justify-between text-emerald-700"><span>Coupon ({{ $order->coupon_code }})</span><span>−₹{{ number_format($order->coupon_discount, 2) }}</span></div>
+                @endif
                 <div class="flex justify-between"><span class="text-stone-500">Shipping</span><span>₹{{ number_format($order->shipping_amount, 2) }}</span></div>
                 <div class="flex justify-between"><span class="text-stone-500">GST ({{ $order->tax_percent }}%)</span><span>₹{{ number_format($order->tax_amount, 2) }}</span></div>
                 <div class="flex justify-between text-base font-semibold pt-2 border-t border-[var(--line)]"><span>Total</span><span class="text-brand">₹{{ number_format($order->total, 2) }}</span></div>

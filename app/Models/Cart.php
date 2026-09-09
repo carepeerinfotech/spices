@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['session_id', 'user_id'])]
+#[Fillable(['session_id', 'user_id', 'coupon_id'])]
 class Cart extends Model
 {
     public function items(): HasMany
@@ -18,6 +18,11 @@ class Cart extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function coupon(): BelongsTo
+    {
+        return $this->belongsTo(Coupon::class);
     }
 
     public function subtotal(): float

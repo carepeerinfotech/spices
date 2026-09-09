@@ -94,4 +94,34 @@ class CartController extends Controller
             return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
         }
     }
+
+    public function applyCoupon(Request $request)
+    {
+        $data = $request->validate([
+            'code' => ['required', 'string', 'max:50'],
+        ]);
+
+        try {
+            $cart = $this->cartService->applyCoupon($this->cartService->getCart(), $data['code']);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Coupon applied.',
+                'data' => $this->cartService->summary($cart),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+        }
+    }
+
+    public function removeCoupon()
+    {
+        $cart = $this->cartService->removeCoupon($this->cartService->getCart());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Coupon removed.',
+            'data' => $this->cartService->summary($cart),
+        ]);
+    }
 }

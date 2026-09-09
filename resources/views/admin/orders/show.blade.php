@@ -142,6 +142,9 @@
                 <div class="flex justify-between text-emerald-700"><span>Offer savings</span><span>−₹{{ number_format($order->offersDiscount(), 2) }}</span></div>
             @endif
             <div class="flex justify-between"><span>Subtotal</span><span>₹{{ number_format($order->subtotal, 2) }}</span></div>
+            @if($order->coupon_discount > 0)
+                <div class="flex justify-between text-emerald-700"><span>Coupon ({{ $order->coupon_code }})</span><span>−₹{{ number_format($order->coupon_discount, 2) }}</span></div>
+            @endif
             <div class="flex justify-between"><span>Shipping</span><span>₹{{ number_format($order->shipping_amount, 2) }}</span></div>
             <div class="flex justify-between"><span>GST</span><span>₹{{ number_format($order->tax_amount, 2) }}</span></div>
             <div class="flex justify-between font-semibold text-base pt-2 border-t border-slate-100"><span>Total</span><span>₹{{ number_format($order->total, 2) }}</span></div>

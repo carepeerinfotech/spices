@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Manage Contact Messages', 'slug' => 'contact-messages.manage', 'group' => 'CMS'],
             ['name' => 'Manage Categories', 'slug' => 'categories.manage', 'group' => 'Catalog'],
             ['name' => 'Manage Products', 'slug' => 'products.manage', 'group' => 'Catalog'],
+            ['name' => 'Manage Coupons', 'slug' => 'coupons.manage', 'group' => 'Catalog'],
             ['name' => 'Manage Orders', 'slug' => 'orders.manage', 'group' => 'Orders'],
         ];
 
