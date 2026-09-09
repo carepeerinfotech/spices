@@ -1549,6 +1549,10 @@ footer {
     line-height: 1;
   }
 
+  aside form.relative {
+    display: none;
+  }
+
   @media (max-width: 600px) {
     .whatsapp-float {
       width: 52px;
