@@ -13,8 +13,17 @@
         if ($activeImageIndex === false) $activeImageIndex = 0;
     @endphp
     <div class="grid lg:grid-cols-2 gap-8 lg:gap-10">
-        <div>
-            <div class="gallery-viewport relative rounded-2xl overflow-hidden bg-cream-dark aspect-square mb-3 shadow-md shadow-stone-900/5" id="gallery-viewport">
+        <div class="flex flex-col-reverse sm:flex-row gap-3">
+            @if($product->images->count() > 1)
+                <div class="flex sm:flex-col gap-2 overflow-x-auto sm:overflow-x-visible sm:overflow-y-auto sm:max-h-[520px] sm:w-20 shrink-0" id="gallery-thumbs">
+                    @foreach($product->images as $image)
+                        <button type="button" class="thumb w-16 h-16 sm:w-full sm:h-20 shrink-0 rounded-lg overflow-hidden border {{ $loop->index === $activeImageIndex ? 'border-brand' : 'border-[var(--line)]' }}" data-index="{{ $loop->index }}">
+                            <img src="{{ $image->url() }}" alt="" class="w-full h-full object-cover">
+                        </button>
+                    @endforeach
+                </div>
+            @endif
+            <div class="gallery-viewport relative rounded-2xl overflow-hidden bg-cream-dark aspect-square shadow-md shadow-stone-900/5 flex-1 min-w-0" id="gallery-viewport">
                 <div class="gallery-zoom" id="gallery-zoom">
                     <img id="main-image" src="{{ $mainSrc }}" alt="{{ $product->name }}" class="gallery-image w-full h-full object-cover">
                 </div>
@@ -30,15 +39,6 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><path d="M11 8v6M8 11h6"/></svg>
                 </button>
             </div>
-            @if($product->images->count() > 1)
-                <div class="flex gap-2 overflow-x-auto" id="gallery-thumbs">
-                    @foreach($product->images as $image)
-                        <button type="button" class="thumb w-16 h-16 rounded-lg overflow-hidden border {{ $loop->index === $activeImageIndex ? 'border-brand' : 'border-[var(--line)]' }}" data-index="{{ $loop->index }}">
-                            <img src="{{ $image->url() }}" alt="" class="w-full h-full object-cover">
-                        </button>
-                    @endforeach
-                </div>
-            @endif
         </div>
         <div>
             <p class="text-sm text-stone-500 mb-2">{{ $product->category?->name }}</p>
@@ -209,7 +209,7 @@
     currentImageIndex = index;
     mainImage.src = galleryImages[index];
     document.querySelectorAll('#gallery-thumbs .thumb').forEach(function (thumb, i) {
-      thumb.className = 'thumb w-16 h-16 rounded-lg overflow-hidden border ' + (i === index ? 'border-brand' : 'border-[var(--line)]');
+      thumb.className = 'thumb w-16 h-16 sm:w-full sm:h-20 shrink-0 rounded-lg overflow-hidden border ' + (i === index ? 'border-brand' : 'border-[var(--line)]');
     });
     if (lightbox?.classList.contains('is-open')) lightboxImage.src = galleryImages[index];
   }
@@ -217,7 +217,7 @@
   function showUnlistedImage(src) {
     mainImage.src = src;
     document.querySelectorAll('#gallery-thumbs .thumb').forEach(function (thumb) {
-      thumb.className = 'thumb w-16 h-16 rounded-lg overflow-hidden border border-[var(--line)]';
+      thumb.className = 'thumb w-16 h-16 sm:w-full sm:h-20 shrink-0 rounded-lg overflow-hidden border border-[var(--line)]';
     });
   }
 

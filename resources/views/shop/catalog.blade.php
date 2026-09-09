@@ -25,7 +25,7 @@
                         </button>
                     </form>
 
-                    <div class="rounded-2xl bg-white border border-[var(--line)] overflow-hidden">
+                    <div class="rounded-2xl bg-white border border-[var(--line)] overflow-hidden" style="margin-top: 0;">
                         <button type="button"
                             class="cat-toggle w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-stone-800 border-b border-[var(--line)] lg:pointer-events-none"
                             aria-expanded="false" aria-controls="category-list">
