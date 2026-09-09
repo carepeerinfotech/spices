@@ -40,7 +40,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->validateCsrfTokens(except: [
             'payments/paytm/callback',
-            'webhooks/shiprocket/*',
+            'webhooks/courier/*',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

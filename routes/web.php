@@ -134,7 +134,7 @@ Route::middleware('auth')->group(function () {
 
 Route::post('/payments/paytm/callback', [PaymentController::class, 'paytmCallback'])->name('payments.paytm.callback');
 
-Route::post('/webhooks/shiprocket/{token}', [ShiprocketWebhookController::class, 'handle'])->name('webhooks.shiprocket');
+Route::post('/webhooks/courier/{token}', [ShiprocketWebhookController::class, 'handle'])->name('webhooks.shiprocket');
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('login', [AdminAuthController::class, 'showLogin'])->name('login');
