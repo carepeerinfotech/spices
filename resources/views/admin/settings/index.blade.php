@@ -92,12 +92,20 @@
                             <option value="live" @selected(($shiprocket['driver'] ?? '') === 'live')>Live API</option>
                         </select>
                     </div>
-                    <div><label class="text-sm">Pickup location name</label><input name="pickup_location" value="{{ $shiprocket['pickup_location'] ?? 'Primary' }}" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></div>
+                    <div>
+                        <label class="text-sm">Pickup location name</label>
+                        <input name="pickup_location" value="{{ $shiprocket['pickup_location'] ?? 'Primary' }}" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2">
+                        <p class="text-xs text-slate-500 mt-1">Must exactly match (case &amp; spelling) a pickup address nickname registered in Shiprocket.</p>
+                    </div>
                     <div><label class="text-sm">API email</label><input name="email" value="{{ $shiprocket['email'] ?? '' }}" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></div>
                     <div><label class="text-sm">API password {{ $masked['shiprocket_password'] ? '('.$masked['shiprocket_password'].')' : '' }}</label><input name="password" placeholder="Leave blank to keep" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></div>
                     <div><label class="text-sm">Channel ID</label><input name="channel_id" value="{{ $shiprocket['channel_id'] ?? '' }}" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></div>
                 </div>
-                <button type="button" id="test-shiprocket" class="text-sm text-teal-700">Test Shiprocket connection</button>
+                <div class="flex items-center gap-3">
+                    <button type="button" id="test-shiprocket" class="text-sm text-teal-700">Test Shiprocket connection</button>
+                    <button type="button" id="fetch-pickup-locations" class="text-sm text-teal-700">Look up pickup locations from Shiprocket</button>
+                </div>
+                <ul id="pickup-locations-result" class="hidden text-xs text-slate-600 bg-slate-50 border border-slate-200 rounded-lg p-3 space-y-1"></ul>
 
                 <div class="pt-3 border-t border-slate-100 space-y-2">
                     <p class="text-sm font-medium">Order status webhook</p>
@@ -133,6 +141,32 @@ document.getElementById('test-paytm')?.addEventListener('click', function () {
 });
 document.getElementById('test-shiprocket')?.addEventListener('click', function () {
   AppAjax.request(@json(route('admin.settings.test-shiprocket')), { method: 'POST', body: {} });
+});
+document.getElementById('fetch-pickup-locations')?.addEventListener('click', function () {
+  var list = document.getElementById('pickup-locations-result');
+  AppAjax.request(@json(route('admin.settings.shiprocket-pickup-locations')), { method: 'POST', body: {}, toast: false })
+    .then(function (result) {
+      list.innerHTML = '';
+      list.classList.remove('hidden');
+
+      if (!result.ok || !result.data.success) {
+        list.innerHTML = '<li class="text-red-600">' + (result.data.message || 'Unable to fetch pickup locations.') + '</li>';
+        return;
+      }
+
+      var locations = result.data.locations || [];
+      if (!locations.length) {
+        list.innerHTML = '<li>No pickup addresses found on this Shiprocket account.</li>';
+        return;
+      }
+
+      locations.forEach(function (loc) {
+        var li = document.createElement('li');
+        li.innerHTML = 'Nickname: <code class="font-mono bg-white border border-slate-200 rounded px-1">' +
+          (loc.pickup_location || '') + '</code> — ' + [loc.address, loc.city, loc.state, loc.pin_code].filter(Boolean).join(', ');
+        list.appendChild(li);
+      });
+    });
 });
 </script>
 @endpush

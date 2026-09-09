@@ -206,5 +206,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('settings', [SettingsController::class, 'update'])->name('settings.update');
         Route::post('settings/test-paytm', [SettingsController::class, 'testPaytm'])->name('settings.test-paytm');
         Route::post('settings/test-shiprocket', [SettingsController::class, 'testShiprocket'])->name('settings.test-shiprocket');
+        Route::post('settings/shiprocket-pickup-locations', [SettingsController::class, 'shiprocketPickupLocations'])->name('settings.shiprocket-pickup-locations');
     });
 });

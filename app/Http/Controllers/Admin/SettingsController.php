@@ -147,4 +147,13 @@ class SettingsController extends Controller
     {
         return response()->json($shipping->driver()->testConnection());
     }
+
+    public function shiprocketPickupLocations(ShippingManager $shipping)
+    {
+        try {
+            return response()->json(['success' => true, 'locations' => $shipping->driver()->pickupLocations()]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
 }
