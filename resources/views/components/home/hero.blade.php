@@ -2,13 +2,13 @@
   <div class="slides">
     <!-- Replace the src values below with your own banner images anytime. -->
      <article class="slide active">
-      <img src="{{ asset('assets/images/banner-neww3.jpg') }}" alt="Pure Powder Spices" />
+      <img src="{{ asset('assets/images/spices-banner1.jpg') }}" alt="Pure Powder Spices" />
     </article> 
     <article class="slide">
-      <img src="{{ asset('assets/images/banner-neww4.jpg') }}" alt="Blended Masala" />
+      <img src="{{ asset('assets/images/atta1.jpg') }}" alt="Blended Masala" />
     </article> 
     <article class="slide">
-      <img src="{{ asset('assets/images/banner-neww2.jpg') }}" alt="Vrat Atta" />
+      <img src="{{ asset('assets/images/mix-product1.jpg') }}" alt="Vrat Atta" />
     </article>  
     <article class="slide">
       <img
