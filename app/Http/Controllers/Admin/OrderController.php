@@ -45,4 +45,24 @@ class OrderController extends Controller
             'status' => $order->status,
         ]);
     }
+
+    public function updateAddress(Request $request, Order $order)
+    {
+        $data = $request->validate([
+            'customer_name' => ['required', 'string', 'max:255'],
+            'customer_phone' => ['required', 'string', 'max:20'],
+            'shipping_address' => ['required', 'string', 'max:500'],
+            'shipping_city' => ['required', 'string', 'max:100'],
+            'shipping_state' => ['required', 'string', 'max:100'],
+            'shipping_postal_code' => ['required', 'regex:/^\d{6}$/'],
+            'shipping_country' => ['required', Rule::in(array_keys(config('countries')))],
+        ]);
+
+        $order->update($data);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Shipping address updated.',
+        ]);
+    }
 }

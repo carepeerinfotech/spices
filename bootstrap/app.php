@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -11,6 +12,15 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+    ->withSchedule(function (Schedule $schedule): void {
+        // Drains the mail (and any other) queue without a persistent worker —
+        // just the one cron entry shared hosting already supports:
+        // * * * * * php artisan schedule:run. No-op when QUEUE_CONNECTION=sync,
+        // since jobs run inline at dispatch and never reach the queue table.
+        $schedule->command('queue:work --stop-when-empty --max-time=50 --tries=3')
+            ->everyMinute()
+            ->withoutOverlapping();
+    })
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'admin' => \App\Http\Middleware\EnsureAdmin::class,
@@ -30,6 +40,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->validateCsrfTokens(except: [
             'payments/paytm/callback',
+            'webhooks/shiprocket/*',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

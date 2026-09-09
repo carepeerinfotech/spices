@@ -64,42 +64,7 @@ class ShiprocketProvider implements ShippingProvider
 
     public function createOrder(Order $order): Shipment
     {
-        $pickup = $this->settings->get('shiprocket', 'pickup_location', 'Primary');
-        $payload = [
-            'order_id' => $order->order_number,
-            'order_date' => $order->created_at?->format('Y-m-d H:i') ?? now()->format('Y-m-d H:i'),
-            'pickup_location' => $pickup,
-            'billing_customer_name' => $order->billing_name ?: $order->customer_name,
-            'billing_last_name' => '',
-            'billing_address' => $order->billing_address ?: $order->shipping_address,
-            'billing_city' => $order->billing_city ?: $order->shipping_city,
-            'billing_pincode' => $order->billing_postal_code ?: $order->shipping_postal_code,
-            'billing_state' => $order->billing_state ?: $order->shipping_state,
-            'billing_country' => $order->billing_country ?: 'India',
-            'billing_email' => $order->billing_email ?: $order->customer_email,
-            'billing_phone' => $order->billing_phone ?: $order->customer_phone,
-            'shipping_is_billing' => (bool) $order->billing_same_as_shipping,
-            'shipping_customer_name' => $order->customer_name,
-            'shipping_address' => $order->shipping_address,
-            'shipping_city' => $order->shipping_city,
-            'shipping_pincode' => $order->shipping_postal_code,
-            'shipping_state' => $order->shipping_state,
-            'shipping_country' => $order->shipping_country ?: 'India',
-            'shipping_email' => $order->customer_email,
-            'shipping_phone' => $order->customer_phone,
-            'order_items' => $order->items->map(fn ($item) => [
-                'name' => $item->product_name.($item->variant_label ? ' - '.$item->variant_label : ''),
-                'sku' => $item->product_sku,
-                'units' => $item->quantity,
-                'selling_price' => (float) $item->price,
-            ])->values()->all(),
-            'payment_method' => $order->payment_method === 'cod' ? 'COD' : 'Prepaid',
-            'sub_total' => (float) $order->subtotal,
-            'length' => 10,
-            'breadth' => 10,
-            'height' => 10,
-            'weight' => max((float) ($order->shipping_weight ?: 0.5), 0.5),
-        ];
+        $payload = ['order_id' => $order->order_number] + $this->orderPayload($order);
 
         $response = $this->http()->post($this->base.'/orders/create/adhoc', $payload)->json();
 
@@ -120,6 +85,76 @@ class ShiprocketProvider implements ShippingProvider
         $this->log($shipment, 'create_order', 'created', 'Shiprocket order created.');
 
         return $shipment;
+    }
+
+    public function updateOrder(Order $order, Shipment $shipment): Shipment
+    {
+        if ($shipment->awb_code) {
+            throw new \RuntimeException('This shipment already has an AWB assigned, so Shiprocket no longer allows editing order/address details. Cancel and recreate the shipment instead.');
+        }
+
+        $payload = ['order_id' => $order->order_number] + $this->orderPayload($order);
+
+        $response = $this->http()->post($this->base.'/orders/update/adhoc', $payload)->json();
+
+        if (! data_get($response, 'success')) {
+            throw new \RuntimeException(data_get($response, 'message', 'Unable to update Shiprocket order.'));
+        }
+
+        $shipment->update([
+            'shipment_id' => (string) (data_get($response, 'shipment_id') ?: $shipment->shipment_id),
+            'request_payload' => $payload,
+            'response_payload' => $response,
+            'last_error' => null,
+        ]);
+
+        $this->log($shipment, 'update_order', $shipment->status, 'Shiprocket order updated.');
+
+        return $shipment->fresh();
+    }
+
+    private function orderPayload(Order $order): array
+    {
+        $pickup = $this->settings->get('shiprocket', 'pickup_location', 'Primary');
+        $billingAddress = $order->billing_address ?: $order->shipping_address;
+        $shippingAddress = $order->shipping_address;
+
+        return [
+            'order_date' => $order->created_at?->format('Y-m-d H:i') ?? now()->format('Y-m-d H:i'),
+            'pickup_location' => $pickup,
+            'billing_customer_name' => $order->billing_name ?: $order->customer_name,
+            'billing_last_name' => '',
+            'billing_address' => $billingAddress,
+            'billing_address_2' => $this->addressLine2($billingAddress, $order->billing_postal_code ?: $order->shipping_postal_code),
+            'billing_city' => $order->billing_city ?: $order->shipping_city,
+            'billing_pincode' => $order->billing_postal_code ?: $order->shipping_postal_code,
+            'billing_state' => $order->billing_state ?: $order->shipping_state,
+            'billing_country' => $this->countryName($order->billing_country),
+            'billing_email' => $order->billing_email ?: $order->customer_email,
+            'billing_phone' => $order->billing_phone ?: $order->customer_phone,
+            'shipping_is_billing' => (bool) $order->billing_same_as_shipping,
+            'shipping_customer_name' => $order->customer_name,
+            'shipping_address' => $shippingAddress,
+            'shipping_address_2' => $this->addressLine2($shippingAddress, $order->shipping_postal_code),
+            'shipping_city' => $order->shipping_city,
+            'shipping_pincode' => $order->shipping_postal_code,
+            'shipping_state' => $order->shipping_state,
+            'shipping_country' => $this->countryName($order->shipping_country),
+            'shipping_email' => $order->customer_email,
+            'shipping_phone' => $order->customer_phone,
+            'order_items' => $order->items->map(fn ($item) => [
+                'name' => $item->product_name.($item->variant_label ? ' - '.$item->variant_label : ''),
+                'sku' => $item->product_sku,
+                'units' => $item->quantity,
+                'selling_price' => (float) $item->price,
+            ])->values()->all(),
+            'payment_method' => $order->payment_method === 'cod' ? 'COD' : 'Prepaid',
+            'sub_total' => (float) $order->subtotal,
+            'length' => 10,
+            'breadth' => 10,
+            'height' => 10,
+            'weight' => max((float) ($order->shipping_weight ?: 0.5), 0.5),
+        ];
     }
 
     public function assignAwb(Shipment $shipment, ?string $courierId = null): Shipment
@@ -182,6 +217,17 @@ class ShiprocketProvider implements ShippingProvider
         $shipment->update(['tracking_data' => $response]);
 
         return $response;
+    }
+
+    public function getOrderDetails(Shipment $shipment): array
+    {
+        if (! $shipment->provider_order_id) {
+            return [];
+        }
+
+        $response = $this->http()->get($this->base.'/orders/show/'.$shipment->provider_order_id)->json();
+
+        return data_get($response, 'data', $response ?? []);
     }
 
     public function cancel(Shipment $shipment): Shipment
@@ -252,6 +298,24 @@ class ShiprocketProvider implements ShippingProvider
         $response = $this->http()->get($this->base.'/settings/company/pickup')->json();
 
         return data_get($response, 'data.shipping_address', []);
+    }
+
+    private function addressLine2(?string $address, ?string $postalCode): string
+    {
+        if ($address && preg_match('/\d/', $address)) {
+            return '';
+        }
+
+        return $postalCode ? 'PIN '.$postalCode : '';
+    }
+
+    private function countryName(?string $country): string
+    {
+        if (! $country) {
+            return 'India';
+        }
+
+        return config('countries.'.$country, $country);
     }
 
     private function token(bool $force = false): string

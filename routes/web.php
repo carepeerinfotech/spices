@@ -37,6 +37,7 @@ use App\Http\Controllers\Shop\ShippingPolicyController;
 use App\Http\Controllers\Shop\ShippingQuoteController;
 use App\Http\Controllers\Shop\ShopController;
 use App\Http\Controllers\Shop\TermsController;
+use App\Http\Controllers\Webhooks\ShiprocketWebhookController;
 use App\Http\Middleware\EnsureAdmin;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
@@ -133,6 +134,8 @@ Route::middleware('auth')->group(function () {
 
 Route::post('/payments/paytm/callback', [PaymentController::class, 'paytmCallback'])->name('payments.paytm.callback');
 
+Route::post('/webhooks/shiprocket/{token}', [ShiprocketWebhookController::class, 'handle'])->name('webhooks.shiprocket');
+
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('login', [AdminAuthController::class, 'showLogin'])->name('login');
     Route::post('login', [AdminAuthController::class, 'login'])->middleware('throttle:10,1')->name('login.submit');
@@ -189,10 +192,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('orders', [AdminOrderController::class, 'index'])->name('orders.index');
             Route::get('orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
             Route::patch('orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.status');
+            Route::patch('orders/{order}/address', [AdminOrderController::class, 'updateAddress'])->name('orders.address');
             Route::post('orders/{order}/shiprocket', [ShipmentController::class, 'sendToShiprocket'])->name('orders.shiprocket');
             Route::post('shipments/{shipment}/awb', [ShipmentController::class, 'assignAwb'])->name('shipments.awb');
             Route::post('shipments/{shipment}/pickup', [ShipmentController::class, 'pickup'])->name('shipments.pickup');
             Route::get('shipments/{shipment}/track', [ShipmentController::class, 'track'])->name('shipments.track');
+            Route::get('shipments/{shipment}/details', [ShipmentController::class, 'orderDetails'])->name('shipments.details');
             Route::post('shipments/{shipment}/cancel', [ShipmentController::class, 'cancel'])->name('shipments.cancel');
             Route::post('shipments/{shipment}/return', [ShipmentController::class, 'createReturn'])->name('shipments.return');
         });

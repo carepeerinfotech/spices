@@ -68,6 +68,23 @@ class FakeShiprocketProvider implements ShippingProvider
         return $shipment;
     }
 
+    public function updateOrder(Order $order, Shipment $shipment): Shipment
+    {
+        if ($shipment->awb_code) {
+            throw new \RuntimeException('This shipment already has an AWB assigned, so it can no longer be edited. Cancel and recreate the shipment instead.');
+        }
+
+        $shipment->update([
+            'freight_charge' => $order->shipping_amount,
+            'etd_days' => $order->estimated_delivery_days,
+            'response_payload' => ['ok' => true, 'updated' => true],
+        ]);
+
+        $this->log($shipment, 'update_order', $shipment->status, 'Fake Shiprocket order updated.');
+
+        return $shipment->fresh();
+    }
+
     public function assignAwb(Shipment $shipment, ?string $courierId = null): Shipment
     {
         $shipment->update([
@@ -109,6 +126,35 @@ class FakeShiprocketProvider implements ShippingProvider
         $shipment->update(['tracking_data' => $data]);
 
         return $data;
+    }
+
+    public function getOrderDetails(Shipment $shipment): array
+    {
+        $order = $shipment->order;
+
+        return [
+            'id' => $shipment->provider_order_id,
+            'channel_order_id' => $order->order_number,
+            'status' => ucfirst(str_replace('_', ' ', $shipment->status)),
+            'payment_method' => $order->payment_method === 'cod' ? 'COD' : 'Prepaid',
+            'total' => (float) $order->total,
+            'customer_name' => $order->customer_name,
+            'customer_email' => $order->customer_email,
+            'customer_phone' => $order->customer_phone,
+            'shipping_address' => $order->shipping_address,
+            'shipping_city' => $order->shipping_city,
+            'shipping_state' => $order->shipping_state,
+            'shipping_pincode' => $order->shipping_postal_code,
+            'shipping_country' => $order->shipping_country,
+            'courier_name' => $shipment->courier_name,
+            'awb_code' => $shipment->awb_code,
+            'products' => $order->items->map(fn ($item) => [
+                'name' => $item->product_name,
+                'sku' => $item->product_sku,
+                'units' => $item->quantity,
+                'selling_price' => (float) $item->price,
+            ])->values()->all(),
+        ];
     }
 
     public function cancel(Shipment $shipment): Shipment

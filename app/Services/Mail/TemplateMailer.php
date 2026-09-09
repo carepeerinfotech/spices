@@ -2,6 +2,7 @@
 
 namespace App\Services\Mail;
 
+use App\Jobs\SendTemplateMail;
 use App\Models\EmailTemplate;
 use App\Services\Settings\SettingsService;
 use Illuminate\Support\Facades\Config;
@@ -117,5 +118,18 @@ class TemplateMailer
         }
 
         return true;
+    }
+
+    /**
+     * Same as send(), but off the request. With QUEUE_CONNECTION=sync (the
+     * shared-hosting-friendly default, no worker or cron required) this still
+     * runs immediately and inline; with a real queue connection it's handed
+     * to a worker so checkout doesn't wait on SMTP.
+     *
+     * @param  string|array<int, string>  $to
+     */
+    public function queue(string $slug, string|array $to, array $data = []): void
+    {
+        SendTemplateMail::dispatch($slug, $to, $data);
     }
 }

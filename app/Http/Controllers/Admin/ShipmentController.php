@@ -18,16 +18,13 @@ class ShipmentController extends Controller
 
     public function sendToShiprocket(Order $order)
     {
-        if ($order->shipment) {
-            return response()->json(['success' => false, 'message' => 'Shipment already exists.'], 422);
-        }
-
         try {
-            $shipment = $this->shipping->driver()->createOrder($order->load('items'));
+            $existed = (bool) $order->shipment;
+            $shipment = $this->shipping->pushOrder($order);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Order sent to Shiprocket.',
+                'message' => $existed ? 'Shiprocket order updated.' : 'Order sent to Shiprocket.',
                 'shipment' => $shipment,
             ]);
         } catch (\Throwable $e) {
@@ -74,6 +71,17 @@ class ShipmentController extends Controller
             $tracking = $this->shipping->driver()->track($shipment);
 
             return response()->json(['success' => true, 'tracking' => $tracking, 'shipment' => $shipment->fresh()]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+        }
+    }
+
+    public function orderDetails(Shipment $shipment)
+    {
+        try {
+            $details = $this->shipping->driver()->getOrderDetails($shipment);
+
+            return response()->json(['success' => true, 'details' => $details]);
         } catch (\Throwable $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
         }

@@ -290,6 +290,12 @@ class CheckoutController extends Controller
                 $this->sendAccountCreatedMail($account);
             }
 
+            // Prepaid orders go to Shiprocket once payment is confirmed
+            // (see PaymentController); COD has no payment gate to wait on.
+            if ($data['payment_method'] === 'cod') {
+                $this->pushToShiprocket($order);
+            }
+
             if ($data['payment_method'] === 'paytm') {
                 $payment = $this->payments->paytm()->initiate($order);
 
@@ -396,13 +402,28 @@ class CheckoutController extends Controller
     }
 
     /**
-     * Notify the customer, then send the store owners their own copy.
-     * Mail failures must never roll back a paid-for order.
+     * Push the order to Shiprocket. Best-effort: a Shiprocket outage must
+     * never block order placement or payment confirmation, so failures are
+     * only reported and left for the admin to retry from the order page.
+     */
+    private function pushToShiprocket(Order $order): void
+    {
+        try {
+            $this->shipping->pushOrder($order);
+        } catch (\Throwable $e) {
+            report($e);
+        }
+    }
+
+    /**
+     * Notify the customer, then send the store owners their own copy. Queued
+     * so checkout doesn't wait on SMTP; mail failures must never roll back a
+     * paid-for order either way.
      */
     private function sendOrderNotifications(Order $order): void
     {
         try {
-            $this->mailer->send('order_placed', $order->customer_email, OrderMailData::customer($order));
+            $this->mailer->queue('order_placed', $order->customer_email, OrderMailData::customer($order));
         } catch (\Throwable $e) {
             report($e);
         }
@@ -413,7 +434,7 @@ class CheckoutController extends Controller
         }
 
         try {
-            $this->mailer->send('order_placed_admin', $admins, OrderMailData::admin($order));
+            $this->mailer->queue('order_placed_admin', $admins, OrderMailData::admin($order));
         } catch (\Throwable $e) {
             report($e);
         }

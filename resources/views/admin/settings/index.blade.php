@@ -98,6 +98,26 @@
                     <div><label class="text-sm">Channel ID</label><input name="channel_id" value="{{ $shiprocket['channel_id'] ?? '' }}" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></div>
                 </div>
                 <button type="button" id="test-shiprocket" class="text-sm text-teal-700">Test Shiprocket connection</button>
+
+                <div class="pt-3 border-t border-slate-100 space-y-2">
+                    <p class="text-sm font-medium">Order status webhook</p>
+                    <p class="text-xs text-slate-500">
+                        In Shiprocket: Settings → API → Configure → Webhook. Paste this URL as the endpoint
+                        and set the type to Real Time — order status here updates automatically when Shiprocket
+                        reports a shipment as shipped or delivered.
+                    </p>
+                    <div>
+                        <label class="text-sm">Webhook URL</label>
+                        <input type="text" readonly onclick="this.select()"
+                               value="{{ route('webhooks.shiprocket', ['token' => $shiprocket['webhook_token'] ?? '']) }}"
+                               class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm font-mono">
+                    </div>
+                    <div>
+                        <label class="text-sm">Webhook token</label>
+                        <input name="webhook_token" value="{{ $shiprocket['webhook_token'] ?? '' }}" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-sm">
+                        <p class="text-xs text-slate-500 mt-1">Part of the URL above. Change it (and update Shiprocket) if it's ever leaked.</p>
+                    </div>
+                </div>
             @endif
 
             <button type="submit" class="rounded-lg bg-teal-700 hover:bg-teal-600 text-white px-4 py-2 text-sm">Save {{ $title }}</button>

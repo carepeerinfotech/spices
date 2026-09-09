@@ -7,6 +7,7 @@ use App\Services\Payments\PaymentGatewayManager;
 use App\Services\Settings\SettingsService;
 use App\Services\Shipping\ShippingManager;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class SettingsController extends Controller
 {
@@ -14,6 +15,12 @@ class SettingsController extends Controller
 
     public function index()
     {
+        // Generated once so a webhook URL is ready to paste into Shiprocket
+        // from the first visit to this page, no extra "generate" step.
+        if (blank($this->settings->get('shiprocket', 'webhook_token'))) {
+            $this->settings->set('shiprocket', 'webhook_token', Str::random(40));
+        }
+
         return view('admin.settings.index', [
             'features' => $this->settings->group('features'),
             'commerce' => $this->settings->group('commerce'),
@@ -120,6 +127,7 @@ class SettingsController extends Controller
                 'password' => $request->input('password'),
                 'pickup_location' => $request->input('pickup_location', 'Primary'),
                 'channel_id' => $request->input('channel_id'),
+                'webhook_token' => $request->input('webhook_token') ?: $this->settings->get('shiprocket', 'webhook_token'),
             ], [
                 'enabled' => ['type' => 'boolean'],
                 'password' => ['encrypted' => true],

@@ -13,11 +13,15 @@ interface ShippingProvider
 
     public function createOrder(Order $order): Shipment;
 
+    public function updateOrder(Order $order, Shipment $shipment): Shipment;
+
     public function assignAwb(Shipment $shipment, ?string $courierId = null): Shipment;
 
     public function generatePickup(Shipment $shipment): Shipment;
 
     public function track(Shipment $shipment): array;
+
+    public function getOrderDetails(Shipment $shipment): array;
 
     public function cancel(Shipment $shipment): Shipment;
 

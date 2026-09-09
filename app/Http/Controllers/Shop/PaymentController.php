@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Shop;
 
 use App\Http\Controllers\Controller;
+use App\Models\Order;
 use App\Models\PaymentTransaction;
 use App\Services\Mail\TemplateMailer;
 use App\Services\Payments\PaymentGatewayManager;
+use App\Services\Shipping\ShippingManager;
 use Illuminate\Http\Request;
 
 class PaymentController extends Controller
@@ -13,6 +15,7 @@ class PaymentController extends Controller
     public function __construct(
         private PaymentGatewayManager $payments,
         private TemplateMailer $mailer,
+        private ShippingManager $shipping,
     ) {}
 
     public function fakePaytm(PaymentTransaction $transaction)
@@ -47,6 +50,8 @@ class PaymentController extends Controller
         ]);
 
         if ($txn->status === 'paid') {
+            $this->pushToShiprocket($txn->order);
+
             return redirect()->route('shop.checkout.success', $txn->order->order_number)
                 ->with('success', 'Payment successful.');
         }
@@ -66,9 +71,25 @@ class PaymentController extends Controller
         ]);
 
         if ($txn->status === 'paid') {
+            $this->pushToShiprocket($txn->order);
+
             return redirect()->route('shop.checkout.success', $txn->order->order_number);
         }
 
         return redirect()->route('shop.cart')->with('error', 'Payment failed.');
+    }
+
+    /**
+     * Best-effort: a Shiprocket outage must never block payment confirmation,
+     * so failures are only reported and left for the admin to retry from the
+     * order page.
+     */
+    private function pushToShiprocket(Order $order): void
+    {
+        try {
+            $this->shipping->pushOrder($order);
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 }
