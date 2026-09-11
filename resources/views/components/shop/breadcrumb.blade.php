@@ -2,8 +2,8 @@
 
 @if($title)
 <section class="relative overflow-hidden">
-    <div class="absolute inset-0 bg-cover bg-center bg-no-repeat sm:hidden" style="background-image:url('{{ asset('assets/images/breadcrumb-mobile1.jpg') }}')"></div>
-    <div class="absolute inset-0 bg-cover bg-center bg-no-repeat hidden sm:block" style="background-image:url('{{ asset('assets/images/breadcrumb-desktop.jpg') }}')"></div>
+    <div class="absolute inset-0 bg-cover bg-center bg-no-repeat sm:hidden" style="background-image:url('{{ asset('assets/images/breadd-mobb2.jpg') }}')"></div>
+    <div class="absolute inset-0 bg-cover bg-center bg-no-repeat hidden sm:block" style="background-image:url('{{ asset('assets/images/breadd-deskk2.jpg') }}')"></div>
 
     <div class="absolute inset-0 bg-gradient-to-b from-black/20 via-black/25 to-black/40"></div>
 
