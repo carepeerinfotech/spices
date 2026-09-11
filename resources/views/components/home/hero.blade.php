@@ -4,12 +4,13 @@
      <article class="slide active">
       <img src="{{ asset('assets/images/spices-banner1.jpg') }}" alt="Pure Powder Spices" />
     </article> 
-    <article class="slide">
-      <img src="{{ asset('assets/images/atta1.jpg') }}" alt="Blended Masala" />
-    </article> 
+    
     <article class="slide">
       <img src="{{ asset('assets/images/mix-product1.jpg') }}" alt="Vrat Atta" />
     </article>  
+    <article class="slide">
+      <img src="{{ asset('assets/images/atta1.jpg') }}" alt="Blended Masala" />
+    </article> 
     <article class="slide">
       <img
         src="{{ asset('assets/images/banner-neww1.jpg') }}"

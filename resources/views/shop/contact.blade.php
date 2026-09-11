@@ -25,7 +25,7 @@
                     </span>
                     <div>
                         <p class="text-xs uppercase tracking-wide text-white/60 mb-0.5">Phone</p>
-                        <a href="tel:9915954385" class="font-medium hover:text-gold transition-colors">9915954385</a>
+                        <a href="tel:9915954385" class="font-medium hover:text-gold transition-colors">+91 9915954385</a>
                     </div>
                 </div>
                 <div class="flex items-start gap-3">

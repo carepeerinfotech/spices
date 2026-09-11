@@ -49,6 +49,22 @@
     </div>
 </section>
 
+<section class="py-14 sm:py-20 bg-cream border-t border-[var(--line)]">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
+        <div class="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
+            <div>
+                <p class="text-brand text-xs font-semibold tracking-widest uppercase mb-2">Quality Assurance</p>
+                <h2 class="section-title text-left mb-4">Our In-House Testing Lab</h2>
+                <p class="text-stone-600 leading-relaxed mb-4">Every batch that leaves our facility is verified in our own in-house lab before it reaches your kitchen — checked for purity, moisture content and adulterants using standards that go beyond regulatory requirements.</p>
+                <p class="text-stone-600 leading-relaxed">This isn't outsourced or occasional testing — it's a permanent part of our production line, run by our own quality team, so every packet carries the same promise of purity our family has stood behind since 1974.</p>
+            </div>
+            <div class="rounded-2xl overflow-hidden shadow-md shadow-stone-900/5 aspect-[4/3]">
+                <img src="{{ asset('assets/images/spices-testing.jpg') }}" alt="Elephant Spices in-house lab testing spice purity" class="w-full h-full object-cover" loading="lazy">
+            </div>
+        </div>
+    </div>
+</section>
+
 <section class="py-14 sm:py-20">
     <div class="max-w-6xl mx-auto px-4 sm:px-6">
         <div class="grid sm:grid-cols-2 gap-6">
