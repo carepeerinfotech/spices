@@ -34,7 +34,7 @@
       <div>
         <h3>Contact Us</h3>
         <ul>
-          <li><a href="tel:9915954385">9915954385</a></li>
+          <li><a href="tel:9915954385">+91 9915954385</a></li>
           <li><a href="mailto:info@elephantspices.com">info@elephantspices.com</a></li>
           <li>Amritsar Haldi Sales Corporation,
             F 22/44, Public Sahara Gali, Opposite Pillar No. 67 ,
