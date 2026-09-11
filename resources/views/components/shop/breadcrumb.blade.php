@@ -7,7 +7,7 @@
 
     <div class="absolute inset-0 bg-gradient-to-b from-black/20 via-black/25 to-black/40"></div>
 
-    <div class="relative max-w-6xl mx-auto px-4 sm:px-6 text-center flex items-center justify-center h-[300px] sm:h-[215px]">
+    <div class="relative max-w-6xl mx-auto px-4 sm:px-6 text-center flex items-center justify-center h-[300px] sm:h-[255px]">
         <h1 class="font-display text-3xl sm:text-5xl text-white tracking-tight">{{ $title }}</h1>
     </div>
 </section>
