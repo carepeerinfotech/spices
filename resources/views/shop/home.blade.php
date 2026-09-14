@@ -22,6 +22,7 @@
     <x-home.header :cart-count="$cartCount" />
     <main>
       <x-home.hero />
+      <x-home.marquee text="No Added Preservatives" />
       <x-home.featured-collections :categories="$categories" />
       <x-home.best-sellers :products="$featuredProducts" />
       <x-home.why-us />
