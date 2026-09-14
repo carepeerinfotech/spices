@@ -471,6 +471,49 @@ body.search-open {
     height: 32px;
   }
 }
+.marquee-strip {
+  background: var(--red);
+  color: #fff;
+  overflow: hidden;
+  padding: 14px 0;
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 22s linear infinite;
+}
+.marquee-content {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.marquee-content span {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.marquee-content span:not(.marquee-dot) {
+  padding: 0 20px;
+}
+.marquee-dot {
+  color: var(--gold);
+  font-size: 10px;
+}
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+}
 .cart-drawer {
   position: fixed;
   inset: 0;
