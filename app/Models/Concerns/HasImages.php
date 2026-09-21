@@ -29,6 +29,8 @@ trait HasImages
     }
 
     /**
+     * In the saved display order — the primary image stays where it was put,
+     * so the admin editor and the storefront gallery list images identically.
      * Reads through the loaded relation so a page rendering several
      * collections costs one query, not one per collection.
      */
@@ -36,13 +38,16 @@ trait HasImages
     {
         return $this->images
             ->where('collection', $collection)
-            ->sortByDesc('is_primary')
+            ->sortBy([['sort_order', 'asc'], ['id', 'asc']])
             ->values();
     }
 
+    /** The starred image, or the first in display order when none is starred. */
     public function image(string $collection = 'default'): ?Image
     {
-        return $this->imagesIn($collection)->first();
+        $images = $this->imagesIn($collection);
+
+        return $images->firstWhere('is_primary', true) ?? $images->first();
     }
 
     public function imageUrlFor(string $collection = 'default'): ?string

@@ -141,6 +141,65 @@ class ProductImageTest extends TestCase
         $this->assertSame(1, $product->imagesIn('gallery')->where('is_primary', true)->count());
     }
 
+    public function test_starring_an_image_does_not_move_it_in_the_admin_gallery(): void
+    {
+        Storage::fake('public');
+        $admin = $this->admin();
+
+        $product = $this->createProductWith($admin, 3);
+        $ids = $product->imagesIn('gallery')->pluck('id')->all();
+
+        $this->actingAs($admin)->postJson(route('admin.images.primary', $ids[1]))->assertOk();
+
+        $product->refresh()->unsetRelation('images');
+        $this->assertSame($ids, $product->imagesIn('gallery')->pluck('id')->all());
+        $this->assertSame($ids[1], $product->image('gallery')->id);
+
+        // The editor lists thumbnails in saved order, not starred-first, so a
+        // drag after reloading persists the order the admin actually sees.
+        $this->actingAs($admin)
+            ->get(route('admin.products.edit', $product))
+            ->assertOk()
+            ->assertSeeInOrder(array_map(fn ($id) => 'data-image-id="'.$id.'"', $ids), false);
+    }
+
+    public function test_product_page_opens_on_the_starred_image_and_keeps_the_saved_order(): void
+    {
+        Storage::fake('public');
+        $admin = $this->admin();
+
+        $product = $this->createProductWith($admin, 4);
+        $images = $product->imagesIn('gallery');
+
+        $this->actingAs($admin)->postJson(route('admin.images.primary', $images[1]))->assertOk();
+
+        $this->get(route('shop.product', $product->slug))
+            ->assertOk()
+            ->assertSee('id="main-image" src="'.$images[1]->url().'"', false)
+            ->assertSee('var currentImageIndex = 1;', false)
+            ->assertSeeInOrder($images->map(fn ($image) => 'src="'.$image->url().'" alt=""')->all(), false);
+    }
+
+    public function test_product_page_shows_the_variant_image_first_without_highlighting_a_thumbnail(): void
+    {
+        Storage::fake('public');
+        $admin = $this->admin();
+
+        $product = $this->createProductWith($admin, 3);
+        $images = $product->imagesIn('gallery');
+        $this->actingAs($admin)->postJson(route('admin.images.primary', $images[1]))->assertOk();
+
+        $variantImage = app(ImageService::class)->attach($product->variants()->sole(), 'image', UploadedFile::fake()->image('v.jpg'));
+
+        $this->get(route('shop.product', $product->slug))
+            ->assertOk()
+            // A variant's own image still wins over the starred gallery image…
+            ->assertSee('id="main-image" src="'.$variantImage->url().'"', false)
+            // …and since it is not a thumbnail, no thumbnail claims to be showing.
+            ->assertSee('var currentImageIndex = -1;', false)
+            ->assertDontSee('overflow-hidden border border-brand', false);
+    }
+
     public function test_admin_can_reorder_the_gallery_without_disturbing_the_primary(): void
     {
         Storage::fake('public');

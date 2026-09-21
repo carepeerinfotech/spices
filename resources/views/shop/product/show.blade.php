@@ -10,7 +10,9 @@
     @php
         $mainSrc = $defaultVariant?->imageUrl() ?: $product->primaryImageUrl();
         $activeImageIndex = $product->images->search(fn ($img) => $img->url() === $mainSrc);
-        if ($activeImageIndex === false) $activeImageIndex = 0;
+        // -1: the main image is the variant's own picture, which has no
+        // thumbnail — so none is highlighted, rather than the first.
+        if ($activeImageIndex === false) $activeImageIndex = -1;
     @endphp
     <div class="grid lg:grid-cols-2 gap-8 lg:gap-10">
         <div class="flex flex-col-reverse sm:flex-row gap-3">
@@ -192,12 +194,13 @@
 
   // Gallery: carousel navigation, thumbnails, zoom and lightbox.
   var galleryImages = @json($product->images->map(fn ($img) => $img->url())->values());
+  // -1 while showing an image that is not in the gallery (a variant's own).
+  var currentImageIndex = {{ (int) $activeImageIndex }};
   if (!galleryImages.length) {
     var initialSrc = document.getElementById('main-image')?.getAttribute('src');
-    if (initialSrc) galleryImages = [initialSrc];
+    if (initialSrc) { galleryImages = [initialSrc]; currentImageIndex = 0; }
   }
-  var currentImageIndex = {{ (int) $activeImageIndex }};
-  if (currentImageIndex < 0 || currentImageIndex >= galleryImages.length) currentImageIndex = 0;
+  if (currentImageIndex >= galleryImages.length) currentImageIndex = -1;
 
   var lightbox = document.getElementById('gallery-lightbox');
   var lightboxImage = document.getElementById('gallery-lightbox-image');
@@ -215,10 +218,19 @@
   }
 
   function showUnlistedImage(src) {
+    currentImageIndex = -1;
     mainImage.src = src;
     document.querySelectorAll('#gallery-thumbs .thumb').forEach(function (thumb) {
       thumb.className = 'thumb w-16 h-16 sm:w-full sm:h-20 shrink-0 rounded-lg overflow-hidden border border-[var(--line)]';
     });
+  }
+
+  // From an image outside the gallery, next starts at the first gallery image
+  // and previous at the last.
+  function stepGallery(delta) {
+    if (!galleryImages.length) return;
+    var from = currentImageIndex < 0 ? (delta > 0 ? -1 : 0) : currentImageIndex;
+    renderGalleryImage((from + delta + galleryImages.length) % galleryImages.length);
   }
 
   document.querySelectorAll('#gallery-thumbs .thumb').forEach(function (thumb) {
@@ -227,12 +239,8 @@
     });
   });
 
-  document.getElementById('gallery-prev')?.addEventListener('click', function () {
-    renderGalleryImage((currentImageIndex - 1 + galleryImages.length) % galleryImages.length);
-  });
-  document.getElementById('gallery-next')?.addEventListener('click', function () {
-    renderGalleryImage((currentImageIndex + 1) % galleryImages.length);
-  });
+  document.getElementById('gallery-prev')?.addEventListener('click', function () { stepGallery(-1); });
+  document.getElementById('gallery-next')?.addEventListener('click', function () { stepGallery(1); });
 
   var zoomWrap = document.getElementById('gallery-zoom');
   if (zoomWrap && hoverCapable) {
@@ -267,17 +275,13 @@
   lightbox?.addEventListener('click', function (e) {
     if (e.target === lightbox) closeLightbox();
   });
-  document.getElementById('gallery-lightbox-prev')?.addEventListener('click', function () {
-    renderGalleryImage((currentImageIndex - 1 + galleryImages.length) % galleryImages.length);
-  });
-  document.getElementById('gallery-lightbox-next')?.addEventListener('click', function () {
-    renderGalleryImage((currentImageIndex + 1) % galleryImages.length);
-  });
+  document.getElementById('gallery-lightbox-prev')?.addEventListener('click', function () { stepGallery(-1); });
+  document.getElementById('gallery-lightbox-next')?.addEventListener('click', function () { stepGallery(1); });
   document.addEventListener('keydown', function (e) {
     if (!lightbox || !lightbox.classList.contains('is-open')) return;
     if (e.key === 'Escape') closeLightbox();
-    if (e.key === 'ArrowLeft') renderGalleryImage((currentImageIndex - 1 + galleryImages.length) % galleryImages.length);
-    if (e.key === 'ArrowRight') renderGalleryImage((currentImageIndex + 1) % galleryImages.length);
+    if (e.key === 'ArrowLeft') stepGallery(-1);
+    if (e.key === 'ArrowRight') stepGallery(1);
   });
 
   document.querySelectorAll('.variant-btn').forEach(function (btn) {
