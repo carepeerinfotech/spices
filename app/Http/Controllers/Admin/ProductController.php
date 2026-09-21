@@ -56,7 +56,7 @@ class ProductController extends Controller
         $this->images->syncFromRequest($product, $request);
         $this->syncVariantImages($product, $request);
 
-        return $this->respond($request, 'Product created successfully.');
+        return $this->respond($request, $product, 'Product created successfully.');
     }
 
     public function edit(Product $product)
@@ -86,7 +86,7 @@ class ProductController extends Controller
         $this->images->syncFromRequest($product, $request);
         $this->syncVariantImages($product, $request);
 
-        return $this->respond($request, 'Product updated successfully.');
+        return $this->respond($request, $product, 'Product updated successfully.');
     }
 
     public function destroy(Product $product)
@@ -139,16 +139,28 @@ class ProductController extends Controller
         }
     }
 
-    private function respond(Request $request, string $message)
+    /**
+     * Saving returns to the product's edit form, reopening the tab the admin
+     * was on (posted as `tab`) rather than dropping them back on the listing.
+     */
+    private function respond(Request $request, Product $product, string $message)
     {
+        $redirect = route('admin.products.edit', array_filter([
+            'product' => $product,
+            'tab' => $request->input('tab'),
+        ]));
+
         if ($request->expectsJson()) {
+            // The toast only lives until the page reloads; the flash shows on the reloaded form.
+            session()->flash('success', $message);
+
             return response()->json([
                 'success' => true,
                 'message' => $message,
-                'redirect' => route('admin.products.index'),
+                'redirect' => $redirect,
             ]);
         }
 
-        return redirect()->route('admin.products.index')->with('success', $message);
+        return redirect()->to($redirect)->with('success', $message);
     }
 }

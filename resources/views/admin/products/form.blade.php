@@ -5,23 +5,29 @@
 @section('subtitle', 'Manage details, variations, media, shipping and offers')
 
 @section('content')
+@php
+    $tabs = ['basic' => 'Basic Info', 'variants' => 'Variations & Pricing', 'media' => 'Media', 'shipping' => 'Shipping', 'offers' => 'Offers', 'seo' => 'SEO / Status'];
+    // ?tab= keeps the open tab across reloads and saves; the script below keeps it in the URL.
+    $activeTab = in_array(request()->query('tab'), array_keys($tabs), true) ? request()->query('tab') : 'basic';
+@endphp
 <form data-ajax="formdata" method="POST" enctype="multipart/form-data"
       action="{{ $product->exists ? route('admin.products.update', $product) : route('admin.products.store') }}"
       class="rounded-xl bg-white border border-slate-200 overflow-hidden" id="product-form">
     @csrf
     @if($product->exists) @method('PUT') @endif
+    <input type="hidden" name="tab" value="{{ $activeTab }}" id="active-tab">
 
     <div class="border-b border-slate-200 px-4 pt-3 flex flex-wrap gap-2" role="tablist">
-        @foreach(['basic' => 'Basic Info', 'variants' => 'Variations & Pricing', 'media' => 'Media', 'shipping' => 'Shipping', 'offers' => 'Offers', 'seo' => 'SEO / Status'] as $key => $label)
+        @foreach($tabs as $key => $label)
             <button type="button" data-tab="{{ $key }}" role="tab"
-                    class="tab-btn px-3 py-2 text-sm rounded-t-lg border border-b-0 {{ $key === 'basic' ? 'bg-slate-50 border-slate-200 text-teal-800 font-medium' : 'border-transparent text-slate-500' }}">
+                    class="tab-btn px-3 py-2 text-sm rounded-t-lg border border-b-0 {{ $key === $activeTab ? 'bg-slate-50 border-slate-200 text-teal-800 font-medium' : 'border-transparent text-slate-500' }}">
                 {{ $label }}
             </button>
         @endforeach
     </div>
 
     <div class="p-6 space-y-5">
-        <div data-tab-panel="basic" class="space-y-4">
+        <div data-tab-panel="basic" @class(['space-y-4', 'hidden' => $activeTab !== 'basic'])>
             <div class="grid sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium mb-1.5">Name</label>
@@ -77,7 +83,7 @@
             </div>
         </div>
 
-        <div data-tab-panel="variants" class="hidden space-y-4">
+        <div data-tab-panel="variants" @class(['space-y-4', 'hidden' => $activeTab !== 'variants'])>
             <div id="options-wrap" class="space-y-3">
                 <div class="flex items-center justify-between">
                     <h3 class="font-medium">Options (e.g. Size, Color)</h3>
@@ -137,7 +143,7 @@
             </div>
         </div>
 
-        <div data-tab-panel="media" class="hidden space-y-6">
+        <div data-tab-panel="media" @class(['space-y-6', 'hidden' => $activeTab !== 'media'])>
             <x-image-upload :owner="$product" collection="gallery"
                             help="Drag thumbnails to reorder. The starred image is used on listings." />
 
@@ -171,7 +177,7 @@
             @endif
         </div>
 
-        <div data-tab-panel="shipping" class="hidden space-y-4">
+        <div data-tab-panel="shipping" @class(['space-y-4', 'hidden' => $activeTab !== 'shipping'])>
             <div class="grid sm:grid-cols-4 gap-4">
                 <div>
                     <label class="block text-sm font-medium mb-1.5">Weight (kg)</label>
@@ -192,7 +198,7 @@
             </div>
         </div>
 
-        <div data-tab-panel="offers" class="hidden space-y-4">
+        <div data-tab-panel="offers" @class(['space-y-4', 'hidden' => $activeTab !== 'offers'])>
             <div class="flex items-center justify-between">
                 <div>
                     <h3 class="font-medium">Offers</h3>
@@ -256,7 +262,7 @@
             <p id="offers-empty" class="text-sm text-slate-500 {{ ($product->offers ?? collect())->isNotEmpty() ? 'hidden' : '' }}">No offers yet.</p>
         </div>
 
-        <div data-tab-panel="seo" class="hidden space-y-4">
+        <div data-tab-panel="seo" @class(['space-y-4', 'hidden' => $activeTab !== 'seo'])>
             <div>
                 <label class="block text-sm font-medium mb-1.5">Meta title</label>
                 <input name="meta_title" value="{{ old('meta_title', $product->meta_title) }}" class="w-full rounded-lg border border-slate-300 px-3 py-2">
@@ -284,6 +290,8 @@
 @push('scripts')
 <script>
 (function () {
+  var activeTabInput = document.getElementById('active-tab');
+
   document.querySelectorAll('.tab-btn').forEach(function (btn) {
     btn.addEventListener('click', function () {
       var key = btn.getAttribute('data-tab');
@@ -294,6 +302,12 @@
       document.querySelectorAll('[data-tab-panel]').forEach(function (panel) {
         panel.classList.toggle('hidden', panel.getAttribute('data-tab-panel') !== key);
       });
+
+      // A reload reopens the tab from the URL; a save sends it back via the hidden input.
+      activeTabInput.value = key;
+      var url = new URL(window.location.href);
+      url.searchParams.set('tab', key);
+      history.replaceState(history.state, '', url);
     });
   });
 
