@@ -306,7 +306,99 @@ class ProductImageTest extends TestCase
             ->assertOk()
             ->assertSee('Variant images')
             ->assertSee($variant->sku)
-            ->assertSee('name="image_file"', false);
+            // Keyed by variant so several variants' fields never collide.
+            ->assertSee('name="variant_images['.$variant->id.']"', false)
+            ->assertDontSee('name="image_file"', false);
+    }
+
+    public function test_saving_the_form_uploads_and_replaces_a_variant_image(): void
+    {
+        Storage::fake('public');
+        $admin = $this->admin();
+
+        $product = $this->createProductWith($admin, 1);
+        $variant = $product->variants()->sole();
+
+        $this->actingAs($admin)->putJson(route('admin.products.update', $product), $this->payload([
+            'variant_images' => [$variant->id => UploadedFile::fake()->image('v1.jpg')],
+        ]))->assertOk();
+
+        $first = $variant->fresh()->image('image');
+        $this->assertNotNull($first);
+        $this->assertStringStartsWith('products/variants/'.$variant->id.'/', $first->path);
+        Storage::disk('public')->assertExists($first->path);
+
+        $this->actingAs($admin)->putJson(route('admin.products.update', $product), $this->payload([
+            'variant_images' => [$variant->id => UploadedFile::fake()->image('v2.jpg')],
+        ]))->assertOk();
+
+        $images = $variant->fresh()->imagesIn('image');
+        $this->assertCount(1, $images);
+        $this->assertNotSame($first->id, $images->first()->id);
+        Storage::disk('public')->assertMissing($first->path);
+
+        // The product gallery is not touched by a variant upload.
+        $this->assertCount(1, $product->fresh()->imagesIn('gallery'));
+    }
+
+    public function test_each_variant_gets_its_own_upload(): void
+    {
+        Storage::fake('public');
+        $admin = $this->admin();
+
+        $product = $this->createProductWith($admin, 1);
+        $variants = [
+            ['sku' => 'GAL-100G', 'option_label' => '100g', 'price' => 100, 'stock' => 5],
+            ['sku' => 'GAL-250G', 'option_label' => '250g', 'price' => 220, 'stock' => 5],
+        ];
+
+        $this->actingAs($admin)
+            ->putJson(route('admin.products.update', $product), $this->payload(['variants' => $variants]))
+            ->assertOk();
+
+        [$small, $large] = $product->variants()->orderBy('id')->get()->all();
+
+        $this->actingAs($admin)->putJson(route('admin.products.update', $product), $this->payload([
+            'variants' => [
+                ['id' => $small->id] + $variants[0],
+                ['id' => $large->id] + $variants[1],
+            ],
+            'variant_images' => [$large->id => UploadedFile::fake()->image('large.jpg')],
+        ]))->assertOk();
+
+        $this->assertTrue($small->fresh()->imagesIn('image')->isEmpty());
+        $this->assertCount(1, $large->fresh()->imagesIn('image'));
+    }
+
+    public function test_a_variant_upload_cannot_target_another_products_variant(): void
+    {
+        Storage::fake('public');
+        $admin = $this->admin();
+
+        $product = $this->createProductWith($admin, 1);
+        $other = Product::create(['name' => 'Other', 'slug' => 'other', 'sku' => 'OTH-001', 'price' => 10, 'stock' => 1]);
+        $foreign = $other->variants()->create(['sku' => 'OTH-001', 'name' => 'Other', 'price' => 10, 'stock' => 1, 'is_default' => true]);
+
+        $this->actingAs($admin)->putJson(route('admin.products.update', $product), $this->payload([
+            'variant_images' => [$foreign->id => UploadedFile::fake()->image('sneaky.jpg')],
+        ]))->assertOk();
+
+        $this->assertTrue($foreign->fresh()->imagesIn('image')->isEmpty());
+    }
+
+    public function test_oversized_variant_uploads_are_rejected(): void
+    {
+        Storage::fake('public');
+        $admin = $this->admin();
+
+        $product = $this->createProductWith($admin, 1);
+        $variant = $product->variants()->sole();
+
+        $this->actingAs($admin)->putJson(route('admin.products.update', $product), $this->payload([
+            'variant_images' => [$variant->id => UploadedFile::fake()->create('huge.jpg', 5000, 'image/jpeg')],
+        ]))
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('variant_images.'.$variant->id);
     }
 
     public function test_create_page_tells_you_to_save_before_adding_variant_images(): void

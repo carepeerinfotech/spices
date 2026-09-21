@@ -54,6 +54,7 @@ class ProductController extends Controller
         );
 
         $this->images->syncFromRequest($product, $request);
+        $this->syncVariantImages($product, $request);
 
         return $this->respond($request, 'Product created successfully.');
     }
@@ -83,6 +84,7 @@ class ProductController extends Controller
         );
 
         $this->images->syncFromRequest($product, $request);
+        $this->syncVariantImages($product, $request);
 
         return $this->respond($request, 'Product updated successfully.');
     }
@@ -117,6 +119,24 @@ class ProductController extends Controller
             'meta_title' => $request->input('meta_title'),
             'meta_description' => $request->input('meta_description'),
         ];
+    }
+
+    /**
+     * Variant uploads arrive as variant_images[{variant id}]. Applied after the
+     * save, and only to variants of this product that survived it — a variant
+     * dropped in the same save, or one from another product, is skipped.
+     */
+    private function syncVariantImages(Product $product, StoreProductRequest $request): void
+    {
+        $files = array_filter((array) $request->file('variant_images', []));
+
+        if ($files === []) {
+            return;
+        }
+
+        foreach ($product->variants()->whereKey(array_keys($files))->get() as $variant) {
+            $this->images->replace($variant, 'image', $files[$variant->id]);
+        }
     }
 
     private function respond(Request $request, string $message)

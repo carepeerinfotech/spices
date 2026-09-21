@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Services\Media\ImageService;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
@@ -18,6 +19,7 @@ class StoreProductRequest extends FormRequest
     public function rules(): array
     {
         $productId = $this->route('product')?->id;
+        $variantImageMaxKb = (int) (app(ImageService::class)->config(ProductVariant::class, 'image')['max_kb'] ?? 4096);
 
         return [
             'category_id' => ['nullable', 'exists:categories,id'],
@@ -59,6 +61,9 @@ class StoreProductRequest extends FormRequest
             'offers.*.apply_to_category' => ['sometimes', 'boolean'],
             'offers.*.starts_at' => ['required_with:offers', 'date'],
             'offers.*.ends_at' => ['required_with:offers', 'date', 'after_or_equal:offers.*.starts_at'],
+            // One upload per variant, keyed by variant id.
+            'variant_images' => ['nullable', 'array'],
+            'variant_images.*' => ['nullable', 'image', 'max:'.$variantImageMaxKb],
             // Upload rules come from config/media.php; removal and ordering are
             // applied instantly through the images endpoints, not on save.
         ] + app(ImageService::class)->rules(Product::class);

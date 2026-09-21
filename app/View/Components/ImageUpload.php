@@ -42,11 +42,14 @@ class ImageUpload extends Component
         public string $collection = 'default',
         ?string $label = null,
         public ?string $help = null,
+        ?string $name = null,
     ) {
         $this->config = app(ImageService::class)->config($owner, $collection);
 
         $this->multiple = (bool) ($this->config['multiple'] ?? false);
-        $this->inputName = $collection.($this->multiple ? '_files[]' : '_file');
+        // Overridable so several owners of one type (e.g. every variant of a
+        // product) can share a form without their fields colliding.
+        $this->inputName = ($name ?? $collection.($this->multiple ? '_files' : '_file')).($this->multiple ? '[]' : '');
         // Unique so several fields can sit in one form and still pair label to input.
         $this->inputId = 'image-upload-'.Str::slug($collection).'-'.Str::random(6);
         $this->images = $owner->exists ? $owner->imagesIn($collection) : collect();

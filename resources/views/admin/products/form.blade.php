@@ -154,6 +154,7 @@
                                 <p class="text-sm font-medium">{{ $variant->option_label ?: $variant->name }}</p>
                                 <p class="text-xs text-slate-400 mb-2">{{ $variant->sku }}</p>
                                 <x-image-upload :owner="$variant" collection="image" label="Image"
+                                                :name="'variant_images['.$variant->id.']'"
                                                 help="Replaces this variant's current image." />
                             </div>
                         @endforeach
