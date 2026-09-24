@@ -8,35 +8,32 @@
 
 <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
     @php
-        $mainSrc = $defaultVariant?->imageUrl() ?: $product->primaryImageUrl();
-        $activeImageIndex = $product->images->search(fn ($img) => $img->url() === $mainSrc);
-        // -1: the main image is the variant's own picture, which has no
-        // thumbnail — so none is highlighted, rather than the first.
-        if ($activeImageIndex === false) $activeImageIndex = -1;
+        // Each variant brings its own gallery (or falls back to the product's);
+        // the script swaps thumbnails to match when another variant is picked.
+        $variantGalleries = $product->variants->mapWithKeys(fn ($variant) => [$variant->id => $product->galleryFor($variant)]);
+        $gallery = $product->galleryFor($defaultVariant);
+        $activeImageIndex = $gallery['active'];
+        $mainSrc = $gallery['images'][$activeImageIndex] ?? null;
     @endphp
     <div class="grid lg:grid-cols-2 gap-8 lg:gap-10">
         <div class="flex flex-col-reverse sm:flex-row gap-3">
-            @if($product->images->count() > 1)
-                <div class="flex sm:flex-col gap-2 overflow-x-auto sm:overflow-x-visible sm:overflow-y-auto sm:max-h-[520px] sm:w-20 shrink-0" id="gallery-thumbs">
-                    @foreach($product->images as $image)
-                        <button type="button" class="thumb w-16 h-16 sm:w-full sm:h-20 shrink-0 rounded-lg overflow-hidden border {{ $loop->index === $activeImageIndex ? 'border-brand' : 'border-[var(--line)]' }}" data-index="{{ $loop->index }}">
-                            <img src="{{ $image->url() }}" alt="" class="w-full h-full object-cover">
-                        </button>
-                    @endforeach
-                </div>
-            @endif
+            <div class="flex sm:flex-col gap-2 overflow-x-auto sm:overflow-x-visible sm:overflow-y-auto sm:max-h-[520px] sm:w-20 shrink-0" id="gallery-thumbs" @if(count($gallery['images']) < 2) hidden @endif>
+                @foreach($gallery['images'] as $url)
+                    <button type="button" class="thumb w-16 h-16 sm:w-full sm:h-20 shrink-0 rounded-lg overflow-hidden border {{ $loop->index === $activeImageIndex ? 'border-brand' : 'border-[var(--line)]' }}" data-index="{{ $loop->index }}">
+                        <img src="{{ $url }}" alt="" class="w-full h-full object-cover">
+                    </button>
+                @endforeach
+            </div>
             <div class="gallery-viewport relative rounded-2xl overflow-hidden bg-cream-dark aspect-square shadow-md shadow-stone-900/5 flex-1 min-w-0" id="gallery-viewport">
                 <div class="gallery-zoom" id="gallery-zoom">
                     <img id="main-image" src="{{ $mainSrc }}" alt="{{ $product->name }}" class="gallery-image w-full h-full object-cover">
                 </div>
-                @if($product->images->count() > 1)
-                    <button type="button" id="gallery-prev" class="gallery-nav gallery-nav--prev" aria-label="Previous image">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
-                    </button>
-                    <button type="button" id="gallery-next" class="gallery-nav gallery-nav--next" aria-label="Next image">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
-                    </button>
-                @endif
+                <button type="button" id="gallery-prev" class="gallery-nav gallery-nav--prev" aria-label="Previous image" @if(count($gallery['images']) < 2) hidden @endif>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+                </button>
+                <button type="button" id="gallery-next" class="gallery-nav gallery-nav--next" aria-label="Next image" @if(count($gallery['images']) < 2) hidden @endif>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
                 <button type="button" id="gallery-zoom-btn" class="gallery-zoom-btn" aria-label="Zoom image">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><path d="M11 8v6M8 11h6"/></svg>
                 </button>
@@ -86,8 +83,7 @@
                                     data-saving="{{ $offer ? '₹'.number_format($offer->discountFor((float) $variant->price), 2) : '' }}"
                                     data-compare="{{ (! $offer && $variant->compare_price) ? '₹'.number_format($variant->compare_price, 2) : '' }}"
                                     data-stock="{{ $variant->stock }}"
-                                    data-active="{{ $variant->inStock() ? 1 : 0 }}"
-                                    data-image="{{ $variant->imageUrl() }}">
+                                    data-active="{{ $variant->inStock() ? 1 : 0 }}">
                                 {{ $variant->option_label ?: $variant->sku }}
                             </button>
                         @endforeach
@@ -134,14 +130,12 @@
     <button type="button" class="gallery-lightbox__close" id="gallery-lightbox-close" aria-label="Close">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
     </button>
-    @if($product->images->count() > 1)
-        <button type="button" id="gallery-lightbox-prev" class="gallery-nav gallery-nav--prev" aria-label="Previous image">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
-        </button>
-        <button type="button" id="gallery-lightbox-next" class="gallery-nav gallery-nav--next" aria-label="Next image">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
-        </button>
-    @endif
+    <button type="button" id="gallery-lightbox-prev" class="gallery-nav gallery-nav--prev" aria-label="Previous image" @if(count($gallery['images']) < 2) hidden @endif>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+    </button>
+    <button type="button" id="gallery-lightbox-next" class="gallery-nav gallery-nav--next" aria-label="Next image" @if(count($gallery['images']) < 2) hidden @endif>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+    </button>
     <img id="gallery-lightbox-image" src="" alt="{{ $product->name }}">
 </div>
 @endsection
@@ -193,50 +187,63 @@
   });
 
   // Gallery: carousel navigation, thumbnails, zoom and lightbox.
-  var galleryImages = @json($product->images->map(fn ($img) => $img->url())->values());
-  // -1 while showing an image that is not in the gallery (a variant's own).
+  var variantGalleries = @json($variantGalleries);
+  var galleryImages = @json($gallery['images']);
   var currentImageIndex = {{ (int) $activeImageIndex }};
-  if (!galleryImages.length) {
-    var initialSrc = document.getElementById('main-image')?.getAttribute('src');
-    if (initialSrc) { galleryImages = [initialSrc]; currentImageIndex = 0; }
-  }
-  if (currentImageIndex >= galleryImages.length) currentImageIndex = -1;
 
   var lightbox = document.getElementById('gallery-lightbox');
   var lightboxImage = document.getElementById('gallery-lightbox-image');
   var mainImage = document.getElementById('main-image');
   var hoverCapable = window.matchMedia('(hover: hover)').matches;
 
+  var galleryThumbs = document.getElementById('gallery-thumbs');
+  var thumbClass = 'thumb w-16 h-16 sm:w-full sm:h-20 shrink-0 rounded-lg overflow-hidden border ';
+
   function renderGalleryImage(index) {
     if (!galleryImages[index]) return;
     currentImageIndex = index;
     mainImage.src = galleryImages[index];
-    document.querySelectorAll('#gallery-thumbs .thumb').forEach(function (thumb, i) {
-      thumb.className = 'thumb w-16 h-16 sm:w-full sm:h-20 shrink-0 rounded-lg overflow-hidden border ' + (i === index ? 'border-brand' : 'border-[var(--line)]');
+    galleryThumbs.querySelectorAll('.thumb').forEach(function (thumb, i) {
+      thumb.className = thumbClass + (i === index ? 'border-brand' : 'border-[var(--line)]');
     });
     if (lightbox?.classList.contains('is-open')) lightboxImage.src = galleryImages[index];
   }
 
-  function showUnlistedImage(src) {
-    currentImageIndex = -1;
-    mainImage.src = src;
-    document.querySelectorAll('#gallery-thumbs .thumb').forEach(function (thumb) {
-      thumb.className = 'thumb w-16 h-16 sm:w-full sm:h-20 shrink-0 rounded-lg overflow-hidden border border-[var(--line)]';
+  // Swap in another variant's gallery: thumbnails, arrows and the main image.
+  function loadGallery(gallery) {
+    if (!gallery || !gallery.images.length) return;
+    galleryImages = gallery.images;
+    galleryThumbs.replaceChildren.apply(galleryThumbs, galleryImages.map(function (src, i) {
+      var thumb = document.createElement('button');
+      thumb.type = 'button';
+      // The click handler and the highlight both find thumbnails by this class.
+      thumb.className = thumbClass + 'border-[var(--line)]';
+      thumb.setAttribute('data-index', i);
+      var img = document.createElement('img');
+      img.src = src;
+      img.alt = '';
+      img.className = 'w-full h-full object-cover';
+      thumb.appendChild(img);
+      return thumb;
+    }));
+    var single = galleryImages.length < 2;
+    galleryThumbs.hidden = single;
+    ['gallery-prev', 'gallery-next', 'gallery-lightbox-prev', 'gallery-lightbox-next'].forEach(function (id) {
+      var nav = document.getElementById(id);
+      if (nav) nav.hidden = single;
     });
+    renderGalleryImage(Math.min(gallery.active, galleryImages.length - 1));
   }
 
-  // From an image outside the gallery, next starts at the first gallery image
-  // and previous at the last.
   function stepGallery(delta) {
-    if (!galleryImages.length) return;
-    var from = currentImageIndex < 0 ? (delta > 0 ? -1 : 0) : currentImageIndex;
-    renderGalleryImage((from + delta + galleryImages.length) % galleryImages.length);
+    if (galleryImages.length < 2) return;
+    renderGalleryImage((currentImageIndex + delta + galleryImages.length) % galleryImages.length);
   }
 
-  document.querySelectorAll('#gallery-thumbs .thumb').forEach(function (thumb) {
-    thumb.addEventListener('click', function () {
-      renderGalleryImage(parseInt(thumb.getAttribute('data-index'), 10));
-    });
+  // Delegated, so thumbnails rebuilt by loadGallery() keep working.
+  galleryThumbs.addEventListener('click', function (e) {
+    var thumb = e.target.closest('.thumb');
+    if (thumb) renderGalleryImage(parseInt(thumb.getAttribute('data-index'), 10));
   });
 
   document.getElementById('gallery-prev')?.addEventListener('click', function () { stepGallery(-1); });
@@ -309,12 +316,7 @@
       stockEl.textContent = active ? (btn.getAttribute('data-stock') + ' in stock') : 'Out of stock';
       stockEl.className = 'mt-2 text-sm ' + (active ? 'text-emerald-700' : 'text-rose-600');
       setQtyMax(parseInt(btn.getAttribute('data-stock'), 10) || 0);
-      var variantImage = btn.getAttribute('data-image');
-      if (variantImage) {
-        var listedIndex = galleryImages.indexOf(variantImage);
-        if (listedIndex !== -1) renderGalleryImage(listedIndex);
-        else showUnlistedImage(variantImage);
-      }
+      loadGallery(variantGalleries[variantId]);
     });
   });
 

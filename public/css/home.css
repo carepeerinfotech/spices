@@ -370,6 +370,11 @@ body.search-open {
   transition: background 0.2s ease, color 0.2s ease;
   z-index: 2;
 }
+/* Arrows and thumbnails are hidden while the shown gallery has a single image. */
+.gallery-nav[hidden],
+#gallery-thumbs[hidden] {
+  display: none;
+}
 .gallery-nav:hover {
   background: #fff;
   color: var(--red);

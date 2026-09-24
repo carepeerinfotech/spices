@@ -129,4 +129,26 @@ class Product extends Model
     {
         return $this->imageUrlFor('gallery');
     }
+
+    /**
+     * What the product page gallery shows for a variant: its own images when it
+     * has any, otherwise the product gallery. "active" is the starred image's
+     * position, so the page opens on it with its thumbnail highlighted.
+     *
+     * @return array{images: array<int, string>, active: int}
+     */
+    public function galleryFor(?ProductVariant $variant = null): array
+    {
+        [$owner, $collection] = $variant && $variant->imagesIn('image')->isNotEmpty()
+            ? [$variant, 'image']
+            : [$this, 'gallery'];
+
+        $images = $owner->imagesIn($collection);
+        $active = $images->search(fn (Image $image) => $image->is($owner->image($collection)));
+
+        return [
+            'images' => $images->map(fn (Image $image) => $image->url())->all(),
+            'active' => $active === false ? 0 : $active,
+        ];
+    }
 }

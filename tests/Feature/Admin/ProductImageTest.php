@@ -180,24 +180,52 @@ class ProductImageTest extends TestCase
             ->assertSeeInOrder($images->map(fn ($image) => 'src="'.$image->url().'" alt=""')->all(), false);
     }
 
-    public function test_product_page_shows_the_variant_image_first_without_highlighting_a_thumbnail(): void
+    public function test_product_page_shows_the_variants_own_images_as_thumbnails(): void
     {
         Storage::fake('public');
         $admin = $this->admin();
 
         $product = $this->createProductWith($admin, 3);
-        $images = $product->imagesIn('gallery');
-        $this->actingAs($admin)->postJson(route('admin.images.primary', $images[1]))->assertOk();
+        $gallery = $product->imagesIn('gallery');
+        $variant = $product->variants()->sole();
 
-        $variantImage = app(ImageService::class)->attach($product->variants()->sole(), 'image', UploadedFile::fake()->image('v.jpg'));
+        $service = app(ImageService::class);
+        $variantImages = collect([
+            $service->attach($variant, 'image', UploadedFile::fake()->image('v1.jpg')),
+            $service->attach($variant, 'image', UploadedFile::fake()->image('v2.jpg')),
+        ]);
+        $this->actingAs($admin)->postJson(route('admin.images.primary', $variantImages[1]))->assertOk();
 
         $this->get(route('shop.product', $product->slug))
             ->assertOk()
-            // A variant's own image still wins over the starred gallery image…
-            ->assertSee('id="main-image" src="'.$variantImage->url().'"', false)
-            // …and since it is not a thumbnail, no thumbnail claims to be showing.
-            ->assertSee('var currentImageIndex = -1;', false)
-            ->assertDontSee('overflow-hidden border border-brand', false);
+            // The variant's starred image opens, highlighted in its own thumbnails…
+            ->assertSee('id="main-image" src="'.$variantImages[1]->url().'"', false)
+            ->assertSee('var currentImageIndex = 1;', false)
+            ->assertSeeInOrder($variantImages->map(fn ($image) => 'src="'.$image->url().'" alt=""')->all(), false)
+            // …in place of the product gallery.
+            ->assertDontSee('src="'.$gallery[0]->url().'" alt=""', false);
+    }
+
+    public function test_each_variant_gallery_falls_back_to_the_product_gallery(): void
+    {
+        Storage::fake('public');
+        $admin = $this->admin();
+
+        $product = $this->createProductWith($admin, 2);
+        $this->actingAs($admin)->putJson(route('admin.products.update', $product), $this->payload(['variants' => [
+            ['sku' => 'GAL-100G', 'option_label' => '100g', 'price' => 100, 'stock' => 5],
+            ['sku' => 'GAL-250G', 'option_label' => '250g', 'price' => 220, 'stock' => 5],
+        ]]))->assertOk();
+
+        [$small, $large] = $product->variants()->orderBy('id')->get()->all();
+        $largeImage = app(ImageService::class)->attach($large, 'image', UploadedFile::fake()->image('large.jpg'));
+
+        $product = $product->fresh(['images', 'variants.images']);
+        $gallery = $product->imagesIn('gallery')->map(fn ($image) => $image->url())->all();
+
+        $this->assertSame(['images' => $gallery, 'active' => 0], $product->galleryFor($product->variants->find($small->id)));
+        $this->assertSame(['images' => [$largeImage->url()], 'active' => 0], $product->galleryFor($product->variants->find($large->id)));
+        $this->assertSame(['images' => $gallery, 'active' => 0], $product->galleryFor(null));
     }
 
     public function test_admin_can_reorder_the_gallery_without_disturbing_the_primary(): void
