@@ -79,9 +79,9 @@ return [
             'permission' => 'products.manage',
             'collections' => [
                 'image' => [
-                    'label' => 'Variant image',
+                    'label' => 'Variant images',
                     'directory' => 'products/variants/{id}',
-                    'multiple' => false,
+                    'multiple' => true,
                     'max_kb' => 4096,
                 ],
             ],

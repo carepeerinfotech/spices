@@ -159,9 +159,9 @@
                             <div class="rounded-lg border border-slate-200 p-3">
                                 <p class="text-sm font-medium">{{ $variant->option_label ?: $variant->name }}</p>
                                 <p class="text-xs text-slate-400 mb-2">{{ $variant->sku }}</p>
-                                <x-image-upload :owner="$variant" collection="image" label="Image"
+                                <x-image-upload :owner="$variant" collection="image" label="Images"
                                                 :name="'variant_images['.$variant->id.']'"
-                                                help="Replaces this variant's current image." />
+                                                help="Add one or more images. Drag to reorder; the starred image shows when this variant is picked." />
                             </div>
                         @endforeach
                     </div>

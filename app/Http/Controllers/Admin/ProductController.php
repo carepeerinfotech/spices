@@ -122,9 +122,10 @@ class ProductController extends Controller
     }
 
     /**
-     * Variant uploads arrive as variant_images[{variant id}]. Applied after the
-     * save, and only to variants of this product that survived it — a variant
-     * dropped in the same save, or one from another product, is skipped.
+     * Variant uploads arrive as variant_images[{variant id}][] and are appended
+     * to that variant's images. Applied after the save, and only to variants of
+     * this product that survived it — a variant dropped in the same save, or one
+     * from another product, is skipped.
      */
     private function syncVariantImages(Product $product, StoreProductRequest $request): void
     {
@@ -135,7 +136,9 @@ class ProductController extends Controller
         }
 
         foreach ($product->variants()->whereKey(array_keys($files))->get() as $variant) {
-            $this->images->replace($variant, 'image', $files[$variant->id]);
+            foreach (array_filter((array) $files[$variant->id]) as $file) {
+                $this->images->attach($variant, 'image', $file);
+            }
         }
     }
 

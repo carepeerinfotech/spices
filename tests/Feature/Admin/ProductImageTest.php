@@ -296,7 +296,7 @@ class ProductImageTest extends TestCase
             ->assertDontSee('primary_image_id', false);
     }
 
-    public function test_variant_image_is_uploaded_and_replaced_through_its_own_field(): void
+    public function test_variant_images_are_stored_in_the_variants_own_folder(): void
     {
         Storage::fake('public');
         $admin = $this->admin();
@@ -311,13 +311,13 @@ class ProductImageTest extends TestCase
         $this->assertStringStartsWith('products/variants/'.$variant->id.'/', $first->path);
         Storage::disk('public')->assertExists($first->path);
 
-        // A single collection replaces, taking the old file with it.
-        $second = app(ImageService::class)->replace($variant, 'image', UploadedFile::fake()->image('v2.jpg'));
+        // A second image is added alongside; the first stays primary.
+        app(ImageService::class)->attach($variant, 'image', UploadedFile::fake()->image('v2.jpg'));
 
         $variant->refresh()->unsetRelation('images');
-        $this->assertCount(1, $variant->imagesIn('image'));
-        $this->assertSame($second->url(), $variant->imageUrl());
-        Storage::disk('public')->assertMissing($first->path);
+        $this->assertCount(2, $variant->imagesIn('image'));
+        $this->assertSame($first->url(), $variant->imageUrl());
+        Storage::disk('public')->assertExists($first->path);
     }
 
     public function test_a_variant_without_an_image_falls_back_to_the_product_primary(): void
@@ -366,11 +366,11 @@ class ProductImageTest extends TestCase
             ->assertSee('Variant images')
             ->assertSee($variant->sku)
             // Keyed by variant so several variants' fields never collide.
-            ->assertSee('name="variant_images['.$variant->id.']"', false)
+            ->assertSee('name="variant_images['.$variant->id.'][]"', false)
             ->assertDontSee('name="image_file"', false);
     }
 
-    public function test_saving_the_form_uploads_and_replaces_a_variant_image(): void
+    public function test_saving_the_form_adds_several_images_to_a_variant(): void
     {
         Storage::fake('public');
         $admin = $this->admin();
@@ -379,22 +379,26 @@ class ProductImageTest extends TestCase
         $variant = $product->variants()->sole();
 
         $this->actingAs($admin)->putJson(route('admin.products.update', $product), $this->payload([
-            'variant_images' => [$variant->id => UploadedFile::fake()->image('v1.jpg')],
+            'variant_images' => [$variant->id => [
+                UploadedFile::fake()->image('v1.jpg'),
+                UploadedFile::fake()->image('v2.jpg'),
+            ]],
         ]))->assertOk();
 
         $first = $variant->fresh()->image('image');
         $this->assertNotNull($first);
         $this->assertStringStartsWith('products/variants/'.$variant->id.'/', $first->path);
-        Storage::disk('public')->assertExists($first->path);
+        $this->assertCount(2, $variant->fresh()->imagesIn('image'));
 
+        // A later save appends instead of replacing.
         $this->actingAs($admin)->putJson(route('admin.products.update', $product), $this->payload([
-            'variant_images' => [$variant->id => UploadedFile::fake()->image('v2.jpg')],
+            'variant_images' => [$variant->id => [UploadedFile::fake()->image('v3.jpg')]],
         ]))->assertOk();
 
         $images = $variant->fresh()->imagesIn('image');
-        $this->assertCount(1, $images);
-        $this->assertNotSame($first->id, $images->first()->id);
-        Storage::disk('public')->assertMissing($first->path);
+        $this->assertCount(3, $images);
+        $this->assertSame($first->id, $variant->fresh()->image('image')->id);
+        Storage::disk('public')->assertExists($first->path);
 
         // The product gallery is not touched by a variant upload.
         $this->assertCount(1, $product->fresh()->imagesIn('gallery'));
@@ -422,7 +426,7 @@ class ProductImageTest extends TestCase
                 ['id' => $small->id] + $variants[0],
                 ['id' => $large->id] + $variants[1],
             ],
-            'variant_images' => [$large->id => UploadedFile::fake()->image('large.jpg')],
+            'variant_images' => [$large->id => [UploadedFile::fake()->image('large.jpg')]],
         ]))->assertOk();
 
         $this->assertTrue($small->fresh()->imagesIn('image')->isEmpty());
@@ -439,7 +443,7 @@ class ProductImageTest extends TestCase
         $foreign = $other->variants()->create(['sku' => 'OTH-001', 'name' => 'Other', 'price' => 10, 'stock' => 1, 'is_default' => true]);
 
         $this->actingAs($admin)->putJson(route('admin.products.update', $product), $this->payload([
-            'variant_images' => [$foreign->id => UploadedFile::fake()->image('sneaky.jpg')],
+            'variant_images' => [$foreign->id => [UploadedFile::fake()->image('sneaky.jpg')]],
         ]))->assertOk();
 
         $this->assertTrue($foreign->fresh()->imagesIn('image')->isEmpty());
@@ -454,10 +458,10 @@ class ProductImageTest extends TestCase
         $variant = $product->variants()->sole();
 
         $this->actingAs($admin)->putJson(route('admin.products.update', $product), $this->payload([
-            'variant_images' => [$variant->id => UploadedFile::fake()->create('huge.jpg', 5000, 'image/jpeg')],
+            'variant_images' => [$variant->id => [UploadedFile::fake()->create('huge.jpg', 5000, 'image/jpeg')]],
         ]))
             ->assertStatus(422)
-            ->assertJsonValidationErrors('variant_images.'.$variant->id);
+            ->assertJsonValidationErrors('variant_images.'.$variant->id.'.0');
     }
 
     public function test_create_page_tells_you_to_save_before_adding_variant_images(): void

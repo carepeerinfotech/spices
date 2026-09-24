@@ -61,9 +61,10 @@ class StoreProductRequest extends FormRequest
             'offers.*.apply_to_category' => ['sometimes', 'boolean'],
             'offers.*.starts_at' => ['required_with:offers', 'date'],
             'offers.*.ends_at' => ['required_with:offers', 'date', 'after_or_equal:offers.*.starts_at'],
-            // One upload per variant, keyed by variant id.
+            // Any number of uploads per variant, keyed by variant id.
             'variant_images' => ['nullable', 'array'],
-            'variant_images.*' => ['nullable', 'image', 'max:'.$variantImageMaxKb],
+            'variant_images.*' => ['nullable', 'array'],
+            'variant_images.*.*' => ['image', 'max:'.$variantImageMaxKb],
             // Upload rules come from config/media.php; removal and ordering are
             // applied instantly through the images endpoints, not on save.
         ] + app(ImageService::class)->rules(Product::class);
